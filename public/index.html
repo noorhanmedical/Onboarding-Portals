@@ -86,6 +86,14 @@ main{position:relative;z-index:1}
 @media(prefers-reduced-motion:reduce){.tile,.addtile,.chev-r{transition:none}.tile:hover,.addtile:hover{transform:none}}
 
 /* ---- typography & density refinement ---- */
+.acc-check{display:flex;align-items:center;gap:8px;cursor:pointer}.acc-check input{width:20px;height:20px;min-height:0;accent-color:hsl(224 72% 40%);margin:0}.access.regular .acc-check input,.acc-check.regular input{accent-color:hsl(168 58% 34%)}
+.access.off{border:1.5px solid hsl(214 20% 85%)!important;background:hsl(210 20% 97%)!important}.access.off .acc-tag{background:hsl(214 14% 62%)!important}.access.off .access-h b{color:hsl(214 15% 45%)!important}
+.tile.acc-off{border:1.5px solid hsl(214 20% 85%);background:hsl(210 20% 97%)}.tile.acc-off .ico{background:hsl(214 20% 90%);color:hsl(214 15% 45%)}
+.acc-pick{grid-column:1/-1;display:flex;align-items:center;gap:16px;flex-wrap:wrap;font-size:15px;color:var(--navy)}
+.tile-wrap{position:relative;display:flex}.tile-wrap>.tile{flex:1;min-width:0}.tile-wrap>.trash,.tile-wrap>.trash-ask{position:absolute;right:12px;top:16px}
+.trash{all:unset;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:9px;color:hsl(214 15% 55%)}.trash:hover{background:hsl(0 80% 96%);color:var(--red)}.trash:focus-visible{outline:2px solid hsl(210 90% 60%)}
+.trash-ask{display:inline-flex;align-items:center;gap:6px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:4px 6px 4px 10px;font-size:14px;box-shadow:0 6px 18px hsla(215,40%,30%,.15);z-index:2}
+.tile-wrap .ptile .tile-top{padding-right:34px}
 .access.admin{border:2px solid hsl(224 72% 40%);background:linear-gradient(180deg,hsl(224 90% 96%),hsl(224 80% 99%))}
 .access.regular{border:2px solid hsl(168 58% 34%);background:linear-gradient(180deg,hsl(160 60% 95%),hsl(160 50% 99%))}
 .access.admin .access-h b{color:hsl(224 70% 28%)}.access.regular .access-h b{color:hsl(168 65% 22%)}
@@ -352,8 +360,8 @@ const IMG_Q=[['entry','How do imaging results enter your EMR?',['Electronic inte
 ['unack','What happens if a result is not acknowledged?',['Escalated to office manager','Reassigned to covering provider','Reviewed in weekly report','Other','Not Sure']]];
 const LABS=[['Quest Diagnostics','https://www.questdiagnostics.com'],['Labcorp','https://www.labcorp.com'],['Other laboratory','']];
 const SVC_GROUPS=[['BrainWave','BrainWave'],['VitalWave','VitalWave'],['Ultrasound','Ultrasound'],['Physician','Physician-performed testing or procedures'],['Other','Other configured services']];
-const blankAccess=()=>({url:'',username:'',pathway:'',sentDate:'',sentTo:'',sentBy:'',notes:''});
-const newLogin=(type,name)=>({id:uid(),type,name,website:'',admin:'',email:'',status:'not_started',access:{admin:blankAccess(),regular:blankAccess()},extra:[]});
+const blankAccess=(on=true)=>({on,url:'',username:'',pathway:'',sentDate:'',sentTo:'',sentBy:'',notes:''});
+const newLogin=(type,name)=>({id:uid(),type,name,website:'',admin:'',email:'',status:'not_started',access:{admin:blankAccess(true),regular:blankAccess(false)},extra:[]});
 const uid=()=>'i'+Math.random().toString(36).slice(2,9);
 function npiOk(v){if(!/^\d{10}$/.test(v))return false;const d=('80840'+v.slice(0,9)).split('').map(Number);let s=0;for(let i=d.length-1,a=true;i>=0;i--,a=!a){let x=d[i];if(a){x*=2;if(x>9)x-=9;}s+=x;}return (10-s%10)%10===+v[9];}
 const blank=v=>v===undefined||v===null||String(v).trim()==='';
@@ -362,7 +370,7 @@ function fresh(){
   const loc={id:uid(),name:'Main Clinic',street:'',suite:'',city:'',state:'AZ',zip:'',tz:'America/Phoenix',phone:'',fax:'',days:[],open:'',close:'',primary:true};
     return {v:4,clinic:'Sonoran Family Health',site:'Scottsdale Clinic',
     org:{legalName:'',dba:'',npi:'',type:'',phone:'',fax:'',email:'',website:'',status:''},
-    locations:[loc],contacts:{primaryId:'',omId:''},clinicians:[],payers:[],logins:[],hours:{},visits:{ways:[],text:''},phone:{},room:{name:'',loc:''},
+    locations:[loc],contacts:{primaryId:'',omId:''},clinicians:[],payers:[],logins:[],hours:{},visits:{ways:[],text:''},phone:{adminOn:true,regOn:false},room:{name:'',loc:''},
     flows:{lab:{},imaging:{},example:'',labs:[],delivery:{}},emrs:[],team:[],vendors:[],
     sched:{useFacility:true,days:[],from:'',to:'',tz:'',holidays:'',lead:'',sameDay:'',cancel:'',contactId:''},avail:[],
     services:[{id:'s1',name:'BrainWave',line:'BrainWave',cat:'',performer:'technician',minutes:45,rooms:'Quiet room, door closes',authorized:true,selected:false},
@@ -375,7 +383,9 @@ function fresh(){
     settings:{payerInvite:'',emrInvite:'',labInvite:''},audit:[]};
 }
 const KEY='plexus-my-progress-v4';
-function load(){try{const s=JSON.parse(localStorage.getItem(KEY));if(s&&s.v===4){s.logins=s.logins.filter(l=>l.name||l.website||[l.access.admin,l.access.regular,...(l.extra||[])].some(a=>a.username||a.pathway));s.logins.forEach(l=>{if(!['EMR','Lab portal','Clearinghouse'].includes(l.type))l.type='Other';l.extra=l.extra||[];for(const a of [l.access.admin,l.access.regular,...l.extra])if(a.url===undefined)a.url=(a.username||a.pathway)?(l.website||''):'';});if(s.phone){if(s.phone.adminUrl===undefined)s.phone.adminUrl=s.phone.adminUser?(s.phone.website||''):'';if(s.phone.regUrl===undefined)s.phone.regUrl=s.phone.regUser?(s.phone.website||''):'';}s.payers=migratePayers(s.payers);for(const [k] of SECTIONS)if(!s.tasks[k])s.tasks[k]={state:'not_started',reason:''};s.clinicians.forEach(c=>{if(!c.lics){c.lics=c.licenses?[{number:c.licenses}]:[];}});return s;}}catch(e){}return fresh();}
+function load(){try{const s=JSON.parse(localStorage.getItem(KEY));if(s&&s.v===4){s.logins=s.logins.filter(l=>l.name||l.website||[l.access.admin,l.access.regular,...(l.extra||[])].some(a=>a.username||a.pathway));s.logins.forEach(l=>{if(!['EMR','Lab portal','Clearinghouse'].includes(l.type))l.type='Other';l.extra=l.extra||[];for(const a of [l.access.admin,l.access.regular,...l.extra])if(a.url===undefined)a.url=(a.username||a.pathway)?(l.website||''):'';
+    {const has=a=>!!(a.username||a.pathway||a.url);for(const a of [l.access.admin,l.access.regular,...l.extra]){if(a.pathway===''&&(a.username||a.url))a.pathway='fill';}
+     if(l.access.admin.on===undefined)l.access.admin.on=has(l.access.admin)||!has(l.access.regular);if(l.access.regular.on===undefined)l.access.regular.on=has(l.access.regular);l.extra.forEach(a=>{if(a.on===undefined)a.on=true;});}});if(s.phone){if(s.phone.adminOn===undefined)s.phone.adminOn=!!s.phone.adminUser||!s.phone.regUser;if(s.phone.regOn===undefined)s.phone.regOn=!!s.phone.regUser;if(s.phone.adminUrl===undefined)s.phone.adminUrl=s.phone.adminUser?(s.phone.website||''):'';if(s.phone.regUrl===undefined)s.phone.regUrl=s.phone.regUser?(s.phone.website||''):'';}s.payers=migratePayers(s.payers);for(const [k] of SECTIONS)if(!s.tasks[k])s.tasks[k]={state:'not_started',reason:''};s.clinicians.forEach(c=>{if(!c.lics){c.lics=c.licenses?[{number:c.licenses}]:[];}});return s;}}catch(e){}return fresh();}
 
 /* ---------------- completeness ---------------- */
 function compat(s){
@@ -399,15 +409,15 @@ function checks(s,k){
     const d=f.delivery;const miss=[['destination','preferred result destination'],['notification','provider notification method'],['critical','critical result workflow'],['responsibleId','responsible contact'],['escalation','escalation procedure']].filter(([x])=>blank(d[x])).map(x=>x[1]);
     if(miss.length)c(`Complete result delivery: ${miss.join(', ')}.`);for(const l of f.labs)if(blank(l.website)||blank(l.username))c(`Add the portal website and username for ${l.key}.`);}
   if(k==='emr'){for(const p of s.payers){const m=portalMissing(p);if(m.length)c(`${portalTitle(p)}: ${m.join(', ')}, or check “Invitation sent”.`);}if(!s.logins.some(l=>l.type==='EMR'))c('Add at least one EMR.');for(const e of s.logins){const n=e.name||e.type||'a login';if(blank(e.name))c(`Enter the name for each ${LOGIN_GROUP_LABEL[e.type]||'login'}.`);
-    {const all=[e.access.admin,e.access.regular,...(e.extra||[])];if(!all.some(accOk))c(all.some(a=>!blank(a.username)&&blank(a.url))?`Enter the login URL for ${n}.`:`Add administrator or regular access for ${n}.`);}
-    for(const a of [e.access.admin,e.access.regular,...(e.extra||[])])if(a.pathway==='sent'&&(blank(a.sentDate)||blank(a.sentTo)))c(`Enter the date and recipient of each invitation for ${n}.`);}}
+    {for(const x of loginMissing(e).filter(x=>x!=='Name'))c(`${n}: ${x}.`);}
+    for(const a of [e.access.admin,e.access.regular,...(e.extra||[])].filter(a=>a.on!==false))if(a.pathway==='sent'&&(blank(a.sentDate)||blank(a.sentTo)))c(`Enter the date and recipient of each invitation for ${n}.`);}}
   if(k==='team'){const om=s.team.find(m=>m.role==='Office Manager');if(!om)c('Add the office manager.');if(s.team.filter(m=>m!==om).length<1)c('Add at least one more team member.');for(const m of s.team){if(blank(m.name))c('Enter a name on each team card.');else if(blank(m.email)&&blank(m.phone))c(`Add an email or phone for ${m.name}.`);}}
   if(k==='scheduling'){if(!s.visits.ways.length&&blank(s.visits.text))c('Tell us how you schedule patients for regular visits.');
     for(const x of act){const h=s.hours[x.id]||{};if(blank(h.text)&&!(h.days&&h.days.length&&h.start&&h.end))c(`Add general hours for ${x.name||'each clinician'}.`);}}
   if(k==='vendors'){for(const v of s.vendors)if(blank(v.name)&&(v.contact||v.email||v.phone||v.user))c('Enter the name on each vendor card.');}
   if(k==='testing'){if(blank(s.room.name))c('Enter the dedicated room name.');if(blank(s.room.loc))c('Choose the room’s clinic location.');}
   if(k==='billing'){const b=s.billing;if(blank(b.contact))c('Enter the billing contact.');if(blank(b.email)&&blank(b.phone))c('Add the billing contact’s email or phone.');}
-  if(k==='systems'){const t=s.phone;if(blank(t.system))c('Enter your phone system.');if(blank(t.adminUser)&&blank(t.regUser))c('Add administrator or regular access for the phone system.');if(blank(t.contactName))c('Tell us who the contact for your phone system is.');}
+  if(k==='systems'){const t=s.phone;if(blank(t.system))c('Enter your phone system.');if(!t.adminOn&&!t.regOn)c('Check administrator or regular access for the phone system.');if(t.adminOn&&blank(t.adminUser))c('Enter the phone system admin username.');if(t.regOn&&blank(t.regUser))c('Enter the phone system regular username.');if(blank(t.contactName))c('Tell us who the contact for your phone system is.');}
   return o;
 }
 function status(s){
@@ -456,7 +466,7 @@ function Verify({item,patch,P}){const [n,setN]=useState('');
   ${P.plexus&&item.status!=='verified'&&html`<div class="row"><input style="width:220px;min-height:32px" placeholder="Verification note" value=${n} onInput=${e=>setN(e.target.value)}/><button class="btn pri sm" disabled=${!n.trim()} onClick=${()=>{patch(i=>{i.status='verified';i.verifiedAt=new Date().toLocaleString();},'Access verified: '+n,true);setN('');}}>Record verified access</button></div>`}</div>`;}
 
 /* ---------------- iOS bento design system ---------------- */
-const ICONS={clipboard:['M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2','M9 2h6v4H9z','m9 14 2 2 4-4'],building:['M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z','M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2','M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2','M10 6h4','M10 10h4','M10 14h4','M10 18h4'],
+const ICONS={trash:['M3 6h18','M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6','M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2','M10 11v6','M14 11v6'],clipboard:['M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2','M9 2h6v4H9z','m9 14 2 2 4-4'],building:['M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z','M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2','M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2','M10 6h4','M10 10h4','M10 14h4','M10 18h4'],
 pin:['M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z','M12 13a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z'],
 users:['M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2','M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z','M22 21v-2a4 4 0 0 0-3-3.87','M16 3.13a4 4 0 0 1 0 7.75'],
 user:['M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2','M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z'],
@@ -658,11 +668,12 @@ function PortalTile({p,Pa,P,icon,open,setOpen,onRemove}){
   const sub=p.key==='State Medicaid'&&p.state?p.state:p.key==='Blue Cross Blue Shield'&&p.localPlan?p.localPlan:MULTI_ROWS[p.key]&&p.key!=='Other Portal'?(p.key==='Medicaid Managed Care'?'Managed care':'Commercial'):'';
   if(open)return html`<div ref=${ref} class="tile editing ptile" role="group" aria-label=${'Editing '+portalTitle(p)} onKeyDown=${e=>{if(e.key==='Escape'){e.stopPropagation();setOpen(null);}}}>
     <div class="ed-h"><span class="ico">${Icon(icon)}</span><div class="ed-t"><b>${portalTitle(p)}</b>${m.length>0&&html`<span class="ed-miss">Still needed: ${m.join(', ')}</span>`}</div><button type="button" class="btn pri sm" onClick=${()=>setOpen(null)}>${Icon('check',15)} Done</button></div>
-    <div class="ed-b"><${PortalAccess} p=${p} Pa=${Pa} P=${P}/>${onRemove&&P.edit&&html`<button type="button" class="link danger-link" onClick=${onRemove}>Remove ${portalTitle(p)}</button>`}</div></div>`;
-  return html`<button type="button" class=${'tile ptile'+(m.length?' incomplete':'')} onClick=${()=>setOpen(p.id)}>
+    <div class="ed-b"><${PortalAccess} p=${p} Pa=${Pa} P=${P}/></div></div>`;
+  return html`<div class="tile-wrap"><button type="button" class=${'tile ptile'+(m.length?' incomplete':'')} onClick=${()=>setOpen(p.id)}>
     <span class="tile-top"><span class="ico sm">${Icon(icon,17)}</span><span class="tile-title"><b>${portalTitle(p)}</b>${sub&&html`<span class="badge">${sub}</span>`}</span>
       ${m.length?html`<span class="ind dot" aria-label="Incomplete"/>`:html`<span class="ind ok" aria-label="Complete">${Icon('check',14)}</span>`}<span class="chev-r">${Icon('chev',18)}</span></span>
-    <span class="tile-lines">${p.invited?html`<span>Invite sent</span>`:p.username?html`<span>${host(p.website)}</span><span>${p.username}</span>`:html`<span class="ph">Add portal login</span>`}</span></button>`;
+    <span class="tile-lines">${p.invited?html`<span>Invite sent</span>`:p.username?html`<span>${host(p.website)}</span><span>${p.username}</span>`:html`<span class="ph">Add portal login</span>`}</span></button>
+    ${onRemove&&P.edit&&html`<${Trash} label=${portalTitle(p)} confirm=${!!(p.username||p.invited||p.name||(p.website&&p.website!==SIGNIN[p.key]))} onClick=${onRemove}/>`}</div>`;
 }
 function PortalEntry({p,Pa,P,open,onRemove}){
   const m=portalMissing(p);
@@ -691,7 +702,7 @@ function PortalCards({s,up,P,sec,required}){
               html`<label class=${'iosrow'+(on?' on':'')}><input type="checkbox" checked=${on} disabled=${!P.edit} onChange=${e=>{if(e.target.checked)add(g,k);else if(entries(g,k).some(p=>p.username||p.invited||p.name||(p.website&&p.website!==SIGNIN[k])))setAsk(id);else remove(g,k);}}/><span>${k}${MULTI_ROWS[k]&&n>0?html` <small class="muted">(${n})</small>`:''}</span><i class="tick">${on?Icon('check',15):''}</i></label>`}</li>`;})}</ul>
           </aside>
           <div class="stack pe-list">
-            <div class="bento c2 ptiles">${sel.map(p=>html`<${PortalTile} key=${p.id} p=${p} icon=${icon} Pa=${f=>Pa(p.id,f)} P=${P} open=${fresh===p.id} setOpen=${setFresh} onRemove=${MULTI_ROWS[p.key]?()=>{setFresh(null);up(d=>{d.payers=d.payers.filter(x=>x.id!==p.id);},sec);}:null}/>`)}
+            <div class="bento c2 ptiles">${sel.map(p=>html`<${PortalTile} key=${p.id} p=${p} icon=${icon} Pa=${f=>Pa(p.id,f)} P=${P} open=${fresh===p.id} setOpen=${setFresh} onRemove=${()=>{setFresh(null);up(d=>{d.payers=d.payers.filter(x=>x.id!==p.id);},sec);}}/>`)}
               ${P.edit&&entries(g,'Medicaid Managed Care').length>0&&html`<${AddTile} label="Add managed care plan" onClick=${()=>add(g,'Medicaid Managed Care',true)}/>`}
               ${P.edit&&html`<${AddTile} label=${g==='ins'?'Add insurer':'Add portal'} onClick=${()=>add(g,g==='ins'?'Other Commercial Insurance':'Other Portal',true)}/>`}</div>
           </div>
@@ -749,23 +760,34 @@ function Password({k,label='Password',dis}){
   const [v,setV]=useState(SECRETS[k]||''),[show,setShow]=useState(false);const id=useMemo(()=>'f'+(++fid),[]);
   return html`<div class="field"><label for=${id}>${label}</label><div class="pw"><input id=${id} type=${show?'text':'password'} autocomplete="new-password" value=${v} disabled=${dis} onInput=${e=>{SECRETS[k]=e.target.value;setV(e.target.value);}}/><button type="button" class="link" onClick=${()=>setShow(!show)}>${show?'Hide':'Show'}</button></div></div>`;
 }
-function AccessPanel({a,A,cls,label,req,sk,s,P,onRemove}){
-  return html`<div class=${'access '+cls}><div class="access-h"><b><span class=${'acc-tag '+cls}>${cls==='admin'?'Admin':'Regular'}</span>${label}${req&&html`<span class="req" aria-label="required"> *</span>`}</b>${onRemove&&P.edit&&html`<button type="button" class="link" onClick=${onRemove}>Remove</button>`}</div>
-    <div class="pathways" role="radiogroup" aria-label=${label}>${[['will_send','Invitation will be sent'],['sent','Invitation sent'],['','Fill this out']].map(([v,l])=>html`<button type="button" class=${'choice'+((a.pathway||'')===v?' on':'')} role="radio" aria-checked=${(a.pathway||'')===v} disabled=${!P.edit} onClick=${()=>A(x=>{x.pathway=v;})}><b>${l}</b></button>`)}</div>
-    ${!a.pathway&&html`<div class="grid"><${Field} full label="Login URL" type="url" ph="https://" value=${a.url} on=${v=>A(x=>{x.url=v;})} dis=${!P.edit}/><${Field} label="Username" req=${req} value=${a.username} on=${v=>A(x=>{x.username=v;})} dis=${!P.edit}/><${Password} k=${sk} dis=${!P.edit}/></div>`}
+function AccessPanel({a,A,cls,label,req,sk,s,P,onRemove,toggle=true}){
+  const on=a.on!==false;
+  return html`<div class=${'access '+cls+(on?'':' off')}><div class="access-h">
+      ${toggle?html`<label class="acc-check"><input type="checkbox" checked=${on} disabled=${!P.edit} onChange=${e=>A(x=>{x.on=e.target.checked;})}/><span class=${'acc-tag '+cls}>${cls==='admin'?'Admin':'Regular'}</span><b>${label}</b></label>`:html`<b><span class=${'acc-tag '+cls}>${cls==='admin'?'Admin':'Regular'}</span>${label}</b>`}
+      ${onRemove&&P.edit&&html`<${Trash} label=${label} onClick=${onRemove}/>`}</div>
+    ${on&&html`<div class="pathways" role="radiogroup" aria-label=${label}>${[['will_send','Invitation will be sent'],['sent','Invitation sent'],['fill','Fill this out']].map(([v,l])=>html`<button type="button" class=${'choice'+(a.pathway===v?' on':'')} role="radio" aria-checked=${a.pathway===v} disabled=${!P.edit} onClick=${()=>A(x=>{x.pathway=v;})}><b>${l}</b></button>`)}</div>
+    ${a.pathway==='fill'&&html`<div class="grid"><${Field} full label="Login URL" req type="url" ph="https://" value=${a.url} on=${v=>A(x=>{x.url=v;})} dis=${!P.edit}/><${Field} label="Username" req value=${a.username} on=${v=>A(x=>{x.username=v;})} dis=${!P.edit}/><${Password} k=${sk} dis=${!P.edit}/></div>`}
     ${a.pathway==='will_send'&&html`<div class="row small">Send to <code>${PLEXUS_BILLING}</code><${Copy} text=${PLEXUS_BILLING} label="Copy"/></div>`}
     ${a.pathway==='sent'&&html`<div class="grid">
       <${Field} label="Date sent" type="date" req value=${a.sentDate} on=${v=>A(x=>{x.sentDate=v;})} dis=${!P.edit}/>
-      <${Field} label="Sent to (email)" type="email" req value=${a.sentTo} on=${v=>A(x=>{x.sentTo=v;})} dis=${!P.edit}/></div>`}
+      <${Field} label="Sent to (email)" type="email" req value=${a.sentTo} on=${v=>A(x=>{x.sentTo=v;})} dis=${!P.edit}/></div>`}`}
+    ${!on&&html`<span class="small muted">Not provided — check the box to add.</span>`}
   </div>`;
 }
-const accOk=a=>!!a.pathway||(!blank(a.username)&&!blank(a.url));
-const accState=a=>a.username?'✓':a.pathway==='will_send'?'invite pending':a.pathway==='sent'?'invite sent':'';
+function Trash({label,onClick,confirm}){
+  const [ask,setAsk]=useState(false);
+  if(ask)return html`<span class="trash-ask" onClick=${e=>e.stopPropagation()}>Delete?<button type="button" class="btn danger sm" onClick=${e=>{e.stopPropagation();setAsk(false);onClick();}}>Delete</button><button type="button" class="btn ghost sm" onClick=${e=>{e.stopPropagation();setAsk(false);}}>Cancel</button></span>`;
+  return html`<button type="button" class="trash" aria-label=${'Delete '+label} title=${'Delete '+label} onClick=${e=>{e.stopPropagation();if(confirm)setAsk(true);else onClick();}}>${Icon('trash',16)}</button>`;
+}
+const accOk=a=>a.pathway==='will_send'||a.pathway==='sent'||(a.pathway==='fill'&&!blank(a.username)&&!blank(a.url));
+const accIssue=a=>!a.pathway?'choose an option':a.pathway==='fill'?[blank(a.url)&&'Login URL',blank(a.username)&&'Username'].filter(Boolean).join(', '):'';
+const accState=a=>a.pathway==='fill'&&a.username?'✓':a.pathway==='will_send'?'invite pending':a.pathway==='sent'?'invite sent':'';
 const LOGIN_GROUPS=[['EMR','EMR','monitor',EMRS.filter(x=>x!=='Other'),'Add EMR','EMR name'],['Lab portal','Lab Portal','flask',LAB_NAMES.filter(x=>x!=='Other'),'Add lab','Lab name'],['Clearinghouse','Clearinghouse','receipt',CLEARINGHOUSES.filter(x=>x!=='Other'),'Add clearinghouse','Clearinghouse name'],['Other','Other Systems','key',[],'Add system','System name']];
 const LOGIN_GROUP_LABEL={EMR:'EMR','Lab portal':'lab','Clearinghouse':'clearinghouse',Other:'system'};
-const loginMissing=e=>{const all=[e.access.admin,e.access.regular,...(e.extra||[])];return [blank(e.name)&&'Name',!all.some(accOk)&&(all.some(a=>!blank(a.username)&&blank(a.url))?'Login URL':'Administrator or regular access')].filter(Boolean);};
+const loginMissing=e=>{const m=[];if(blank(e.name))m.push('Name');const on=[['Administrator access',e.access.admin],['Regular access',e.access.regular],...(e.extra||[]).map((a,i)=>['Regular access '+(i+2),a])].filter(([,a])=>a.on!==false);
+  if(!on.length)m.push('Check administrator or regular access');for(const [l,a] of on)if(!accOk(a))m.push(`${l} (${accIssue(a)})`);return m;};
 function LoginTile({e,L,P,s,up,icon,open,setOpen,onRemove,nameLabel,custom}){
-  const ref=useRef(null),m=loginMissing(e),ad=e.access.admin,regs=[e.access.regular,...(e.extra||[])].filter(accOk).length,adminOk=accOk(ad);
+  const ref=useRef(null),m=loginMissing(e),ad=e.access.admin,regs=[e.access.regular,...(e.extra||[])].filter(a=>a.on!==false&&accOk(a)).length,adminOk=ad.on!==false&&accOk(ad);
   useEffect(()=>{if(open&&ref.current){ref.current.scrollIntoView({block:'nearest',behavior:'smooth'});const f=ref.current.querySelector('input:not([type=checkbox])');f&&f.focus({preventScroll:true});}},[open]);
   const title=e.name||('New '+(LOGIN_GROUP_LABEL[e.type]||'system'));
   if(open)return html`<div ref=${ref} class="tile editing ptile" role="group" aria-label=${'Editing '+title} onKeyDown=${ev=>{if(ev.key==='Escape'){ev.stopPropagation();setOpen(null);}}}>
@@ -775,15 +797,17 @@ function LoginTile({e,L,P,s,up,icon,open,setOpen,onRemove,nameLabel,custom}){
       <div class="pref-note">${Icon('key',15)}<span><b>Administrator access is preferred.</b> Regular access works if admin isn’t available — at least one is required.</span></div>
       <div class="access-pair"><${AccessPanel} a=${ad} A=${f=>L(x=>f(x.access.admin))} cls="admin" label="Administrator access" sk=${e.id+':admin'} s=${s} P=${P}/>
         <${AccessPanel} a=${e.access.regular} A=${f=>L(x=>f(x.access.regular))} cls="regular" label="Regular access" sk=${e.id+':regular'} s=${s} P=${P}/>
-        ${(e.extra||[]).map((a,i)=>html`<${AccessPanel} key=${i} a=${a} A=${f=>L(x=>f(x.extra[i]))} cls="regular" label=${'Regular access '+(i+2)} sk=${e.id+':reg'+i} s=${s} P=${P} onRemove=${()=>L(x=>{x.extra.splice(i,1);})}/>`)}</div>
-      ${P.edit&&html`<button type="button" class="btn ghost addacc" onClick=${()=>L(x=>{(x.extra=x.extra||[]).push(blankAccess());})}>${Icon('plus',16)} Add another regular access</button>`}
+        ${(e.extra||[]).map((a,i)=>html`<${AccessPanel} key=${i} a=${a} A=${f=>L(x=>f(x.extra[i]))} cls="regular" label=${'Regular access '+(i+2)} sk=${e.id+':reg'+i} s=${s} P=${P} toggle=${false} onRemove=${()=>L(x=>{x.extra.splice(i,1);})}/>`)}</div>
+      ${P.edit&&html`<button type="button" class="btn ghost addacc" onClick=${()=>L(x=>{(x.extra=x.extra||[]).push(blankAccess(true));})}>${Icon('plus',16)} Add another regular access</button>`}
       <span class="small muted">${Icon('lock',12)} Passwords clear on reload and never appear on cards.</span>
       <${Verify} item=${e} P=${P} patch=${(f,msg)=>up(d=>f(d.logins.find(x=>x.id===e.id)),null,`${e.name||e.type} login: ${msg}`)}/>
-      ${onRemove&&P.edit&&html`<button type="button" class="link danger-link" onClick=${onRemove}>Remove ${title}</button>`}</div></div>`;
-  return html`<button type="button" class=${'tile ptile'+(m.length?' incomplete':'')} onClick=${()=>setOpen(e.id)}>
+      </div></div>`;
+  const hasData=[ad,e.access.regular,...(e.extra||[])].some(a=>a.username||a.url||a.pathway);
+  return html`<div class="tile-wrap"><button type="button" class=${'tile ptile'+(m.length?' incomplete':'')} onClick=${()=>setOpen(e.id)}>
     <span class="tile-top"><span class="ico sm">${Icon(icon,17)}</span><span class="tile-title"><b>${title}</b></span>
       ${m.length?html`<span class="ind dot" aria-label="Incomplete"/>`:html`<span class="ind ok" aria-label="Complete">${Icon('check',14)}</span>`}<span class="chev-r">${Icon('chev',18)}</span></span>
-    <span class="tile-lines">${m.length&&!adminOk&&!regs?html`<span class="ph">Add administrator or regular access</span>`:html`<span>${[adminOk?'Admin '+accState(ad):'',regs?`${regs} regular`:''].filter(Boolean).join(' · ')}</span>`}</span></button>`;
+    <span class="tile-lines">${m.length&&!adminOk&&!regs?html`<span class="ph">Add administrator or regular access</span>`:html`<span>${[adminOk?'Admin '+accState(ad):'',regs?`${regs} regular`:''].filter(Boolean).join(' · ')}</span>`}</span></button>
+    ${onRemove&&P.edit&&html`<${Trash} label=${title} confirm=${hasData} onClick=${onRemove}/>`}</div>`;
 }
 function LoginCards({s,up,P}){
   const [q,setQ]=useState(''),[ask,setAsk]=useState(null),[openId,setOpenId]=useState(null);
@@ -832,7 +856,8 @@ function Systems({s,up,P}){
         <${Field} label="Contact email" type="email" value=${t.contactEmail} on=${set('contactEmail')} dis=${!P.edit}/>
         <${Field} label="Company (if an outside vendor)" value=${t.contactCompany} on=${set('contactCompany')} dis=${!P.edit}/></div>`}/>
     ${html`<div class="pref-note span">${Icon('key',15)}<span><b>Administrator access is preferred.</b> Regular access works if admin isn’t available — at least one is required.</span></div>`}
-    ${[['adminUser','phone:admin','Administrator Access','Can manage users, routing and settings','Admin'],['regUser','phone:regular','Regular Access','Standard user / extension','Regular']].map(([k,sk,title,hint,lbl])=>html`<${Tile} key=${k} id=${'ph-'+k} P=${P} icon="key" title=${title} cls=${k==='adminUser'?'acc-admin':'acc-regular'} lines=${t[k]?[t[k],(t[k==='adminUser'?'adminUrl':'regUrl']||'').replace(/^https?:\/\//,'')]:[]} empty="Add login URL, username and password" done=${!blank(t[k])?true:!blank(t[k==='adminUser'?'regUser':'adminUser'])?null:false}
+    <div class="acc-pick span"><span>Which access will you provide?</span>${[['adminOn','Administrator','admin'],['regOn','Regular','regular']].map(([k,l,c])=>html`<label class=${'acc-check '+c}><input type="checkbox" checked=${t[k]} disabled=${!P.edit} onChange=${e=>set(k)(e.target.checked)}/><span class=${'acc-tag '+c}>${l}</span></label>`)}</div>
+    ${[['adminUser','phone:admin','Administrator Access','Can manage users, routing and settings','Admin'],['regUser','phone:regular','Regular Access','Standard user / extension','Regular']].map(([k,sk,title,hint,lbl])=>html`<${Tile} key=${k} id=${'ph-'+k} P=${P} icon="key" title=${title} cls=${(k==='adminUser'?t.adminOn:t.regOn)?(k==='adminUser'?'acc-admin':'acc-regular'):'acc-off'} lines=${t[k]?[t[k],(t[k==='adminUser'?'adminUrl':'regUrl']||'').replace(/^https?:\/\//,'')]:[]} empty=${(k==='adminUser'?t.adminOn:t.regOn)?'Add login URL, username and password':'Not provided'} done=${(k==='adminUser'?t.adminOn:t.regOn)?!blank(t[k]):null}
       editor=${()=>html`<div class="grid"><${Field} full label="Login URL" type="url" ph="https://" value=${t[k==='adminUser'?'adminUrl':'regUrl']} on=${set(k==='adminUser'?'adminUrl':'regUrl')} dis=${!P.edit}/><${Field} label=${lbl+' username'} value=${t[k]} on=${set(k)} dis=${!P.edit}/><${Password} k=${sk} label=${lbl+' password'} dis=${!P.edit}/></div><span class="small muted">${Icon('lock',12)} Passwords aren’t saved in this preview. In the live portal they go to the secure credential vault.</span>`}/>`)}
   </${Group}>`;
 }
