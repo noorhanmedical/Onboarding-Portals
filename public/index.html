@@ -86,6 +86,7 @@ main{position:relative;z-index:1}
 @media(prefers-reduced-motion:reduce){.tile,.addtile,.chev-r{transition:none}.tile:hover,.addtile:hover{transform:none}}
 
 /* ---- typography & density refinement ---- */
+.phase.bill.first{margin-top:0;border-top:0;padding-top:14px}.link.back{display:inline-block;margin-bottom:6px;color:var(--blue);font-weight:600;font-size:14.5px;padding:0}.final.bill .btn.pri{background:hsl(270 52% 44%);border-color:hsl(270 52% 44%)}
 .flat{display:flex;flex-direction:column;gap:10px}.flat+.flat{border-top:1px solid hsl(210 30% 92%);padding-top:14px}.flat-h{font-size:13px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--bluegray)}
 .ptiles{align-content:start}.ptiles .tile.editing{grid-column:1/-1;box-shadow:0 8px 26px hsla(215,50%,30%,.12)}.ptiles .addtile{min-height:96px}@media(max-width:1100px){.tile.editing .ptiles{grid-template-columns:1fr}}
 .tile.editing .payers{grid-template-columns:minmax(220px,270px) 1fr}.tile.editing .plist{top:120px;max-height:calc(100vh - 140px)}@media(max-width:860px){.tile.editing .payers{grid-template-columns:1fr}}
@@ -893,7 +894,7 @@ function App(){
   const [s,setS]=useState(load),[view,setView]=useState('clinic'),[saved,setSaved]=useState(null),[saving,setSaving]=useState(false);
   const [open,setOpen]=useState({}),[active,setActive]=useState(location.hash.slice(1)||'facility');
   const prog=useRef(0),tabsRef=useRef(null),heads=useRef({});
-  const plexus=view!=='clinic';
+  const plexus=view==='review'||view==='console';
   const [ek,setEk]=useState(null),[flags,setFlags]=useState({}),[tried,setTried]=useState(false);
   const P={edit:true,plexus,settlement:true,ek,setEk};
   const who=plexus?'Morgan Lee (Plexus coordinator)':'Jamie Chen (Clinic admin)';
@@ -905,46 +906,50 @@ function App(){
     if(state){n.audit.unshift({t:new Date().toLocaleString(),who,ev:`${LABEL[k]}: ${STATE_LABEL[t.state]} → ${STATE_LABEL[state]}`,d:reason});t.state=state;t.reason=['changes','na'].includes(state)?reason:'';}
     else n.audit.unshift({t:new Date().toLocaleString(),who,ev:`${LABEL[k]}: reminder`,d:reason});return n;});
   const st=useMemo(()=>status(s),[s]);
-  const submitAll=()=>{const inc=st.secs.filter(x=>!x.complete);
+  const VIS=view==='clinic'?SECTIONS.filter(([k])=>!BILLING_KEYS.includes(k)):view==='billing'?SECTIONS.filter(([k])=>BILLING_KEYS.includes(k)):SECTIONS;
+  const vis=st.secs.filter(x=>VIS.some(([k])=>k===x.k)),vdone=vis.filter(x=>x.complete).length,vpct=Math.round(vdone/VIS.length*100);
+  const vsub=vis.every(x=>['submitted','na','verified','waived'].includes(x.state)),vstage=vis.every(x=>['verified','waived'].includes(x.state))?2:vsub?1:0;
+  const gi=k=>SECTIONS.findIndex(x=>x[0]===k);
+  const submitAll=()=>{const inc=vis.filter(x=>!x.complete);
     if(inc.length){setTried(true);setFlags(Object.fromEntries(inc.map(x=>[x.k,true])));setOpen(o=>({...o,...Object.fromEntries(inc.map(x=>[x.k,true]))}));return;}
-    setTried(false);setFlags({});setS(prev=>{const n=structuredClone(prev);for(const [k] of SECTIONS){const t=n.tasks[k];if(!['na','verified','waived'].includes(t.state)){t.state='submitted';t.reason='';}}n.audit.unshift({t:new Date().toLocaleString(),who,ev:'Onboarding submitted for review',d:'All sections'});return n;});};
+    setTried(false);setFlags({});setS(prev=>{const n=structuredClone(prev);for(const [k] of VIS){const t=n.tasks[k];if(!['na','verified','waived'].includes(t.state)){t.state='submitted';t.reason='';}}n.audit.unshift({t:new Date().toLocaleString(),who,ev:(view==='billing'?'Billing':'Clinic')+' onboarding submitted for review',d:VIS.map(x=>x[1]).join(', ')});return n;});};
   const goTo=k=>{setOpen(o=>({...o,[k]:true}));setActive(k);prog.current=Date.now()+1200;try{history.replaceState(null,'','#'+k);}catch(e){}
     requestAnimationFrame(()=>requestAnimationFrame(()=>{const el=document.getElementById('sec-'+k);if(!el)return;const off=56+(tabsRef.current?.offsetHeight||56)+10;
       window.scrollTo({top:el.getBoundingClientRect().top+scrollY-off,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});heads.current[k]?.focus({preventScroll:true});}));};
   useEffect(()=>{const h=location.hash.slice(1);if(BODIES[h])goTo(h);
-    const on=()=>{if(Date.now()<prog.current)return;const off=56+(tabsRef.current?.offsetHeight||56)+14;let cur='facility';for(const [k] of SECTIONS){const el=document.getElementById('sec-'+k);if(el&&el.getBoundingClientRect().top-off<=4)cur=k;}setActive(a=>a===cur?a:cur);};
+    const on=()=>{if(Date.now()<prog.current)return;const off=56+(tabsRef.current?.offsetHeight||56)+14;let cur=null;for(const [k] of SECTIONS){const el=document.getElementById('sec-'+k);if(!el)continue;if(!cur)cur=k;if(el.getBoundingClientRect().top-off<=4)cur=k;}if(!cur)return;setActive(a=>a===cur?a:cur);};
     const end=()=>{prog.current=0;on();};addEventListener('scroll',on,{passive:true});addEventListener('scrollend',end);return()=>{removeEventListener('scroll',on);removeEventListener('scrollend',end);};},[]);
   useEffect(()=>{const sc=tabsRef.current?.firstElementChild,t=sc?.querySelector(`[data-k="${active}"]`);if(!sc||!t)return;if(t.offsetLeft<sc.scrollLeft)sc.scrollLeft=t.offsetLeft-8;else if(t.offsetLeft+t.offsetWidth>sc.scrollLeft+sc.clientWidth)sc.scrollLeft=t.offsetLeft+t.offsetWidth-sc.clientWidth+8;},[active]);
-  const keys=SECTIONS.map(x=>x[0]);
-  const hk=(e,i)=>{let n=-1;const N=SECTIONS.length;if(e.key==='ArrowDown')n=(i+1)%N;if(e.key==='ArrowUp')n=(i+N-1)%N;if(e.key==='Home')n=0;if(e.key==='End')n=N-1;if(n>=0){e.preventDefault();heads.current[keys[n]]?.focus();}};
-  const tk=(e,i)=>{let n=-1;const N=SECTIONS.length;if(e.key==='ArrowRight')n=(i+1)%N;if(e.key==='ArrowLeft')n=(i+N-1)%N;if(n>=0){e.preventDefault();tabsRef.current.querySelector(`[data-k="${keys[n]}"]`)?.focus();}};
+  const keys=VIS.map(x=>x[0]);
+  const hk=(e,i)=>{let n=-1;const N=VIS.length;if(e.key==='ArrowDown')n=(i+1)%N;if(e.key==='ArrowUp')n=(i+N-1)%N;if(e.key==='Home')n=0;if(e.key==='End')n=N-1;if(n>=0){e.preventDefault();heads.current[keys[n]]?.focus();}};
+  const tk=(e,i)=>{let n=-1;const N=VIS.length;if(e.key==='ArrowRight')n=(i+1)%N;if(e.key==='ArrowLeft')n=(i+N-1)%N;if(n>=0){e.preventDefault();tabsRef.current.querySelector(`[data-k="${keys[n]}"]`)?.focus();}};
   const reset=()=>{if(confirmReset){setS(fresh());setConfirmReset(false);}else setConfirmReset(true);};
   const [confirmReset,setConfirmReset]=useState(false);
 
-  const bar=html`<header class="bar"><div class="ctx"><small>Plexus Onboarding / ${plexus?'Workspace':'Clinic'}</small><strong>${view==='console'?'Clinic onboarding':'My Progress'}</strong></div>
-    <div class="views" role="tablist" aria-label="View as">${[['clinic','Clinic view'],['review','Plexus review'],['console','Plexus console']].map(([v,l])=>html`<button role="tab" aria-selected=${view===v} class=${view===v?'on':''} onClick=${()=>{setView(v);scrollTo(0,0);}}>${l}</button>`)}</div>
+  const bar=html`<header class="bar"><div class="ctx"><small>Plexus Onboarding / ${plexus?'Plexus':view==='billing'?'Billing team':'Clinic team'}</small><strong>${view==='console'?'Console':view==='review'?'Plexus review':view==='billing'?'Billing Onboarding':'Clinic Onboarding'}</strong></div>
+    <div class="views" role="tablist" aria-label="View as">${[['clinic','Clinic view'],['billing','Billing view'],['console','Plexus console']].map(([v,l])=>{const on=view===v||(v==='console'&&view==='review');return html`<button role="tab" aria-selected=${on} class=${on?'on':''} onClick=${()=>{setView(v);setOpen({});scrollTo(0,0);}}>${l}</button>`;})}</div>
     <button class="reset" onClick=${reset} onBlur=${()=>setConfirmReset(false)}>${confirmReset?'Click again to erase':'Reset demo'}</button></header>`;
 
   if(view==='console')return html`${bar}<main><${Console} s=${s} st=${st} setS=${setS} openReview=${()=>{setView('review');scrollTo(0,0);}}/></main>`;
   return html`${bar}<main>
     <section class="hero">
-      <div class="hero-top"><div><p class="eyebrow">${s.clinic}${plexus?' · Plexus review':''}</p><h1>My Progress</h1></div>
+      <div class="hero-top"><div>${view==='review'&&html`<button type="button" class="link back" onClick=${()=>{setView('console');scrollTo(0,0);}}>← Back to console</button>`}<p class="eyebrow">${s.clinic}${view==='review'?' · Plexus review':''}</p><h1>${view==='review'?'Plexus Review':view==='billing'?'Billing Onboarding':'Clinic Onboarding'}</h1></div>
         <label class="field" style="min-width:210px"><span class="lbl">Facility</span><select><option>${s.site}</option></select></label></div>
       <div class="stats">
-        <div class="pct"><strong>${st.pct}%</strong><span>complete</span></div>
-        <div><div class="track" role="progressbar" aria-label="Completed sections" aria-valuenow=${st.pct} aria-valuemin="0" aria-valuemax="100"><span style=${`width:${st.pct}%`}/></div>
-          <p><b>${st.done}</b> of ${SECTIONS.length} sections complete${st.submitted?' · submitted for review':''}</p></div>
-        <ol class="stages" aria-label="Onboarding stage">${['Clinic Completing','Plexus Reviewing','Ready to Launch'].map((x,i)=>html`<li class=${i<st.stage?'done':i===st.stage?'cur':''} aria-current=${i===st.stage?'step':undefined}><i>${i<st.stage?'✓':i+1}</i>${x}</li>`)}</ol>
+        <div class="pct"><strong>${vpct}%</strong><span>complete</span></div>
+        <div><div class="track" role="progressbar" aria-label="Completed sections" aria-valuenow=${vpct} aria-valuemin="0" aria-valuemax="100"><span style=${`width:${vpct}%`}/></div>
+          <p><b>${vdone}</b> of ${VIS.length} sections complete${vsub?' · submitted for review':''}</p></div>
+        <ol class="stages" aria-label="Onboarding stage">${[view==='billing'?'Billing Completing':view==='review'?'Teams Completing':'Clinic Completing','Plexus Reviewing','Ready to Launch'].map((x,i)=>html`<li class=${i<vstage?'done':i===vstage?'cur':''} aria-current=${i===vstage?'step':undefined}><i>${i<vstage?'✓':i+1}</i>${x}</li>`)}</ol>
         <div class=${'save'+(!saving&&saved?' ok':'')} aria-live="polite">${saving?'Saving…':saved==='mem'?'Saved for this session (browser storage unavailable)':saved?`✓ All changes saved · ${saved.toLocaleTimeString([],{hour:'numeric',minute:'2-digit'})} · this browser only`:'Changes save automatically'}</div>
       </div>
-      ${st.stage===2&&html`<div class="note ok" style="margin-top:10px">Every section is verified. Launch approval still requires startup, training and the Plexus launch dry run.</div>`}
+      ${vstage===2&&html`<div class="note ok" style="margin-top:10px">Every section is verified. Launch approval still requires startup, training and the Plexus launch dry run.</div>`}
     </section>
-    <nav class="tabs" ref=${tabsRef} aria-label="My Progress sections"><div>${SECTIONS.map(([k,l],i)=>{const x=st.secs[i];return html`${k===BILLING_KEYS[0]&&html`<span class="tab-sep" aria-hidden="true"/>`}<button data-k=${k} class=${(active===k?'on':'')+(BILLING_KEYS.includes(k)?' bill':'')} aria-current=${active===k?'true':undefined} onKeyDown=${e=>tk(e,i)} onClick=${()=>goTo(k)}><i class=${'dot '+(x.complete?'verified':x.state==='not_started'?'not_started':'saved')}/>${l}<span class="sr">, ${secLabel(x)}</span></button>`;})}</div></nav>
-    <div class="secs">${SECTIONS.map(([k,l],i)=>{const x=st.secs[i],isOpen=!!open[k],B=BODIES[k],done=x.complete;
+    <nav class="tabs" ref=${tabsRef} aria-label="My Progress sections"><div>${VIS.map(([k,l],i)=>{const x=st.secs[gi(k)];return html`${k===BILLING_KEYS[0]&&i>0&&html`<span class="tab-sep" aria-hidden="true"/>`}<button data-k=${k} class=${(active===k?'on':'')+(BILLING_KEYS.includes(k)?' bill':'')} aria-current=${active===k?'true':undefined} onKeyDown=${e=>tk(e,i)} onClick=${()=>goTo(k)}><i class=${'dot '+(x.complete?'verified':x.state==='not_started'?'not_started':'saved')}/>${l}<span class="sr">, ${secLabel(x)}</span></button>`;})}</div></nav>
+    <div class="secs">${VIS.map(([k,l],i)=>{const g=gi(k),x=st.secs[g],isOpen=!!open[k],B=BODIES[k],done=x.complete;
       const bill=BILLING_KEYS.includes(k),num=bill?BILLING_KEYS.indexOf(k)+1:i+1;
-      return html`${i===0&&html`<div class="phase"><b>Clinic Onboarding</b><span>${st.secs.filter(x=>!BILLING_KEYS.includes(x.k)&&x.complete).length} of ${SECTIONS.length-BILLING_KEYS.length} complete</span></div>`}
-      ${k===BILLING_KEYS[0]&&html`<div class="phase bill"><b>Billing Onboarding</b><span>${st.secs.filter(x=>BILLING_KEYS.includes(x.k)&&x.complete).length} of ${BILLING_KEYS.length} complete</span></div>`}
-      <section key=${k} id=${'sec-'+k} class=${'sec'+(isOpen?' open':'')+(bill?' bill':'')} style=${`--h1:${SHADES[i][0]};--h2:${SHADES[i][1]}`} aria-labelledby=${'h-'+k}>
+      return html`${i===0&&!bill&&html`<div class="phase"><b>Clinic Onboarding</b><span>${st.secs.filter(x=>!BILLING_KEYS.includes(x.k)&&x.complete).length} of ${SECTIONS.length-BILLING_KEYS.length} complete</span></div>`}
+      ${k===BILLING_KEYS[0]&&html`<div class=${'phase bill'+(i===0?' first':'')}><b>Billing Onboarding</b><span>${st.secs.filter(x=>BILLING_KEYS.includes(x.k)&&x.complete).length} of ${BILLING_KEYS.length} complete</span></div>`}
+      <section key=${k} id=${'sec-'+k} class=${'sec'+(isOpen?' open':'')+(bill?' bill':'')} style=${`--h1:${SHADES[g][0]};--h2:${SHADES[g][1]}`} aria-labelledby=${'h-'+k}>
         <h2><button id=${'h-'+k} ref=${el=>heads.current[k]=el} aria-expanded=${isOpen} aria-controls=${'p-'+k} onKeyDown=${e=>hk(e,i)} onClick=${()=>setOpen(o=>({...o,[k]:!o[k]}))}>
           <span class=${'step'+(done?' done':'')}>${done?'✓':num}</span><span class="title">${l}</span><${Pill}>${secLabel(x)}</${Pill}><span class=${'chev'+(isOpen?' open':'')}>⌄</span></button></h2>
         <div id=${'p-'+k} role="region" aria-labelledby=${'h-'+k} hidden=${!isOpen} class=${'body'+(flags[k]&&!x.complete?' flagged':'')}>
@@ -953,12 +958,12 @@ function App(){
           <${B} s=${s} up=${up} P=${{...P,pre:k+':',setEk:v=>setEk(v==null?null:(String(v).includes(':')?v:k+':'+v))}}/>
           <${Footer} k=${k} sec=${x} P=${P} act=${act} flag=${!!flags[k]}/>
         </div></section>`;})}</div>
-    ${!plexus&&html`<section class="final">
-      ${st.submitted?html`<div class="final-done">${Icon('check',20)}<div><b>Submitted for review</b><span>Plexus will reach out if anything needs changes.</span></div></div>`:html`
-      <div class="final-h"><div><b>Submit for Review</b><span>${st.done===SECTIONS.length?'Everything is complete.':`${SECTIONS.length-st.done} section${SECTIONS.length-st.done>1?'s':''} left`}</span></div>
+    ${!plexus&&html`<section class=${'final'+(view==='billing'?' bill':'')}>
+      ${vsub?html`<div class="final-done">${Icon('check',20)}<div><b>Submitted for review</b><span>Plexus will reach out if anything needs changes.</span></div></div>`:html`
+      <div class="final-h"><div><b>Submit for Review</b><span>${vdone===VIS.length?'Everything is complete.':`${VIS.length-vdone} section${VIS.length-vdone>1?'s':''} left`}</span></div>
         <button class="btn pri big" onClick=${submitAll}>Submit for Review</button></div>
-      ${tried&&st.done<SECTIONS.length&&html`<div class="flagmsg" role="status">${Icon('alert',16)}<span>Finish these first:</span></div>
-        <div class="chips">${st.secs.filter(x=>!x.complete).map(x=>html`<button type="button" class="chip warn" onClick=${()=>goTo(x.k)}>${x.label}</button>`)}</div>`}`}
+      ${tried&&vdone<VIS.length&&html`<div class="flagmsg" role="status">${Icon('alert',16)}<span>Finish these first:</span></div>
+        <div class="chips">${vis.filter(x=>!x.complete).map(x=>html`<button type="button" class="chip warn" onClick=${()=>goTo(x.k)}>${x.label}</button>`)}</div>`}`}
     </section>`}
     <details class="audit"><summary>🕘 Audit history (${s.audit.length})</summary>${s.audit.length?html`<ol>${s.audit.slice(0,200).map(a=>html`<li><b>${a.ev}</b>${a.d?` — ${a.d}`:''}<br/><span class="small muted">${a.who} · ${a.t}</span></li>`)}</ol>`:html`<p class="small muted">No events yet.</p>`}</details>
     <p class="small muted" style="text-align:center;margin-top:18px">Interactive preview · data stays in this browser · no passwords are stored</p>
@@ -972,11 +977,11 @@ function Console({s,st,setS,openReview}){
   return html`
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><h1>Clinic onboarding</h1></div>
   <div class="kpis"><div class="kpi"><b>3</b><span>Assigned clinics</span></div><div class="kpi"><b>${st.review+5}</b><span>Sections awaiting review</span></div><div class="kpi"><b>${access+4}</b><span>Access requests to verify</span></div><div class="kpi"><b>${st.stage===2?1:0}</b><span>Ready to launch</span></div></div>
-  <div class="panel"><div class="tw"><table><thead><tr><th>Facility / organization</th><th>Stage</th><th>Completion</th><th>Outstanding</th><th>Access to verify</th><th>Coordinator</th><th>Target date</th><th>Launch readiness</th><th></th></tr></thead><tbody>
+  <div class="panel"><div class="tw"><table><thead><tr><th>Facility / organization</th><th>Stage</th><th>Clinic team</th><th>Billing team</th><th>Outstanding</th><th>Access to verify</th><th>Coordinator</th><th>Target date</th><th>Launch readiness</th><th></th></tr></thead><tbody>
     <tr><td><b style="font-weight:500">${s.site}</b><div class="small muted">${s.clinic} · ${s.locations.length} location${s.locations.length===1?'':'s'}</div></td><td><${Pill}>${['Clinic Completing','Plexus Reviewing','Ready to Launch'][st.stage]}</${Pill}></td>
-      <td><span class="mini"><span style=${`width:${st.pct}%`}/></span>${st.done}/${SECTIONS.length}</td><td title=${st.secs.filter(x=>!['verified','waived'].includes(x.state)).map(x=>x.label).join(', ')}>${SECTIONS.length-st.done} sections${st.review?html`<div class="small muted">${st.review} awaiting review</div>`:''}</td><td>${access}</td><td>Morgan Lee</td><td>Dec 15, 2026</td>
+      ${[st.secs.filter(x=>!BILLING_KEYS.includes(x.k)),st.secs.filter(x=>BILLING_KEYS.includes(x.k))].map(g=>{const d=g.filter(x=>x.complete).length,sub=g.every(x=>['submitted','na','verified','waived'].includes(x.state));return html`<td><span class="mini"><span style=${`width:${Math.round(d/g.length*100)}%`}/></span>${d}/${g.length}${sub?html`<div class="small muted">Submitted</div>`:''}</td>`;})}<td title=${st.secs.filter(x=>!['verified','waived'].includes(x.state)).map(x=>x.label).join(', ')}>${SECTIONS.length-st.done} sections${st.review?html`<div class="small muted">${st.review} awaiting review</div>`:''}</td><td>${access}</td><td>Morgan Lee</td><td>Dec 15, 2026</td>
       <td>${st.stage===2?html`<${Pill} tone="green">Sections verified</${Pill}>`:html`<${Pill} tone="gray">Not ready</${Pill}>`}</td><td><button class="btn sm pri" onClick=${openReview}>Open review</button></td></tr>
-    ${others.map(o=>html`<tr><td><b style="font-weight:500">${o[0]}</b><div class="small muted">${o[1]} · sample row</div></td><td><${Pill}>${o[3]}</${Pill}></td><td><span class="mini"><span style=${`width:${o[2]}%`}/></span>${o[2]/10}/10</td><td>${o[4]} sections</td><td>${o[5]}</td><td>${o[6]}</td><td>${o[7]}</td><td><${Pill} tone="gray">Not ready</${Pill}></td><td></td></tr>`)}
+    ${others.map(o=>html`<tr><td><b style="font-weight:500">${o[0]}</b><div class="small muted">${o[1]} · sample row</div></td><td><${Pill}>${o[3]}</${Pill}></td><td><span class="mini"><span style=${`width:${o[2]}%`}/></span>${Math.round(o[2]/100*9)}/9</td><td><span class="mini"><span style=${`width:${o[2]>50?100:25}%`}/></span>${o[2]>50?4:1}/4</td><td>${o[4]} sections</td><td>${o[5]}</td><td>${o[6]}</td><td>${o[7]}</td><td><${Pill} tone="gray">Not ready</${Pill}></td><td></td></tr>`)}
   </tbody></table></div></div>
   <div class="panel" style="margin-top:16px;padding:16px 18px"><h3 style="margin:0 0 4px;font-size:15px">Access invitation recipients</h3><p class="small muted" style="margin:0 0 12px">Plexus-managed addresses clinics use for payer, EMR and lab portal invitations. Leave blank until the mailbox is verified.</p>
     <div class="grid">${[['payerInvite','Payer portal invitation recipient'],['emrInvite','Login invitation recipient (EMR, clearinghouse, Availity)'],['labInvite','Lab portal invitation recipient']].map(([k,l])=>html`<div class="field"><label>${l}</label><input type="email" placeholder="Not configured" value=${s.settings[k]} onChange=${set(k)}/></div>`)}</div></div>`;

@@ -1,6 +1,11 @@
 # Plexus Onboarding Portal
 
-Clinic onboarding and billing onboarding for Plexus partner clinics, with Plexus review and console views.
+Clinic onboarding and billing onboarding for Plexus partner clinics.
+
+Three views:
+- **Clinic view** — the clinic team completes Clinic Onboarding.
+- **Billing view** — the billing team completes Billing Onboarding.
+- **Plexus console** — every facility with clinic and billing completion; **Open review** opens Plexus review for that facility.
 
 - **Clinic Onboarding:** Facility Details, Add Clinician, Clinic Flows, Logins, Telephone Systems, Team, Vendors, Scheduling, Testing Day
 - **Billing Onboarding:** Facility Details, Add Clinician, Billing, Logins (insurance, multi-payer and prior authorization portals)
