@@ -113,7 +113,7 @@ main{position:relative;z-index:1}
 .phase.bill.first{margin-top:0;border-top:0;padding-top:14px}.link.back{display:inline-block;margin-bottom:6px;color:var(--blue);font-weight:600;font-size:14.5px;padding:0}.final.bill .btn.pri{background:hsl(270 52% 44%);border-color:hsl(270 52% 44%)}
 .flat{display:flex;flex-direction:column;gap:10px}.flat+.flat{border-top:1px solid hsl(210 30% 92%);padding-top:14px}.flat-h{font-size:13px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--bluegray)}
 .ptiles{align-content:start}.ptiles .tile.editing{grid-column:1/-1;box-shadow:0 8px 26px hsla(215,50%,30%,.12)}.ptiles .addtile{min-height:96px}@media(max-width:1100px){.tile.editing .ptiles{grid-template-columns:1fr}}
-.tile.editing .payers{grid-template-columns:minmax(220px,270px) 1fr}.tile.editing .plist{top:120px;max-height:calc(100vh - 140px)}@media(max-width:860px){.tile.editing .payers{grid-template-columns:1fr}}
+.tile.editing .payers.solo{grid-template-columns:1fr}.tile.editing .payers{grid-template-columns:minmax(220px,270px) 1fr}.tile.editing .plist{top:120px;max-height:calc(100vh - 140px)}@media(max-width:860px){.tile.editing .payers{grid-template-columns:1fr}}
 .pe>summary{justify-content:space-between}.pe-t{flex:1;display:flex;flex-direction:column}.pe-t small{font-size:13.5px;font-weight:400;color:var(--bluegray)}
 .pe-s{display:inline-flex;align-items:center;gap:4px;font-size:13.5px;font-weight:500;padding:3px 10px;border-radius:999px}.pe-s.ok{background:var(--green-soft);color:var(--green)}.pe-s.warn{background:var(--amber-soft);color:var(--amber)}
 .pe-b{padding:4px 16px 16px;gap:12px}.pe-list{gap:10px}.danger-link{color:var(--red);align-self:flex-start}
@@ -333,7 +333,7 @@ const PORTAL_URL=Object.fromEntries(PORTALS_UM);
 const PLEXUS_BILLING='billing@plexusclinical.com';
 const PAYERS=['Medicare','State Medicaid','Blue Cross Blue Shield','UnitedHealthcare','Aetna','Cigna','Humana','AHCCCS — Arizona Complete Health','AHCCCS — Banner University Family Care','AHCCCS — Mercy Care','AHCCCS — Molina Healthcare','AHCCCS — UnitedHealthcare Community Plan'];
 const PRODUCTS=['Commercial','HMO','PPO','Medicare Advantage','Medicaid','Medicaid managed care','Other'];
-const EMRS=['eClinicalWorks','NextGen','athenahealth','Epic','Practice Fusion','Other'];
+const EMRS=['eClinicalWorks','athenahealth','Epic','NextGen','Practice Fusion','Oracle Health (Cerner)','Veradigm (Allscripts)','Greenway','AdvancedMD','Tebra (Kareo)','ModMed','DrChrono','PointClickCare','MatrixCare','Other'];
 const LEVELS=[['Administrator access','A named administrator-level account. Use only when regular access cannot complete the workflow.'],['Regular user access','A named account with standard permissions. Preferred for most workflows.'],['Administrator approval required','Your EMR administrator approves each permission.'],['Invitation will be sent','Your EMR vendor sends Plexus an invitation. No password is shared.'],['Access restricted to authorized administrators','Only your administrators can grant access; Plexus coordinates with them.']];
 const ROLES=['Office Manager','Medical Assistant','Nurse','Front Desk','Scheduler','Referrals','Billing','Credentialing','IT','Provider','Other'];
 const LAB_Q=[['receipt','In your EMR, what happens when you receive a laboratory result?',['Arrives electronically through an interface','Faxed, then scanned into the chart','Downloaded from the lab portal','Other','Not Sure']],
@@ -362,7 +362,7 @@ function fresh(){
   const loc={id:uid(),name:'Main Clinic',street:'',suite:'',city:'',state:'AZ',zip:'',tz:'America/Phoenix',phone:'',fax:'',days:[],open:'',close:'',primary:true};
     return {v:4,clinic:'Sonoran Family Health',site:'Scottsdale Clinic',
     org:{legalName:'',dba:'',npi:'',type:'',phone:'',fax:'',email:'',website:'',status:''},
-    locations:[loc],contacts:{primaryId:'',omId:''},clinicians:[],payers:[],logins:[newLogin('EMR',''),newLogin('Lab portal',''),newLogin('Clearinghouse','')],hours:{},visits:{ways:[],text:''},phone:{},room:{name:'',loc:''},
+    locations:[loc],contacts:{primaryId:'',omId:''},clinicians:[],payers:[],logins:[],hours:{},visits:{ways:[],text:''},phone:{},room:{name:'',loc:''},
     flows:{lab:{},imaging:{},example:'',labs:[],delivery:{}},emrs:[],team:[],vendors:[],
     sched:{useFacility:true,days:[],from:'',to:'',tz:'',holidays:'',lead:'',sameDay:'',cancel:'',contactId:''},avail:[],
     services:[{id:'s1',name:'BrainWave',line:'BrainWave',cat:'',performer:'technician',minutes:45,rooms:'Quiet room, door closes',authorized:true,selected:false},
@@ -375,7 +375,7 @@ function fresh(){
     settings:{payerInvite:'',emrInvite:'',labInvite:''},audit:[]};
 }
 const KEY='plexus-my-progress-v4';
-function load(){try{const s=JSON.parse(localStorage.getItem(KEY));if(s&&s.v===4){for(const t of ['Lab portal','Clearinghouse'])if(!s.logins.some(l=>l.type===t))s.logins.push(newLogin(t,''));s.logins.forEach(l=>{l.extra=l.extra||[];for(const a of [l.access.admin,l.access.regular,...l.extra])if(a.url===undefined)a.url=(a.username||a.pathway)?(l.website||''):'';});if(s.phone){if(s.phone.adminUrl===undefined)s.phone.adminUrl=s.phone.adminUser?(s.phone.website||''):'';if(s.phone.regUrl===undefined)s.phone.regUrl=s.phone.regUser?(s.phone.website||''):'';}s.payers=migratePayers(s.payers);for(const [k] of SECTIONS)if(!s.tasks[k])s.tasks[k]={state:'not_started',reason:''};s.clinicians.forEach(c=>{if(!c.lics){c.lics=c.licenses?[{number:c.licenses}]:[];}});return s;}}catch(e){}return fresh();}
+function load(){try{const s=JSON.parse(localStorage.getItem(KEY));if(s&&s.v===4){s.logins=s.logins.filter(l=>l.name||l.website||[l.access.admin,l.access.regular,...(l.extra||[])].some(a=>a.username||a.pathway));s.logins.forEach(l=>{if(!['EMR','Lab portal','Clearinghouse'].includes(l.type))l.type='Other';l.extra=l.extra||[];for(const a of [l.access.admin,l.access.regular,...l.extra])if(a.url===undefined)a.url=(a.username||a.pathway)?(l.website||''):'';});if(s.phone){if(s.phone.adminUrl===undefined)s.phone.adminUrl=s.phone.adminUser?(s.phone.website||''):'';if(s.phone.regUrl===undefined)s.phone.regUrl=s.phone.regUser?(s.phone.website||''):'';}s.payers=migratePayers(s.payers);for(const [k] of SECTIONS)if(!s.tasks[k])s.tasks[k]={state:'not_started',reason:''};s.clinicians.forEach(c=>{if(!c.lics){c.lics=c.licenses?[{number:c.licenses}]:[];}});return s;}}catch(e){}return fresh();}
 
 /* ---------------- completeness ---------------- */
 function compat(s){
@@ -398,7 +398,7 @@ function checks(s,k){
     if(la<8)c(`Answer the laboratory questions (${la} of 8 answered).`);if(ia<6)c(`Answer the imaging questions (${ia} of 6 answered).`);
     const d=f.delivery;const miss=[['destination','preferred result destination'],['notification','provider notification method'],['critical','critical result workflow'],['responsibleId','responsible contact'],['escalation','escalation procedure']].filter(([x])=>blank(d[x])).map(x=>x[1]);
     if(miss.length)c(`Complete result delivery: ${miss.join(', ')}.`);for(const l of f.labs)if(blank(l.website)||blank(l.username))c(`Add the portal website and username for ${l.key}.`);}
-  if(k==='emr'){if(!s.logins.length)c('Add at least one login.');for(const p of s.payers){const m=portalMissing(p);if(m.length)c(`${portalTitle(p)}: ${m.join(', ')}, or check “Invitation sent”.`);}for(const e of s.logins){const n=e.name||e.type||'a login';if(blank(e.name))c(`Choose the ${e.type==='EMR'?'EMR':e.type==='Lab portal'?'lab':'system'} for each login.`);
+  if(k==='emr'){for(const p of s.payers){const m=portalMissing(p);if(m.length)c(`${portalTitle(p)}: ${m.join(', ')}, or check “Invitation sent”.`);}if(!s.logins.some(l=>l.type==='EMR'))c('Add at least one EMR.');for(const e of s.logins){const n=e.name||e.type||'a login';if(blank(e.name))c(`Enter the name for each ${LOGIN_GROUP_LABEL[e.type]||'login'}.`);
     {const all=[e.access.admin,e.access.regular,...(e.extra||[])];if(!all.some(accOk))c(all.some(a=>!blank(a.username)&&blank(a.url))?`Enter the login URL for ${n}.`:`Add administrator or regular access for ${n}.`);}
     for(const a of [e.access.admin,e.access.regular,...(e.extra||[])])if(a.pathway==='sent'&&(blank(a.sentDate)||blank(a.sentTo)))c(`Enter the date and recipient of each invitation for ${n}.`);}}
   if(k==='team'){const om=s.team.find(m=>m.role==='Office Manager');if(!om)c('Add the office manager.');if(s.team.filter(m=>m!==om).length<1)c('Add at least one more team member.');for(const m of s.team){if(blank(m.name))c('Enter a name on each team card.');else if(blank(m.email)&&blank(m.phone))c(`Add an email or phone for ${m.name}.`);}}
@@ -675,7 +675,7 @@ function PortalCards({s,up,P,sec,required}){
   const [ask,setAsk]=useState(null),[fresh,setFresh]=useState(null),[q,setQ]=useState('');
   const Pa=(id,f)=>up(d=>f(d.payers.find(x=>x.id===id)),sec);
   const entries=(g,k)=>s.payers.filter(p=>p.group===g&&p.key===k);
-  const add=(g,k)=>{const n=newPortal(g,k);up(d=>{d.payers.push(n);},sec,`Selected ${k}`);setFresh(n.id);};
+  const add=(g,k,openIt)=>{const n=newPortal(g,k);up(d=>{d.payers.push(n);},sec,`Selected ${k}`);if(openIt)setFresh(n.id);};
   const remove=(g,k)=>{up(d=>{d.payers=d.payers.filter(p=>!(p.group===g&&p.key===k));},sec,`Deselected ${k}`);setAsk(null);};
   return PORTAL_GROUPS.map(([g,title,icon,rows])=>{const sel=s.payers.filter(p=>p.group===g);const inc=sel.filter(p=>portalMissing(p).length);
     const inv=sel.filter(p=>p.invited).length;
@@ -691,8 +691,9 @@ function PortalCards({s,up,P,sec,required}){
               html`<label class=${'iosrow'+(on?' on':'')}><input type="checkbox" checked=${on} disabled=${!P.edit} onChange=${e=>{if(e.target.checked)add(g,k);else if(entries(g,k).some(p=>p.username||p.invited||p.name||(p.website&&p.website!==SIGNIN[k])))setAsk(id);else remove(g,k);}}/><span>${k}${MULTI_ROWS[k]&&n>0?html` <small class="muted">(${n})</small>`:''}</span><i class="tick">${on?Icon('check',15):''}</i></label>`}</li>`;})}</ul>
           </aside>
           <div class="stack pe-list">
-            ${sel.length?html`<div class="bento c2 ptiles">${sel.map(p=>html`<${PortalTile} key=${p.id} p=${p} icon=${icon} Pa=${f=>Pa(p.id,f)} P=${P} open=${fresh===p.id} setOpen=${setFresh} onRemove=${MULTI_ROWS[p.key]?()=>{setFresh(null);up(d=>{d.payers=d.payers.filter(x=>x.id!==p.id);},sec);}:null}/>`)}
-              ${P.edit&&rows.filter(k=>MULTI_ROWS[k]&&entries(g,k).length>0).map(k=>html`<${AddTile} key=${'a'+k} label=${MULTI_ROWS[k][1]} onClick=${()=>add(g,k)}/>`)}</div>`:html`<div class="empty">${Icon(icon,22)}<span>Select from the list</span></div>`}
+            <div class="bento c2 ptiles">${sel.map(p=>html`<${PortalTile} key=${p.id} p=${p} icon=${icon} Pa=${f=>Pa(p.id,f)} P=${P} open=${fresh===p.id} setOpen=${setFresh} onRemove=${MULTI_ROWS[p.key]?()=>{setFresh(null);up(d=>{d.payers=d.payers.filter(x=>x.id!==p.id);},sec);}:null}/>`)}
+              ${P.edit&&entries(g,'Medicaid Managed Care').length>0&&html`<${AddTile} label="Add managed care plan" onClick=${()=>add(g,'Medicaid Managed Care',true)}/>`}
+              ${P.edit&&html`<${AddTile} label=${g==='ins'?'Add insurer':'Add portal'} onClick=${()=>add(g,g==='ins'?'Other Commercial Insurance':'Other Portal',true)}/>`}</div>
           </div>
         </div>`}/>`;});
 }
@@ -760,32 +761,61 @@ function AccessPanel({a,A,cls,label,req,sk,s,P,onRemove}){
 }
 const accOk=a=>!!a.pathway||(!blank(a.username)&&!blank(a.url));
 const accState=a=>a.username?'✓':a.pathway==='will_send'?'invite pending':a.pathway==='sent'?'invite sent':'';
-function Logins({s,up,P}){
-  const L=(id,f)=>up(d=>f(d.logins.find(x=>x.id===id)),'emr');
-  const add=()=>{const l=newLogin('Other','');l.isNew=true;up(d=>{d.logins.push(l);});P.setEk('login-'+l.id);};
-  const done=id=>up(d=>{const l=d.logins.find(x=>x.id===id);if(!l)return;if(l.isNew&&!l.name&&!l.website&&!l.access.admin.username&&!l.access.admin.pathway)d.logins=d.logins.filter(x=>x!==l);else delete l.isNew;});
-  return html`<${Group} icon="key" title="Logins">
-    ${s.logins.map(e=>{const names=LOGIN_NAMES[e.type]||[];const meta=LOGIN_META[e.type];const ad=e.access.admin;const adminOk=accOk(ad);const allA=[ad,e.access.regular,...(e.extra||[])];const anyOk=allA.some(accOk);const firstUrl=(allA.find(a=>a.url)||{}).url||'';
-      const regs=[e.access.regular,...(e.extra||[])].filter(a=>a.username||a.pathway).length;
-      const miss=[blank(e.name)&&(meta?meta[2]:'System name'),!anyOk&&(allA.some(a=>!blank(a.username)&&blank(a.url))?'Login URL':'Administrator or regular access')].filter(Boolean);
-      return html`<${Tile} key=${e.id} id=${'login-'+e.id} P=${P} icon=${e.type==='Lab portal'?'flask':e.type==='Clearinghouse'?'receipt':'monitor'} title=${meta?meta[0]:(e.name||e.type||'New login')}
-        lines=${[meta?e.name:firstUrl.replace(/^https?:\/\//,''),anyOk?[adminOk?'Admin '+accState(ad):'',regs?`${regs} regular`:''].filter(Boolean).join(' · '):'']} empty=${meta?meta[2]:'Add website and access'} done=${!miss.length} missing=${miss} onDone=${()=>done(e.id)}
-        foot=${!meta&&html`<${Remove} label=${e.name||'this login'} dis=${!P.edit} onRemove=${()=>{P.setEk(null);up(d=>{d.logins=d.logins.filter(x=>x.id!==e.id);},'emr');}}/>`}
-        editor=${()=>html`
-          <div class="grid">
-            ${!meta&&html`<${Sel} label="Login type" value=${e.type} opts=${LOGIN_TYPES} on=${v=>L(e.id,x=>{x.type=v;})} dis=${!P.edit}/>`}
-            ${names.length?html`<${Sel} label=${meta?meta[1]:'System'} req value=${names.includes(e.name)?e.name:(e.name||e.other?'Other':'')} opts=${names} on=${v=>L(e.id,x=>{x.name=v==='Other'?'':v;x.other=v==='Other';})} dis=${!P.edit}/>`:html`<${Field} label="System name" req value=${e.name} on=${v=>L(e.id,x=>{x.name=v;})} dis=${!P.edit}/>`}
-            ${names.length>0&&(e.other||(e.name&&!names.includes(e.name)))&&html`<${Field} label="Name" value=${e.name} on=${v=>L(e.id,x=>{x.name=v;})} dis=${!P.edit}/>`}
+const LOGIN_GROUPS=[['EMR','EMR','monitor',EMRS.filter(x=>x!=='Other'),'Add EMR','EMR name'],['Lab portal','Lab Portal','flask',LAB_NAMES.filter(x=>x!=='Other'),'Add lab','Lab name'],['Clearinghouse','Clearinghouse','receipt',CLEARINGHOUSES.filter(x=>x!=='Other'),'Add clearinghouse','Clearinghouse name'],['Other','Other Systems','key',[],'Add system','System name']];
+const LOGIN_GROUP_LABEL={EMR:'EMR','Lab portal':'lab','Clearinghouse':'clearinghouse',Other:'system'};
+const loginMissing=e=>{const all=[e.access.admin,e.access.regular,...(e.extra||[])];return [blank(e.name)&&'Name',!all.some(accOk)&&(all.some(a=>!blank(a.username)&&blank(a.url))?'Login URL':'Administrator or regular access')].filter(Boolean);};
+function LoginTile({e,L,P,s,up,icon,open,setOpen,onRemove,nameLabel,custom}){
+  const ref=useRef(null),m=loginMissing(e),ad=e.access.admin,regs=[e.access.regular,...(e.extra||[])].filter(accOk).length,adminOk=accOk(ad);
+  useEffect(()=>{if(open&&ref.current){ref.current.scrollIntoView({block:'nearest',behavior:'smooth'});const f=ref.current.querySelector('input:not([type=checkbox])');f&&f.focus({preventScroll:true});}},[open]);
+  const title=e.name||('New '+(LOGIN_GROUP_LABEL[e.type]||'system'));
+  if(open)return html`<div ref=${ref} class="tile editing ptile" role="group" aria-label=${'Editing '+title} onKeyDown=${ev=>{if(ev.key==='Escape'){ev.stopPropagation();setOpen(null);}}}>
+    <div class="ed-h"><span class="ico">${Icon(icon)}</span><div class="ed-t"><b>${title}</b>${m.length>0&&html`<span class="ed-miss">Still needed: ${m.join(', ')}</span>`}</div><button type="button" class="btn pri sm" onClick=${()=>setOpen(null)}>${Icon('check',15)} Done</button></div>
+    <div class="ed-b">
+      ${custom&&html`<div class="grid"><${Field} full label=${nameLabel} req value=${e.name} on=${v=>L(x=>{x.name=v;})} dis=${!P.edit}/></div>`}
+      <div class="pref-note">${Icon('key',15)}<span><b>Administrator access is preferred.</b> Regular access works if admin isn’t available — at least one is required.</span></div>
+      <div class="access-pair"><${AccessPanel} a=${ad} A=${f=>L(x=>f(x.access.admin))} cls="admin" label="Administrator access" sk=${e.id+':admin'} s=${s} P=${P}/>
+        <${AccessPanel} a=${e.access.regular} A=${f=>L(x=>f(x.access.regular))} cls="regular" label="Regular access" sk=${e.id+':regular'} s=${s} P=${P}/>
+        ${(e.extra||[]).map((a,i)=>html`<${AccessPanel} key=${i} a=${a} A=${f=>L(x=>f(x.extra[i]))} cls="regular" label=${'Regular access '+(i+2)} sk=${e.id+':reg'+i} s=${s} P=${P} onRemove=${()=>L(x=>{x.extra.splice(i,1);})}/>`)}</div>
+      ${P.edit&&html`<button type="button" class="btn ghost addacc" onClick=${()=>L(x=>{(x.extra=x.extra||[]).push(blankAccess());})}>${Icon('plus',16)} Add another regular access</button>`}
+      <span class="small muted">${Icon('lock',12)} Passwords clear on reload and never appear on cards.</span>
+      <${Verify} item=${e} P=${P} patch=${(f,msg)=>up(d=>f(d.logins.find(x=>x.id===e.id)),null,`${e.name||e.type} login: ${msg}`)}/>
+      ${onRemove&&P.edit&&html`<button type="button" class="link danger-link" onClick=${onRemove}>Remove ${title}</button>`}</div></div>`;
+  return html`<button type="button" class=${'tile ptile'+(m.length?' incomplete':'')} onClick=${()=>setOpen(e.id)}>
+    <span class="tile-top"><span class="ico sm">${Icon(icon,17)}</span><span class="tile-title"><b>${title}</b></span>
+      ${m.length?html`<span class="ind dot" aria-label="Incomplete"/>`:html`<span class="ind ok" aria-label="Complete">${Icon('check',14)}</span>`}<span class="chev-r">${Icon('chev',18)}</span></span>
+    <span class="tile-lines">${m.length&&!adminOk&&!regs?html`<span class="ph">Add administrator or regular access</span>`:html`<span>${[adminOk?'Admin '+accState(ad):'',regs?`${regs} regular`:''].filter(Boolean).join(' · ')}</span>`}</span></button>`;
+}
+function LoginCards({s,up,P}){
+  const [q,setQ]=useState(''),[ask,setAsk]=useState(null),[openId,setOpenId]=useState(null);
+  const L=id=>f=>up(d=>f(d.logins.find(x=>x.id===id)),'emr');
+  return LOGIN_GROUPS.map(([type,title,icon,names,addLabel,nameLabel])=>{
+    const sel=s.logins.filter(l=>l.type===type),inc=sel.filter(l=>loginMissing(l).length);
+    const has=n=>sel.filter(l=>l.name===n);
+    const pick=n=>up(d=>{d.logins.push(newLogin(type,n));},'emr',`Added ${n}`);
+    const unpick=n=>{up(d=>{d.logins=d.logins.filter(l=>!(l.type===type&&l.name===n));},'emr',`Removed ${n}`);setAsk(null);};
+    const addCustom=()=>{const l=newLogin(type,'');l.custom=true;up(d=>{d.logins.push(l);},'emr');setOpenId(l.id);};
+    const removeOne=id=>{setOpenId(null);up(d=>{d.logins=d.logins.filter(x=>x.id!==id);},'emr');};
+    const custom=l=>l.custom||!names.includes(l.name);
+    return html`<${Tile} key=${type} id=${'lg-'+type} P=${P} icon=${icon} title=${title}
+      lines=${sel.length?[sel.map(l=>l.name||'Unnamed').join(', '),`${sel.length-inc.length} of ${sel.length} ready`]:[]}
+      empty=${type==='EMR'?'Add your EMR':'Optional'} done=${sel.length?!inc.length:(type==='EMR'?false:null)} missing=${type==='EMR'&&!sel.length?['At least one EMR']:inc.map(l=>`${l.name||'Unnamed'} (${loginMissing(l).join(', ')})`)}
+      editor=${()=>html`
+        <div class=${names.length?'payers':'payers solo'}>
+          ${names.length>0&&html`<aside class="plist" aria-label=${title+' checklist'}>
+            <div class="search">${Icon('scan',15)}<input aria-label=${'Search '+title} placeholder="Search" value=${q} onInput=${e=>setQ(e.target.value)}/></div>
+            <ul class="ioslist">${names.filter(n=>n.toLowerCase().includes(q.toLowerCase())).map(n=>{const on=has(n).length>0,id=type+':'+n;return html`<li key=${n}>${ask===id?html`<div class="confirm">Remove ${n}?<button class="btn danger sm" onClick=${()=>unpick(n)}>Remove</button><button class="btn ghost sm" onClick=${()=>setAsk(null)}>Cancel</button></div>`:
+              html`<label class=${'iosrow'+(on?' on':'')}><input type="checkbox" checked=${on} disabled=${!P.edit} onChange=${ev=>{if(ev.target.checked)pick(n);else if(has(n).some(l=>[l.access.admin,l.access.regular,...(l.extra||[])].some(a=>a.username||a.pathway||a.url)))setAsk(id);else unpick(n);}}/><span>${n}</span><i class="tick">${on?Icon('check',15):''}</i></label>`}</li>`;})}</ul>
+          </aside>`}
+          <div class="bento c2 ptiles">
+            ${sel.map(l=>html`<${LoginTile} key=${l.id} e=${l} L=${L(l.id)} P=${P} s=${s} up=${up} icon=${icon} open=${openId===l.id} setOpen=${setOpenId} nameLabel=${nameLabel} custom=${custom(l)} onRemove=${()=>removeOne(l.id)}/>`)}
+            ${P.edit&&html`<${AddTile} label=${addLabel} onClick=${addCustom}/>`}
           </div>
-          ${html`<div class="pref-note span">${Icon('key',15)}<span><b>Administrator access is preferred.</b> Regular access works if admin isn’t available — at least one is required.</span></div>`}
-          <div class="access-pair"><${AccessPanel} a=${ad} A=${f=>L(e.id,x=>f(x.access.admin))} cls="admin" label="Administrator access" sk=${e.id+':admin'} s=${s} P=${P}/>
-          ${html`<${AccessPanel} a=${e.access.regular} A=${f=>L(e.id,x=>f(x.access.regular))} cls="regular" label="Regular access" sk=${e.id+':regular'} s=${s} P=${P}/>`}
-          ${(e.extra||[]).map((a,i)=>html`<${AccessPanel} key=${i} a=${a} A=${f=>L(e.id,x=>f(x.extra[i]))} cls="regular" label=${'Regular access '+(i+2)} sk=${e.id+':reg'+i} s=${s} P=${P} onRemove=${()=>L(e.id,x=>{x.extra.splice(i,1);})}/>`)}</div>
-          ${P.edit&&html`<button type="button" class="btn ghost addacc" onClick=${()=>L(e.id,x=>{(x.extra=x.extra||[]).push(blankAccess());})}>${Icon('plus',16)} Add another regular access</button>`}
-          <span class="small muted">${Icon('lock',12)} Passwords clear on reload and never appear on cards.</span>
-          <${Verify} item=${e} P=${P} patch=${(f,m)=>up(d=>f(d.logins.find(x=>x.id===e.id)),null,`${e.name||e.type} login: ${m}`)}/>`}/>`;})}
+        </div>`}/>`;});
+}
+function Logins({s,up,P}){
+  return html`<${Group} icon="key" title="Logins">
+    <${LoginCards} s=${s} up=${up} P=${P}/>
     <${PortalCards} s=${s} up=${up} P=${P} sec="emr"/>
-    <${AddTile} label="Add another login" needed=${!s.logins.length} dis=${!P.edit} onClick=${add}/>
   </${Group}>
   <${PortalReview} s=${s} P=${P}/>`;
 }
