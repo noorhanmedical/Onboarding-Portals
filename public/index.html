@@ -86,6 +86,8 @@ main{position:relative;z-index:1}
 @media(prefers-reduced-motion:reduce){.tile,.addtile,.chev-r{transition:none}.tile:hover,.addtile:hover{transform:none}}
 
 /* ---- typography & density refinement ---- */
+.pref-note{grid-column:1/-1;display:flex;align-items:flex-start;gap:9px;padding:12px 14px;border-radius:14px;background:hsl(205 100% 95%);border:1px solid hsl(205 80% 82%);color:hsl(212 70% 28%);font-size:15px;line-height:1.45}.pref-note b{font-weight:600}.pref-note svg{margin-top:2px;flex-shrink:0}
+.access-pair{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start}.access-pair .access{height:100%;box-sizing:border-box}@media(max-width:760px){.access-pair{grid-template-columns:1fr}}
 .rdash .hero-top{align-items:flex-start}.rcards{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}@media(max-width:760px){.rcards{grid-template-columns:1fr}}
 .rcard{all:unset;box-sizing:border-box;cursor:pointer;display:flex;flex-direction:column;gap:9px;padding:16px 18px;border-radius:18px;border:1.5px solid var(--line);background:#fff;transition:box-shadow .15s,border-color .15s}
 .rcard:hover{box-shadow:0 6px 20px hsla(215,50%,30%,.1)}.rcard:focus-visible{outline:3px solid hsl(210 90% 60%);outline-offset:2px}
@@ -388,7 +390,7 @@ function checks(s,k){
     const d=f.delivery;const miss=[['destination','preferred result destination'],['notification','provider notification method'],['critical','critical result workflow'],['responsibleId','responsible contact'],['escalation','escalation procedure']].filter(([x])=>blank(d[x])).map(x=>x[1]);
     if(miss.length)c(`Complete result delivery: ${miss.join(', ')}.`);for(const l of f.labs)if(blank(l.website)||blank(l.username))c(`Add the portal website and username for ${l.key}.`);}
   if(k==='emr'){if(!s.logins.length)c('Add at least one login.');for(const p of s.payers){const m=portalMissing(p);if(m.length)c(`${portalTitle(p)}: ${m.join(', ')}, or check “Invitation sent”.`);}for(const e of s.logins){const n=e.name||e.type||'a login';if(blank(e.name))c(`Choose the ${e.type==='EMR'?'EMR':e.type==='Lab portal'?'lab':'system'} for each login.`);if(blank(e.website))c(`Enter the website or login URL for ${n}.`);
-    {const a=e.access.admin;if(blank(a.username)&&!a.pathway)c(`Add administrator access for ${n}.`);}
+    {const has=a=>!blank(a.username)||!!a.pathway;if(![e.access.admin,e.access.regular,...(e.extra||[])].some(has))c(`Add administrator or regular access for ${n}.`);}
     for(const a of [e.access.admin,e.access.regular,...(e.extra||[])])if(a.pathway==='sent'&&(blank(a.sentDate)||blank(a.sentTo)))c(`Enter the date and recipient of each invitation for ${n}.`);}}
   if(k==='team'){const om=s.team.find(m=>m.role==='Office Manager');if(!om)c('Add the office manager.');if(s.team.filter(m=>m!==om).length<1)c('Add at least one more team member.');for(const m of s.team){if(blank(m.name))c('Enter a name on each team card.');else if(blank(m.email)&&blank(m.phone))c(`Add an email or phone for ${m.name}.`);}}
   if(k==='scheduling'){if(!s.visits.ways.length&&blank(s.visits.text))c('Tell us how you schedule patients for regular visits.');
@@ -396,7 +398,7 @@ function checks(s,k){
   if(k==='vendors'){for(const v of s.vendors)if(blank(v.name)&&(v.contact||v.email||v.phone||v.user))c('Enter the name on each vendor card.');}
   if(k==='testing'){if(blank(s.room.name))c('Enter the dedicated room name.');if(blank(s.room.loc))c('Choose the room’s clinic location.');}
   if(k==='billing'){const b=s.billing;if(blank(b.contact))c('Enter the billing contact.');if(blank(b.email)&&blank(b.phone))c('Add the billing contact’s email or phone.');}
-  if(k==='systems'){const t=s.phone;if(blank(t.system))c('Enter your phone system.');if(blank(t.adminUser))c('Enter the phone system admin username.');if(blank(t.regUser))c('Enter the phone system regular username.');if(blank(t.contactName))c('Tell us who the contact for your phone system is.');}
+  if(k==='systems'){const t=s.phone;if(blank(t.system))c('Enter your phone system.');if(blank(t.adminUser)&&blank(t.regUser))c('Add administrator or regular access for the phone system.');if(blank(t.contactName))c('Tell us who the contact for your phone system is.');}
   return o;
 }
 function status(s){
@@ -753,11 +755,11 @@ function Logins({s,up,P}){
   const add=()=>{const l=newLogin('Other','');l.isNew=true;up(d=>{d.logins.push(l);});P.setEk('login-'+l.id);};
   const done=id=>up(d=>{const l=d.logins.find(x=>x.id===id);if(!l)return;if(l.isNew&&!l.name&&!l.website&&!l.access.admin.username&&!l.access.admin.pathway)d.logins=d.logins.filter(x=>x!==l);else delete l.isNew;});
   return html`<${Group} icon="key" title="Logins">
-    ${s.logins.map(e=>{const names=LOGIN_NAMES[e.type]||[];const meta=LOGIN_META[e.type];const ad=e.access.admin;const adminOk=!blank(ad.username)||!!ad.pathway;
+    ${s.logins.map(e=>{const names=LOGIN_NAMES[e.type]||[];const meta=LOGIN_META[e.type];const ad=e.access.admin;const adminOk=!blank(ad.username)||!!ad.pathway;const has=a=>!blank(a.username)||!!a.pathway;const anyOk=[ad,e.access.regular,...(e.extra||[])].some(has);
       const regs=[e.access.regular,...(e.extra||[])].filter(a=>a.username||a.pathway).length;
-      const miss=[blank(e.name)&&(meta?meta[2]:'System name'),blank(e.website)&&'Website',!adminOk&&'Administrator access'].filter(Boolean);
+      const miss=[blank(e.name)&&(meta?meta[2]:'System name'),blank(e.website)&&'Website',!anyOk&&'Administrator or regular access'].filter(Boolean);
       return html`<${Tile} key=${e.id} id=${'login-'+e.id} P=${P} icon=${e.type==='Lab portal'?'flask':e.type==='Clearinghouse'?'receipt':'monitor'} title=${meta?meta[0]:(e.name||e.type||'New login')}
-        lines=${[meta?e.name:e.website.replace(/^https?:\/\//,''),adminOk?['Admin '+accState(ad),regs?`${regs} regular`:''].filter(Boolean).join(' · '):'']} empty=${meta?meta[2]:'Add website and access'} done=${!miss.length} missing=${miss} onDone=${()=>done(e.id)}
+        lines=${[meta?e.name:e.website.replace(/^https?:\/\//,''),anyOk?[adminOk?'Admin '+accState(ad):'',regs?`${regs} regular`:''].filter(Boolean).join(' · '):'']} empty=${meta?meta[2]:'Add website and access'} done=${!miss.length} missing=${miss} onDone=${()=>done(e.id)}
         foot=${!meta&&html`<${Remove} label=${e.name||'this login'} dis=${!P.edit} onRemove=${()=>{P.setEk(null);up(d=>{d.logins=d.logins.filter(x=>x.id!==e.id);},'emr');}}/>`}
         editor=${()=>html`
           <div class="grid">
@@ -766,10 +768,11 @@ function Logins({s,up,P}){
             ${names.length>0&&(e.other||(e.name&&!names.includes(e.name)))&&html`<${Field} label="Name" value=${e.name} on=${v=>L(e.id,x=>{x.name=v;})} dis=${!P.edit}/>`}
             <${Field} label="Website / login URL" req type="url" ph="https://" value=${e.website} on=${v=>L(e.id,x=>{x.website=v;if(x.status==='verified')x.status='entered';})} dis=${!P.edit}/>
           </div>
-          <${AccessPanel} a=${ad} A=${f=>L(e.id,x=>f(x.access.admin))} cls="admin" label="Administrator access" req sk=${e.id+':admin'} s=${s} P=${P}/>
-          ${(e.access.regular.username||e.access.regular.pathway||e.showReg)&&html`<${AccessPanel} a=${e.access.regular} A=${f=>L(e.id,x=>f(x.access.regular))} cls="regular" label="Regular access" sk=${e.id+':regular'} s=${s} P=${P} onRemove=${()=>L(e.id,x=>{x.access.regular=blankAccess();x.showReg=false;})}/>`}
-          ${(e.extra||[]).map((a,i)=>html`<${AccessPanel} key=${i} a=${a} A=${f=>L(e.id,x=>f(x.extra[i]))} cls="regular" label=${'Regular access '+(i+2)} sk=${e.id+':reg'+i} s=${s} P=${P} onRemove=${()=>L(e.id,x=>{x.extra.splice(i,1);})}/>`)}
-          ${P.edit&&html`<button type="button" class="btn ghost addacc" onClick=${()=>L(e.id,x=>{if(!x.showReg&&!x.access.regular.username&&!x.access.regular.pathway)x.showReg=true;else (x.extra=x.extra||[]).push(blankAccess());})}>${Icon('plus',16)} Add regular access</button>`}
+          ${html`<div class="pref-note span">${Icon('key',15)}<span><b>Administrator access is preferred.</b> Regular access works if admin isn’t available — at least one is required.</span></div>`}
+          <div class="access-pair"><${AccessPanel} a=${ad} A=${f=>L(e.id,x=>f(x.access.admin))} cls="admin" label="Administrator access" sk=${e.id+':admin'} s=${s} P=${P}/>
+          ${html`<${AccessPanel} a=${e.access.regular} A=${f=>L(e.id,x=>f(x.access.regular))} cls="regular" label="Regular access" sk=${e.id+':regular'} s=${s} P=${P}/>`}
+          ${(e.extra||[]).map((a,i)=>html`<${AccessPanel} key=${i} a=${a} A=${f=>L(e.id,x=>f(x.extra[i]))} cls="regular" label=${'Regular access '+(i+2)} sk=${e.id+':reg'+i} s=${s} P=${P} onRemove=${()=>L(e.id,x=>{x.extra.splice(i,1);})}/>`)}</div>
+          ${P.edit&&html`<button type="button" class="btn ghost addacc" onClick=${()=>L(e.id,x=>{(x.extra=x.extra||[]).push(blankAccess());})}>${Icon('plus',16)} Add another regular access</button>`}
           <span class="small muted">${Icon('lock',12)} Passwords clear on reload and never appear on cards.</span>
           <${Verify} item=${e} P=${P} patch=${(f,m)=>up(d=>f(d.logins.find(x=>x.id===e.id)),null,`${e.name||e.type} login: ${m}`)}/>`}/>`;})}
     <${PortalCards} s=${s} up=${up} P=${P} sec="emr"/>
@@ -789,7 +792,8 @@ function Systems({s,up,P}){
         <${Field} label="Contact phone" type="tel" value=${t.contactPhone} on=${set('contactPhone')} dis=${!P.edit}/>
         <${Field} label="Contact email" type="email" value=${t.contactEmail} on=${set('contactEmail')} dis=${!P.edit}/>
         <${Field} label="Company (if an outside vendor)" value=${t.contactCompany} on=${set('contactCompany')} dis=${!P.edit}/></div>`}/>
-    ${[['adminUser','phone:admin','Administrator Access','Can manage users, routing and settings','Admin'],['regUser','phone:regular','Regular Access','Standard user / extension','Regular']].map(([k,sk,title,hint,lbl])=>html`<${Tile} key=${k} id=${'ph-'+k} P=${P} icon="key" title=${title} req=${k==='adminUser'} lines=${t[k]?[t[k]]:[]} empty="Add username and password" done=${!blank(t[k])}
+    ${html`<div class="pref-note span">${Icon('key',15)}<span><b>Administrator access is preferred.</b> Regular access works if admin isn’t available — at least one is required.</span></div>`}
+    ${[['adminUser','phone:admin','Administrator Access','Can manage users, routing and settings','Admin'],['regUser','phone:regular','Regular Access','Standard user / extension','Regular']].map(([k,sk,title,hint,lbl])=>html`<${Tile} key=${k} id=${'ph-'+k} P=${P} icon="key" title=${title} lines=${t[k]?[t[k]]:[]} empty="Add username and password" done=${!blank(t[k])?true:!blank(t[k==='adminUser'?'regUser':'adminUser'])?null:false}
       editor=${()=>html`<div class="grid"><${Field} label=${lbl+' username'} value=${t[k]} on=${set(k)} dis=${!P.edit}/><${Password} k=${sk} label=${lbl+' password'} dis=${!P.edit}/></div><span class="small muted">${Icon('lock',12)} Passwords aren’t saved in this preview. In the live portal they go to the secure credential vault.</span>`}/>`)}
   </${Group}>`;
 }
