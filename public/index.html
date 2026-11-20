@@ -733,7 +733,7 @@ function AccessPanel({a,A,cls,label,req,sk,s,P,onRemove}){
   return html`<div class=${'access '+cls}><div class="access-h"><b>${label}${req&&html`<span class="req" aria-label="required"> *</span>`}</b>${onRemove&&P.edit&&html`<button type="button" class="link" onClick=${onRemove}>Remove</button>`}</div>
     <div class="pathways" role="radiogroup" aria-label=${label}>${[['will_send','Invitation will be sent'],['sent','Invitation sent'],['','Fill this out']].map(([v,l])=>html`<button type="button" class=${'choice'+((a.pathway||'')===v?' on':'')} role="radio" aria-checked=${(a.pathway||'')===v} disabled=${!P.edit} onClick=${()=>A(x=>{x.pathway=v;})}><b>${l}</b></button>`)}</div>
     ${!a.pathway&&html`<div class="grid"><${Field} label="Username" req=${req} value=${a.username} on=${v=>A(x=>{x.username=v;})} dis=${!P.edit}/><${Password} k=${sk} dis=${!P.edit}/></div>`}
-    ${a.pathway==='will_send'&&html`<div class="row small">Send to ${s.settings.emrInvite?html`<code>${s.settings.emrInvite}</code><${Copy} text=${s.settings.emrInvite} label="Copy"/>`:html`<span class="muted">Plexus will share the invitation address</span>`}</div>`}
+    ${a.pathway==='will_send'&&html`<div class="row small">Send to <code>${PLEXUS_BILLING}</code><${Copy} text=${PLEXUS_BILLING} label="Copy"/></div>`}
     ${a.pathway==='sent'&&html`<div class="grid">
       <${Field} label="Date sent" type="date" req value=${a.sentDate} on=${v=>A(x=>{x.sentDate=v;})} dis=${!P.edit}/>
       <${Field} label="Sent to (email)" type="email" req value=${a.sentTo} on=${v=>A(x=>{x.sentTo=v;})} dis=${!P.edit}/></div>`}
@@ -1012,9 +1012,7 @@ function Console({s,st,setS,openReview}){
       <td>${st.stage===2?html`<${Pill} tone="green">Sections verified</${Pill}>`:html`<${Pill} tone="gray">Not ready</${Pill}>`}</td><td><div class="acts"><button class="btn sm pri" onClick=${openReview}>Open review</button>${invBtn(s.site)}</div></td></tr>
     ${others.map(o=>html`<tr><td><b style="font-weight:500">${o[0]}</b><div class="small muted">${o[1]} · sample row</div></td><td><${Pill}>${o[3]}</${Pill}></td><td><span class="mini"><span style=${`width:${o[2]}%`}/></span>${Math.round(o[2]/100*9)}/9</td><td><span class="mini"><span style=${`width:${o[2]>50?100:25}%`}/></span>${o[2]>50?4:1}/4</td><td>${o[4]} sections</td><td>${o[5]}</td><td>${o[6]}</td><td>${o[7]}</td><td><${Pill} tone="gray">Not ready</${Pill}></td><td><div class="acts">${invBtn(o[0])}</div></td></tr>`)}
   </tbody></table></div></div>
-  ${open&&invPanel(open)}
-  <div class="panel" style="margin-top:16px;padding:16px 18px"><h3 style="margin:0 0 4px;font-size:15px">Access invitation recipients</h3><p class="small muted" style="margin:0 0 12px">Plexus-managed addresses clinics use for payer, EMR and lab portal invitations. Leave blank until the mailbox is verified.</p>
-    <div class="grid">${[['payerInvite','Payer portal invitation recipient'],['emrInvite','Login invitation recipient (EMR, clearinghouse, Availity)'],['labInvite','Lab portal invitation recipient']].map(([k,l])=>html`<div class="field"><label>${l}</label><input type="email" placeholder="Not configured" value=${s.settings[k]} onChange=${set(k)}/></div>`)}</div></div>`;
+  ${open&&invPanel(open)}`;
 }
 render(html`<${App}/>`,document.getElementById('app'));
 </script>
