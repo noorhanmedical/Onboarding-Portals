@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Plexus Onboarding — My Progress</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--canvas:hsl(208 50% 94%);--line:hsl(207 40% 86%);--ink:hsl(218 55% 15%);--muted:hsl(220 14% 45%);--card:#fff;--soft:hsl(205 50% 95%);--field:hsl(208 34% 80%);
+--accent:hsl(212 72% 36%);--accent-soft:hsl(205 85% 95%);--accent-line:hsl(205 60% 82%);--surface:hsla(205,60%,99%,.82);--ice:hsl(198 80% 92%);--frost:hsl(205 70% 97%);
+--green:hsl(152 40% 32%);--green-soft:hsl(150 45% 94%);--amber:hsl(36 70% 32%);--amber-soft:hsl(40 85% 93%);--red:hsl(6 55% 42%);--red-soft:hsl(6 70% 96%);--blue:hsl(214 60% 40%);--blue-soft:hsl(214 70% 95%)}
+*{box-sizing:border-box}
+html{scroll-padding-top:130px}
+body{margin:0;background:radial-gradient(1200px 500px at 85% -10%,hsla(195,90%,85%,.55),transparent 60%),radial-gradient(900px 500px at -10% 30%,hsla(220,80%,88%,.5),transparent 60%),linear-gradient(180deg,hsl(205 60% 96%),hsl(212 45% 92%));background-attachment:fixed;color:var(--ink);font-family:'IBM Plex Sans',system-ui,sans-serif;font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}button:disabled{cursor:not-allowed;opacity:.55}
+:focus-visible{outline:2px solid hsl(236 60% 60%);outline-offset:2px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+/* app bar */
+.bar{position:fixed;inset:0 0 auto;height:56px;z-index:50;background:linear-gradient(90deg,hsl(222 65% 12%),hsl(214 70% 22%) 60%,hsl(200 70% 30%));color:#eef6ff;display:flex;align-items:center;gap:14px;padding:0 20px;border-bottom:1px solid #222}
+.bar .ctx{flex:1;min-width:0}.bar .ctx small{display:block;font-size:10.5px;letter-spacing:.14em;color:#999;text-transform:uppercase}.bar .ctx strong{font-weight:300;font-size:15px}
+.bar select,.bar button{background:hsla(210,60%,90%,.08);border:1px solid hsla(200,80%,85%,.25);color:#eee;border-radius:8px;height:34px;padding:0 10px;font-size:13px}
+.bar .views{display:flex;gap:4px;background:hsla(215,60%,8%,.35);border:1px solid hsla(200,80%,85%,.2);border-radius:9px;padding:3px}
+.bar .views button{border:0;background:none;height:28px}.bar .views button.on{background:hsl(198 85% 90%);color:hsl(218 60% 18%)}
+main{max-width:1180px;margin:0 auto;padding:76px 24px 60px}
+/* winter */
+.hero::after{content:none}
+.sec>h2 button::after{content:none;position:absolute;right:58px;top:50%;transform:translateY(-50%);font-size:34px;color:hsla(0,0%,100%,.09);pointer-events:none}
+.snow{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}.snow i{position:absolute;top:-12px;color:hsla(205,80%,70%,.45);font-style:normal;animation:fall linear infinite}
+@keyframes fall{to{transform:translate3d(30px,105vh,0) rotate(220deg)}}
+main{position:relative;z-index:1}
+.card{box-shadow:0 1px 2px hsla(210,60%,30%,.05)}
+.access-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.access{border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:10px;border:1px solid var(--accent-line)}
+.access.admin{background:linear-gradient(180deg,hsl(214 70% 96%),hsl(214 60% 99%))}.access.regular{background:linear-gradient(180deg,hsl(195 75% 95%),hsl(195 60% 99%))}
+.access-h b{display:block;font-weight:600;font-size:14px;color:hsl(214 60% 28%)}.access-h span{font-size:12px;color:var(--muted)}
+.pw{display:flex;align-items:center;gap:6px}.pw input{flex:1}
+@media(max-width:860px){.access-grid{grid-template-columns:1fr}}
+/* ---- iOS bento design system ---- */
+:root{--warm:#fffdf9;--lav:hsl(250 70% 97%);--lav-2:hsl(250 55% 92%);--lav-ink:hsl(250 38% 46%);--navy:hsl(220 55% 18%);--bluegray:hsl(215 18% 46%);--r-card:18px;--r-ctl:12px}
+.grp{display:flex;flex-direction:column;gap:12px}
+.grp-h{display:flex;align-items:center;gap:11px}.grp-h h3{margin:0;font-size:17px;font-weight:600;color:var(--navy);letter-spacing:-.01em}.grp-h p{margin:1px 0 0;font-size:12.5px;color:var(--bluegray)}
+.ico{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:10px;background:linear-gradient(145deg,hsl(208 80% 95%),var(--lav));color:hsl(218 60% 34%);flex-shrink:0;box-shadow:inset 0 0 0 1px hsla(214,60%,60%,.12)}
+.ico.sm{width:30px;height:30px;border-radius:9px}
+.bento{display:grid;gap:14px;grid-template-columns:repeat(2,minmax(0,1fr));align-items:stretch}.bento.c1{grid-template-columns:1fr}.bento.c3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.tile{all:unset;box-sizing:border-box;display:flex;flex-direction:column;gap:8px;min-height:132px;padding:16px 16px 14px;background:var(--warm);border:1px solid hsl(210 30% 90%);border-radius:var(--r-card);box-shadow:0 1px 2px hsla(215,40%,30%,.04),0 8px 24px -12px hsla(215,50%,35%,.14);cursor:pointer;text-align:left;transition:transform .18s ease,box-shadow .18s ease,border-color .18s;min-width:0}
+.tile:hover{transform:translateY(-1px);border-color:hsl(212 55% 82%);box-shadow:0 1px 2px hsla(215,40%,30%,.05),0 14px 30px -14px hsla(215,60%,35%,.24)}
+.tile:focus-visible{outline:2px solid hsl(212 70% 55%);outline-offset:2px}
+.tile.span{grid-column:1/-1}
+.tile-top{display:flex;align-items:center;gap:10px}.tile-title{flex:1;min-width:0;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.tile-title b{font-size:16px;font-weight:600;color:var(--navy);letter-spacing:-.01em;overflow:hidden;text-overflow:ellipsis}
+.badge{font-size:11.5px;font-weight:500;color:var(--lav-ink);background:var(--lav);border:1px solid var(--lav-2);padding:1px 8px;border-radius:99px;white-space:nowrap}
+.chev-r{color:hsl(215 20% 62%);display:inline-flex;transition:transform .18s}.tile:hover .chev-r{transform:translateX(2px);color:hsl(214 55% 45%)}
+.tile-lines{display:flex;flex-direction:column;gap:2px;font-size:13.5px;color:hsl(218 30% 26%);min-width:0}.tile-lines span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tile-lines span+span{color:var(--bluegray);font-size:13px}
+.tile-status{margin-top:auto;display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:500;color:var(--bluegray)}
+.tile-status.ok{color:var(--green)}.tile-status.warn{color:hsl(32 70% 36%)}.tile-status.info{color:hsl(214 60% 40%)}
+.sdot{width:6px;height:6px;border-radius:50%;background:currentColor;display:inline-block}
+.tile.editing{grid-column:1/-1;cursor:default;min-height:0;padding:0;gap:0;background:linear-gradient(180deg,hsla(0,0%,100%,.96),hsla(205,70%,98%,.94));backdrop-filter:blur(10px);border-color:hsl(212 55% 82%);box-shadow:0 1px 2px hsla(215,40%,30%,.05),0 20px 40px -20px hsla(215,60%,35%,.3)}
+.tile.editing:hover{transform:none}
+.ed-h{display:flex;align-items:center;gap:11px;padding:14px 16px;border-bottom:1px solid hsl(210 30% 91%)}.ed-t{flex:1;display:flex;flex-direction:column}.ed-t b{font-size:16px;font-weight:600;color:var(--navy)}.ed-t span{font-size:12px;color:var(--bluegray)}
+.ed-b{padding:14px 16px 16px;display:flex;flex-direction:column;gap:12px}
+.eg{border:1px solid hsl(210 30% 91%);border-radius:14px;background:hsla(0,0%,100%,.7)}
+.eg>summary{list-style:none;cursor:pointer;padding:11px 14px;font-size:13.5px;font-weight:600;color:var(--navy);display:flex;align-items:center;gap:8px}
+.eg>summary::-webkit-details-marker{display:none}
+.eg>summary::before{content:'';width:7px;height:7px;border-right:1.6px solid hsl(215 20% 55%);border-bottom:1.6px solid hsl(215 20% 55%);transform:rotate(-45deg);transition:transform .18s;margin-right:2px}
+.eg[open]>summary::before{transform:rotate(45deg)}
+.eg>.grid,.eg>.stack{padding:2px 14px 14px}
+.stack{display:flex;flex-direction:column;gap:10px}
+.addtile{all:unset;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;min-height:132px;padding:16px;border-radius:var(--r-card);border:1.5px dashed hsl(245 40% 82%);background:linear-gradient(160deg,#fff,var(--lav));color:var(--lav-ink);cursor:pointer;text-align:center;transition:border-color .18s,background .18s,transform .18s}
+.addtile:hover:not(:disabled){border-color:hsl(245 50% 66%);background:linear-gradient(160deg,#fff,var(--lav-2));transform:translateY(-1px)}
+.addtile:focus-visible{outline:2px solid hsl(245 60% 60%);outline-offset:2px}.addtile:disabled{opacity:.5;cursor:not-allowed}
+.addtile .plus{display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:50%;background:#fff;box-shadow:0 0 0 1px var(--lav-2),0 6px 14px -8px hsla(250,50%,45%,.5);color:var(--lav-ink)}
+.addtile b{font-size:14.5px;font-weight:600;color:var(--navy)}.addtile .hint{font-size:12.5px;color:var(--bluegray)}
+.empty{grid-column:1/-1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;min-height:132px;border-radius:var(--r-card);border:1px dashed hsl(210 30% 84%);color:var(--bluegray);font-size:13.5px;text-align:center;padding:16px;background:hsla(0,0%,100%,.5)}
+.search{display:flex;align-items:center;gap:8px;padding:0 12px;border-radius:12px;background:hsl(210 30% 96%);color:var(--bluegray)}.search input{border:0;background:transparent;box-shadow:none!important;padding:9px 0}
+.ioslist{list-style:none;margin:0;padding:0;border-radius:14px;background:#fff;border:1px solid hsl(210 30% 91%);overflow:hidden}
+.ioslist li+li{border-top:1px solid hsl(210 30% 93%)}
+.iosrow{display:flex;align-items:center;gap:10px;padding:11px 12px;font-size:14px;cursor:pointer}.iosrow input{position:absolute;opacity:0;width:1px;height:1px}
+.iosrow:hover{background:hsl(208 60% 97%)}.iosrow span{flex:1}.iosrow .tick{display:inline-flex;color:hsl(214 70% 42%);font-style:normal;width:16px}
+.iosrow:focus-within{box-shadow:inset 0 0 0 2px hsl(212 70% 60%)}.iosrow.on{color:var(--navy);font-weight:500}
+.plist{background:hsla(0,0%,100%,.75);backdrop-filter:blur(8px);border-radius:18px}
+.sec.open .body{background:linear-gradient(180deg,hsla(205,70%,98%,.6),transparent 240px)}
+@media(max-width:860px){.bento,.bento.c3{grid-template-columns:1fr}.tile,.addtile{min-height:112px}}
+@media(prefers-reduced-motion:reduce){.tile,.addtile,.chev-r{transition:none}.tile:hover,.addtile:hover{transform:none}}
+
+/* ---- typography & density refinement ---- */
+.flat{display:flex;flex-direction:column;gap:10px}.flat+.flat{border-top:1px solid hsl(210 30% 92%);padding-top:14px}.flat-h{font-size:13px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--bluegray)}
+.ptiles{align-content:start}.ptiles .tile.editing{grid-column:1/-1;box-shadow:0 8px 26px hsla(215,50%,30%,.12)}.ptiles .addtile{min-height:96px}@media(max-width:1100px){.tile.editing .ptiles{grid-template-columns:1fr}}
+.tile.editing .payers{grid-template-columns:minmax(220px,270px) 1fr}.tile.editing .plist{top:120px;max-height:calc(100vh - 140px)}@media(max-width:860px){.tile.editing .payers{grid-template-columns:1fr}}
+.pe>summary{justify-content:space-between}.pe-t{flex:1;display:flex;flex-direction:column}.pe-t small{font-size:13.5px;font-weight:400;color:var(--bluegray)}
+.pe-s{display:inline-flex;align-items:center;gap:4px;font-size:13.5px;font-weight:500;padding:3px 10px;border-radius:999px}.pe-s.ok{background:var(--green-soft);color:var(--green)}.pe-s.warn{background:var(--amber-soft);color:var(--amber)}
+.pe-b{padding:4px 16px 16px;gap:12px}.pe-list{gap:10px}.danger-link{color:var(--red);align-self:flex-start}
+.tile.editing .ioslist.pick{grid-column:auto}
+.ioslist.pick{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr))}.ioslist.pick li{border-bottom:1px solid hsl(210 30% 93%)}
+.sec .review .tw table{width:100%}
+.phase{display:flex;align-items:baseline;justify-content:space-between;gap:10px;padding:14px 4px 2px}.phase b{font-size:22px;font-weight:700;color:var(--navy)}.phase span{font-size:14.5px;color:var(--bluegray)}
+.phase.bill{margin-top:22px;padding-top:22px;border-top:2px dashed hsl(270 40% 80%)}.phase.bill b{color:hsl(268 50% 32%)}
+.sec.bill{--accent:hsl(270 52% 44%);--accent-soft:hsl(270 70% 96%);--accent-line:hsl(270 45% 84%);--blue:hsl(270 48% 46%);--blue-soft:hsl(270 70% 96%);--line:hsl(268 35% 88%);--lav:hsl(275 70% 96%);background:linear-gradient(180deg,hsl(270 60% 99%),hsl(275 50% 97%))}
+.sec.bill .ico{background:linear-gradient(145deg,hsl(270 80% 96%),hsl(285 70% 94%));color:hsl(270 50% 38%)}
+.sec.bill .iosrow.on,.sec.bill .tick{color:hsl(270 52% 44%)}
+.tabs button.bill.on{background:hsl(270 52% 44%)}.tabs button.bill .dot{outline:1px solid hsl(270 50% 70%)}.tab-sep{width:1px;align-self:stretch;margin:6px 6px;background:hsl(268 30% 80%);flex-shrink:0}
+.pl-instr{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}.pl-note{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:15px}.pl-note>span{flex:1;min-width:200px}
+.plist .ioslist{max-height:none!important;overflow:visible!important;flex-shrink:0}.plist-h{font-size:12.5px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--bluegray);padding:4px 6px 0}
+.final{margin-top:18px;padding:20px 22px;border-radius:20px;background:hsla(0,0%,100%,.92);border:1px solid var(--line);box-shadow:0 10px 30px hsla(210,60%,40%,.08);display:flex;flex-direction:column;gap:12px}
+.final-h{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}.final-h b,.final-done b{display:block;font-size:20px;font-weight:600}.final-h span,.final-done span{font-size:15px;color:var(--bluegray)}
+.btn.big{font-size:16px;min-height:48px;padding:12px 22px}.final-done{display:flex;gap:12px;align-items:center;color:var(--green)}.final-done span{color:var(--bluegray)}
+.chip.warn{border-color:hsl(36 80% 60%);background:hsl(40 100% 97%)}
+.rowfields{display:flex;flex-direction:column;gap:6px}.rowfields>.link{align-self:flex-end}
+.access-h{display:flex;justify-content:space-between;align-items:center}.access .pathways{display:flex;flex-wrap:wrap;gap:8px}.addacc{align-self:flex-start}.tile-title .req,.access-h .req{color:hsl(0 78% 52%);font-weight:700}
+.tile.editing{grid-column:1/-1}
+body{font-size:16px}
+.grp{gap:14px}.grp-h h3{font-size:20px;font-weight:600}.grp-h p{display:none}
+.ico{width:36px;height:36px;border-radius:11px}.ico.sm{width:32px;height:32px}
+.tile{min-height:0;padding:18px 20px;gap:6px}
+.tile-title b{font-size:19px}
+.tile-lines{font-size:16px;color:hsl(218 35% 22%);gap:3px}.tile-lines span+span{font-size:14.5px;color:var(--bluegray)}
+.tile-lines .ph{color:hsl(215 16% 56%);font-size:15.5px}
+.tile-top+.tile-lines{padding-left:42px}
+.ind{display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}.ind.ok{width:22px;height:22px;border-radius:50%;background:var(--green-soft);color:var(--green)}
+.ind.dot{width:8px;height:8px;border-radius:50%;background:hsl(215 18% 72%);margin:0 7px}
+.badge{font-size:13px;padding:2px 9px}
+.addtile{min-height:104px;padding:18px;gap:8px}.addtile b{font-size:16px}
+.addtile.need,.tile.incomplete{transition:box-shadow .2s}
+.flagged .tile.incomplete{border-color:hsl(36 80% 60%);box-shadow:0 0 0 3px hsla(38,90%,60%,.28)}.flagged .tile.incomplete .ind.dot{background:hsl(32 85% 50%)}
+.flagged .addtile.need{border-color:hsl(36 80% 55%);box-shadow:0 0 0 3px hsla(38,90%,60%,.24)}
+.flagmsg{display:flex;align-items:center;gap:9px;font-size:15px;padding:12px 14px;border-radius:14px;background:var(--amber-soft);color:var(--amber)}.flagmsg.info{background:var(--blue-soft);color:var(--blue)}
+.foot{border-top:0;padding-top:4px}.foot-row{justify-content:flex-end;gap:10px}.foot-row .muted{font-size:15px}
+.ed-h{padding:16px 20px}.ed-t b{font-size:19px}.ed-miss{font-size:14px;color:hsl(32 70% 36%)}
+.ed-b{padding:16px 20px 20px;gap:14px}
+.eg>summary{font-size:16px;padding:13px 16px}.eg>.grid,.eg>.stack{padding:2px 16px 16px}
+.field>label,.lbl{font-size:14px}.field small{font-size:13.5px}
+input,select,textarea{font-size:16px;min-height:46px;border-radius:12px;padding:10px 13px}
+.chip{font-size:15px;min-height:38px;padding:7px 14px}
+.btn{font-size:15px;min-height:42px;padding:9px 16px;border-radius:12px}.btn.sm{font-size:14.5px;min-height:36px}
+.link{font-size:15px}
+.choice b{font-size:15px}.choice span{font-size:13.5px}
+.instr{font-size:16px}
+.iosrow{font-size:16px;padding:13px 14px}
+.q .lbl{font-size:16px}
+.small{font-size:14px}
+.access-h b{font-size:16px}.access-h span{font-size:13.5px}
+@media(max-width:640px){.bar .ctx{display:none}.bar .views{margin:0 auto}.tile{padding:16px}.tile-top+.tile-lines{padding-left:0}.tile-title b{font-size:18px}}
+/* fields */
+input,select,textarea{width:100%;font-size:14px;min-height:40px;padding:9px 11px;border:1px solid var(--field);border-radius:10px;background:#fff;transition:border-color .15s,box-shadow .15s}
+textarea{resize:vertical;min-height:70px}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+input:disabled,select:disabled,textarea:disabled{background:var(--soft);color:var(--muted)}
+input[aria-invalid=true]{border-color:var(--red)}
+.field{display:flex;flex-direction:column;gap:5px;min-width:0}.field.full{grid-column:1/-1}
+.field>label,.lbl{font-size:12.5px;font-weight:500;color:var(--muted)}
+.field small{font-size:12px;color:var(--muted)}.field small.err{color:var(--red)}
+.req{color:var(--red)}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 14px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--field);background:#fff;border-radius:99px;padding:5px 12px;font-size:13px;min-height:32px;transition:all .12s}
+.chip:hover:not(:disabled){border-color:var(--accent)}.chip.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:500}
+.check{display:flex;align-items:center;gap:9px;font-size:14px;cursor:pointer}.check input{width:17px;height:17px;min-height:0;accent-color:var(--accent);padding:0}
+/* hero */
+.hero{position:relative;overflow:hidden;background:linear-gradient(135deg,hsla(0,0%,100%,.92),hsla(200,80%,95%,.85));backdrop-filter:blur(8px);border:1px solid var(--line);box-shadow:0 10px 30px hsla(210,60%,40%,.08);border-radius:18px;padding:22px 24px 16px;margin-bottom:12px}
+.hero-top{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-bottom:12px}
+.eyebrow{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0 0 3px}
+h1{font-size:30px;font-weight:400;letter-spacing:-.025em;margin:0}
+.stats{display:grid;grid-template-columns:auto minmax(200px,1fr) auto;gap:6px 22px;align-items:center}
+.pct strong{font-size:36px;font-weight:500;color:var(--accent);letter-spacing:-.03em}.pct span{font-size:13px;color:var(--muted);margin-left:6px}
+.track{height:8px;border-radius:99px;background:var(--soft);overflow:hidden}.track span{display:block;height:100%;background:linear-gradient(90deg,hsl(218 70% 34%),hsl(200 80% 50%),hsl(190 80% 62%));transition:width .4s}
+.stats p{margin:7px 0 0;font-size:13px;color:var(--muted)}.stats p b{color:var(--ink);font-weight:600}
+.stages{display:flex;gap:6px;list-style:none;margin:0;padding:0;flex-wrap:wrap}
+.stages li{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);padding:4px 10px 4px 5px;border:1px solid var(--line);border-radius:99px;white-space:nowrap}
+.stages li i{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:var(--soft);font-style:normal;font-size:11px}
+.stages li.cur{border-color:var(--accent-line);background:var(--accent-soft);color:var(--accent);font-weight:500}.stages li.cur i{background:var(--accent);color:#fff}
+.stages li.done{color:var(--green)}.stages li.done i{background:var(--green-soft)}
+.save{grid-column:1/-1;display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--muted);margin-top:2px}.save.ok{color:var(--green)}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--field);display:inline-block;flex-shrink:0}
+.dot.saved{background:var(--amber)}.dot.submitted,.dot.na{background:hsl(214 60% 55%)}.dot.verified,.dot.waived{background:var(--green)}.dot.changes{background:var(--red)}
+/* tabs */
+.tabs{position:sticky;top:56px;z-index:30;margin:0 -8px 14px;padding:8px;background:color-mix(in srgb,var(--canvas) 82%,transparent);backdrop-filter:blur(10px) saturate(1.4);-webkit-backdrop-filter:blur(10px) saturate(1.4)}
+.tabs>div{position:relative;display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;padding:3px;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+.tabs>div::-webkit-scrollbar{display:none}
+.tabs button{display:inline-flex;align-items:center;gap:7px;flex-shrink:0;border:0;background:none;padding:8px 12px;border-radius:9px;font-size:13px;color:var(--muted);white-space:nowrap;transition:background .15s,color .15s}
+.tabs button:hover{background:var(--soft);color:var(--ink)}.tabs button.on{background:var(--accent);color:#fff}
+/* sections */
+.secs{display:flex;flex-direction:column;gap:10px}
+.sec{background:var(--surface);border:1px solid var(--line);border-radius:14px;scroll-margin-top:130px}
+.sec.open{box-shadow:0 4px 18px hsl(225 40% 20% / .05)}
+.sec>h2{margin:0;font-size:inherit}
+.sec{overflow:hidden}
+.sec>h2 button{display:flex;align-items:center;gap:12px;width:100%;border:0;background:linear-gradient(100deg,var(--h1,hsl(218 62% 26%)),var(--h2,hsl(205 66% 44%)));color:#fff;position:relative;padding:15px 18px;text-align:left}
+.sec>h2 button:hover{filter:brightness(1.08)}
+.sec.open>h2 button{margin-bottom:12px}
+.sec>h2 .step{background:hsla(0,0%,100%,.18);color:#fff}.sec>h2 .step.done{background:hsl(150 45% 88%);color:var(--green)}
+.sec>h2 .todo{color:hsla(0,0%,100%,.8)}.sec>h2 .chev{color:#fff}
+.sec>h2 .pill{background:#fff}
+.step{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background:var(--soft);font-size:13px;color:var(--muted);flex-shrink:0}.step.done{background:var(--green-soft);color:var(--green)}
+.title{font-size:17px;font-weight:500;flex:1}.todo{font-size:12px;color:var(--muted);margin-right:8px}
+.chev{transition:transform .2s;color:var(--muted)}.chev.open{transform:rotate(180deg)}
+.body{padding:2px 18px 18px;display:flex;flex-direction:column;gap:14px}
+.body[hidden]{display:none}
+.pill{display:inline-flex;align-items:center;gap:4px;font-size:12px;padding:3px 9px;border-radius:99px;white-space:nowrap;font-weight:500}
+.pill.green{background:var(--green-soft);color:var(--green)}.pill.amber{background:var(--amber-soft);color:var(--amber)}.pill.red{background:var(--red-soft);color:var(--red)}.pill.blue{background:var(--blue-soft);color:var(--blue)}.pill.gray{background:var(--soft);color:var(--muted)}
+/* cards */
+.cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;align-items:start}.cards.one{grid-template-columns:1fr}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;min-width:0;transition:border-color .15s}
+.card:hover{border-color:var(--accent-line)}.card.wide{grid-column:1/-1}.card.new{border-color:var(--accent-line);box-shadow:0 0 0 3px var(--accent-soft)}
+.card>header{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;padding:14px 16px 4px}
+.card>header h4{margin:0;font-size:15px;font-weight:500}.card>header p{margin:2px 0 0;font-size:12px;color:var(--muted)}
+.meta{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+.cb{padding:6px 16px 16px;display:flex;flex-direction:column;gap:10px}
+.sub{border:1px solid var(--line);border-radius:12px;padding:12px;background:hsl(214 28% 98%);display:flex;flex-direction:column;gap:10px}
+.slot{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-height:150px;border:1.5px dashed var(--field);border-radius:14px;background:transparent;color:var(--muted)}
+.slot:hover:not(:disabled){border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}.slot b{font-size:14px;font-weight:500}.slot span{font-size:12px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:1px solid var(--field);background:#fff;border-radius:10px;padding:7px 14px;font-size:13.5px;font-weight:500;min-height:36px;white-space:nowrap}
+.btn:hover:not(:disabled){border-color:var(--accent)}.btn.pri{background:var(--accent);border-color:var(--accent);color:#fff}.btn.ghost{border-color:transparent;background:none;color:var(--muted)}.btn.ghost:hover{background:var(--soft)}.btn.sm{min-height:30px;padding:4px 10px;font-size:13px}.btn.danger{background:var(--red);border-color:var(--red);color:#fff}
+.link{border:0;background:none;padding:2px 0;color:var(--accent);font-size:13px;font-weight:500}.link:hover{text-decoration:underline}
+.x{border:0;background:none;width:30px;height:30px;border-radius:8px;color:var(--muted);font-size:17px;line-height:1}.x:hover{background:var(--red-soft);color:var(--red)}
+.row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.row.between{justify-content:space-between}.row>.field{flex:1;min-width:170px}
+.muted{color:var(--muted)}.small{font-size:12.5px}
+.subhead{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.subhead h3{margin:0;font-size:15px;font-weight:600}.subhead p{margin:0;font-size:13px}
+.instr{font-size:15px;font-weight:500;margin:0;padding:12px 14px;border-radius:12px;background:var(--accent-soft);color:var(--accent)}
+.note{display:flex;gap:9px;font-size:13.5px;padding:11px 13px;border-radius:12px;background:var(--soft)}
+.note.warn{background:var(--amber-soft);color:var(--amber)}.note.ok{background:var(--green-soft);color:var(--green)}.note.err{background:var(--red-soft);color:var(--red)}
+.note ul{margin:4px 0 0;padding-left:18px}
+.confirm{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:13px;padding:8px 10px;border-radius:10px;background:var(--red-soft);color:var(--red)}
+details.disc>summary{cursor:pointer;font-weight:600;font-size:14px;padding:6px 0;list-style:none;display:flex;align-items:center;gap:7px}
+details.disc>summary::before{content:'›';display:inline-block;transition:transform .2s;color:var(--muted);font-size:18px;line-height:1}
+details.disc[open]>summary::before{transform:rotate(90deg)}
+details.disc>div{display:flex;flex-direction:column;gap:10px;padding:4px 0 6px}
+.count{font-size:11px;background:var(--soft);color:var(--muted);border-radius:99px;padding:1px 7px;font-weight:500}
+.inline{display:flex;flex-direction:column;gap:9px;padding:12px;border-radius:12px;background:var(--soft)}
+/* payers */
+.payers{display:grid;grid-template-columns:minmax(230px,290px) 1fr;gap:16px;align-items:start}
+.plist{position:sticky;top:128px;border:1px solid var(--line);border-radius:14px;background:#fff;padding:12px;display:flex;flex-direction:column;gap:10px;max-height:calc(100vh - 150px);overflow:auto}
+.plist ul{list-style:none;margin:0;padding:0}.plist li{padding:6px;border-radius:8px}.plist li:hover{background:var(--soft)}
+.pathways,.choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.choices{grid-template-columns:repeat(auto-fill,minmax(205px,1fr))}
+.choice{display:flex;flex-direction:column;gap:3px;text-align:left;border:1px solid var(--field);background:#fff;border-radius:12px;padding:10px 12px}
+.choice b{font-size:13.5px;font-weight:500}.choice span{font-size:12px;color:var(--muted)}.choice.on{border-color:var(--accent);background:var(--accent-soft)}.choice:hover:not(:disabled){border-color:var(--accent)}
+.invite{display:flex;flex-direction:column;gap:8px;padding:10px 12px;border-radius:12px;border:1px solid var(--accent-line);background:hsl(236 60% 98.5%)}
+code{font-size:13px;padding:2px 7px;border-radius:6px;background:#fff;border:1px solid var(--line)}
+.secret{display:flex;gap:9px;padding:10px 12px;border-radius:12px;background:var(--soft);font-size:13px;flex-direction:column}
+.secret.cfg{background:var(--red-soft)}
+.q{display:flex;flex-direction:column;gap:7px;padding-bottom:12px;border-bottom:1px solid var(--line)}.q:last-child{border-bottom:0}.q .lbl{font-size:14px;color:var(--ink)}
+.flow{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;list-style:none;margin:0;padding:0}.flow li{display:flex;flex-direction:column;gap:2px;padding:11px 12px;border:1px solid var(--line);border-radius:12px;background:#fff;font-size:12.5px}.flow li b{font-size:13.5px;font-weight:500}.flow li span{color:var(--muted)}
+.svc{display:grid;grid-template-columns:1.4fr auto 1fr auto;gap:12px;align-items:center;padding:9px 0;border-bottom:1px solid var(--line);font-size:13.5px}.svc:last-child{border-bottom:0}
+/* footer */
+.foot{display:flex;flex-direction:column;gap:10px;border-top:1px solid var(--line);padding-top:12px}
+.out{font-size:13px;padding:10px 12px;border-radius:12px;background:var(--soft)}.out h5{margin:0 0 4px;font-size:12.5px}.out ul{margin:0;padding-left:18px}.out.plexus{background:var(--blue-soft)}
+.review{display:flex;flex-direction:column;gap:9px;padding:12px;border-radius:12px;border:1px solid var(--accent-line);background:hsl(236 60% 98.5%)}.review h5{margin:0;font-size:13px;color:var(--accent)}
+.audit{margin-top:14px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px 14px;font-size:13px}.audit summary{cursor:pointer;font-weight:500}
+.audit ol{margin:8px 0 0;padding-left:18px;max-height:360px;overflow:auto}.audit li{margin:4px 0}
+/* console */
+.panel{background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden}
+table{width:100%;border-collapse:collapse;font-size:13px}th{text-align:left;font-weight:500;font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);background:hsl(214 28% 98%);padding:11px 14px;border-bottom:1px solid var(--line)}
+td{padding:13px 14px;border-bottom:1px solid var(--line);vertical-align:top}tr:last-child td{border-bottom:0}
+.tw{overflow-x:auto}
+.mini{width:90px;height:6px;border-radius:99px;background:var(--soft);overflow:hidden;display:inline-block;vertical-align:middle;margin-right:6px}.mini span{display:block;height:100%;background:var(--accent)}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:16px}.kpi{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px}.kpi b{display:block;font-size:28px;font-weight:500}.kpi span{font-size:12.5px;color:var(--muted)}
+@media(max-width:1000px){.stats{grid-template-columns:auto 1fr}.stages{grid-column:1/-1}}
+@media(max-width:860px){.cards,.payers{grid-template-columns:1fr}.plist{position:static;max-height:none}.flow,.kpis{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:640px){main{padding:72px 14px 40px}.hero{padding:16px}.hero-top{flex-direction:column;align-items:stretch}.stats{grid-template-columns:1fr}.grid,.pathways{grid-template-columns:1fr}
+ .tabs{margin:0 -14px 12px;padding:6px 14px}.sec>h2 button{padding:13px 12px}.body{padding:2px 12px 14px}.todo{display:none}.card>header{flex-direction:column}.meta{justify-content:flex-start}
+ .bar{padding:0 10px;gap:8px}.bar .ctx small{display:none}.bar .reset{display:none}.svc{grid-template-columns:1fr auto}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}.snow{display:none}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script src="/htm.js"></script>
+<script>
+const {html,render,useState,useEffect,useRef,useMemo,useCallback}=htmPreact;
+
+/* ---------------- catalog ---------------- */
+const SECTIONS=[['facility','Facility Details'],['rosters','Add Clinician'],['flows','Clinic Flows'],['emr','Logins'],['systems','Telephone Systems'],['team','Team'],['vendors','Vendors'],['scheduling','Scheduling'],['testing','Testing Day'],['bfacility','Facility Details'],['brosters','Add Clinician'],['billing','Billing'],['payers','Logins']];
+const BILLING_KEYS=['bfacility','brosters','billing','payers'];
+/* Billing-team copies of shared sections: same data, same checks */
+const ALIAS={bfacility:'facility',brosters:'rosters'};const base=k=>ALIAS[k]||k;
+const LABEL=Object.fromEntries(SECTIONS);
+const SHADES=[['hsl(222 62% 22%)','hsl(214 64% 38%)'],['hsl(218 60% 28%)','hsl(208 66% 44%)'],['hsl(214 62% 32%)','hsl(200 70% 46%)'],['hsl(210 64% 34%)','hsl(194 66% 44%)'],['hsl(226 52% 30%)','hsl(216 60% 48%)'],['hsl(204 66% 30%)','hsl(192 64% 42%)'],['hsl(220 56% 34%)','hsl(206 62% 50%)'],['hsl(212 54% 36%)','hsl(198 58% 50%)'],['hsl(230 46% 34%)','hsl(214 56% 52%)'],['hsl(272 46% 26%)','hsl(284 48% 42%)'],['hsl(266 44% 30%)','hsl(280 48% 46%)'],['hsl(268 48% 30%)','hsl(282 52% 48%)'],['hsl(258 46% 34%)','hsl(276 50% 52%)']];
+const STATE_LABEL={not_started:'Not Started',saved:'In Progress',submitted:'Ready for Review',changes:'Changes Requested',verified:'Verified',na:'Not Applicable',waived:'Not Applicable'};
+const NA_ALLOWED=['flows','emr','scheduling','systems','vendors'];
+const DAYS=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+const TZ=['America/Phoenix','America/Los_Angeles','America/Denver','America/Chicago','America/New_York'];
+const CREDS=['MD','DO','NP','PA','DPM','Other'];
+const PORTALS=[['NPPES','https://nppes.cms.hhs.gov'],['CAQH','https://proview.caqh.org'],['PECOS','https://pecos.cms.hhs.gov'],['State Medicaid portal',''],['Other','']];
+const PORTAL_GROUPS=[
+  ['ins','Insurance Portals','shield',['Medicare','State Medicaid','Medicaid Managed Care','Blue Cross Blue Shield','UnitedHealthcare','Aetna','Cigna','Humana','Other Commercial Insurance']],
+  ['multi','Multi-Payer Portals','link',['Availity','NaviNet','Other Portal']],
+  ['pa','Prior Authorization Portals','clipboard',['eviCore','Carelon','RadMD','Other Portal']]];
+const MULTI_ROWS={'Medicaid Managed Care':['Plan name','Add managed care plan','New plan'],'Other Commercial Insurance':['Insurer name','Add insurer','New insurer'],'Other Portal':['Portal name','Add portal','New portal']};
+const SIGNIN={Availity:'https://apps.availity.com/availity/web/public.elegant.login',NaviNet:'https://navinet.navimedix.com',eviCore:'https://www.evicore.com',Carelon:'https://www.providerportal.com',RadMD:'https://www.radmd.com'};
+const newPortal=(group,key,name='')=>({id:uid(),group,key,name,website:SIGNIN[key]||'',username:'',invited:false,state:'',localPlan:''});
+const validUrl=u=>/^https?:\/\/[^\s/.]+\.[^\s]+$/i.test((u||'').trim());
+const portalTitle=p=>MULTI_ROWS[p.key]?(p.name||MULTI_ROWS[p.key][2]):p.key;
+const portalMissing=p=>{const m=[];if(MULTI_ROWS[p.key]&&blank(p.name))m.push(MULTI_ROWS[p.key][0]);if(!p.invited){if(blank(p.website))m.push('Portal URL');else if(!validUrl(p.website))m.push('Valid portal URL');if(blank(p.username))m.push('Username');}return m;};
+const portalSummary=p=>p.invited?'Invite sent':portalMissing(p).length?'Missing: '+portalMissing(p).join(', '):`Login: ${p.username}`;
+function migratePayers(list){
+  return (list||[]).map(p=>{if(p.group)return p;const n=p.payer||'';const b={id:p.id||uid(),website:p.website||'',username:p.username||'',invited:false,state:'',localPlan:'',name:''};
+    if(/^AHCCCS/.test(n))return {...b,group:'ins',key:'Medicaid Managed Care',name:n.replace(/^AHCCCS\s*—\s*/,'')};
+    if(['Medicare','State Medicaid','Blue Cross Blue Shield','UnitedHealthcare','Aetna','Cigna','Humana'].includes(n))return {...b,group:'ins',key:n};
+    if(['Availity','NaviNet'].includes(n))return {...b,group:'multi',key:n};
+    if(n==='eviCore'||n==='RadMD')return {...b,group:'pa',key:n};
+    if(/^Carelon/.test(n))return {...b,group:'pa',key:'Carelon'};
+    if(/Optum|Portal/i.test(n))return {...b,group:'multi',key:'Other Portal',name:n};
+    return {...b,group:'ins',key:'Other Commercial Insurance',name:n};});
+}
+const PORTALS_UM=[['Availity','https://www.availity.com'],['eviCore','https://www.evicore.com'],['Carelon (formerly AIM)','https://www.providerportal.com'],['RadMD','https://www.radmd.com'],['NaviNet','https://navinet.navimedix.com'],['Optum Pro / UHC Provider Portal','https://www.uhcprovider.com']];
+const PORTAL_URL=Object.fromEntries(PORTALS_UM);
+const PLEXUS_BILLING='billing@plexusclinical.com';
+const PAYERS=['Medicare','State Medicaid','Blue Cross Blue Shield','UnitedHealthcare','Aetna','Cigna','Humana','AHCCCS — Arizona Complete Health','AHCCCS — Banner University Family Care','AHCCCS — Mercy Care','AHCCCS — Molina Healthcare','AHCCCS — UnitedHealthcare Community Plan'];
+const PRODUCTS=['Commercial','HMO','PPO','Medicare Advantage','Medicaid','Medicaid managed care','Other'];
+const EMRS=['eClinicalWorks','NextGen','athenahealth','Epic','Practice Fusion','Other'];
+const LEVELS=[['Administrator access','A named administrator-level account. Use only when regular access cannot complete the workflow.'],['Regular user access','A named account with standard permissions. Preferred for most workflows.'],['Administrator approval required','Your EMR administrator approves each permission.'],['Invitation will be sent','Your EMR vendor sends Plexus an invitation. No password is shared.'],['Access restricted to authorized administrators','Only your administrators can grant access; Plexus coordinates with them.']];
+const ROLES=['Office Manager','Medical Assistant','Nurse','Front Desk','Scheduler','Referrals','Billing','Credentialing','IT','Provider','Other'];
+const LAB_Q=[['receipt','In your EMR, what happens when you receive a laboratory result?',['Arrives electronically through an interface','Faxed, then scanned into the chart','Downloaded from the lab portal','Other','Not Sure']],
+['destination','Where do laboratory results go?',['Ordering provider inbox','Shared clinical inbox','Medical assistant queue','Other','Not Sure']],
+['reviewer','Who reviews them?',['Ordering provider','Medical assistant first, then provider','Nurse','Covering provider','Other','Not Sure']],
+['notification','How is the provider notified?',['EMR task or alert','EMR inbox message','Phone call','Secure message','Other','Not Sure']],
+['acknowledgment','How does the provider acknowledge the result?',['Signs off in the EMR','Initials a paper copy','Marks reviewed in the inbox','Other','Not Sure']],
+['abnormal','Who handles abnormal results?',['Ordering provider','Nurse','Medical assistant with provider instruction','Covering provider','Other','Not Sure']],
+['critical','How are critical results urgently escalated?',['Phone call to provider immediately','Page or text to on-call provider','Escalated to office manager','Other','Not Sure']],
+['unreviewed','How are unreviewed results followed up?',['Daily inbox review','Weekly unreviewed-results report','Office manager follow-up','Other','Not Sure']]];
+const IMG_Q=[['entry','How do imaging results enter your EMR?',['Electronic interface','Faxed and scanned','Downloaded from imaging portal','Other','Not Sure']],
+['storage','Where are imaging results stored?',['In the patient chart','Imaging portal only','PACS viewer','Other','Not Sure']],
+['notification','How is the ordering provider notified?',['EMR task or alert','EMR inbox message','Phone call','Other','Not Sure']],
+['reviewer','Who reviews and acknowledges them?',['Ordering provider','Covering provider','Nurse then provider','Other','Not Sure']],
+['abnormal','How are abnormal and critical imaging findings handled?',['Radiologist calls provider directly','Provider called by staff immediately','Flagged for same-day review','Other','Not Sure']],
+['unack','What happens if a result is not acknowledged?',['Escalated to office manager','Reassigned to covering provider','Reviewed in weekly report','Other','Not Sure']]];
+const LABS=[['Quest Diagnostics','https://www.questdiagnostics.com'],['Labcorp','https://www.labcorp.com'],['Other laboratory','']];
+const SVC_GROUPS=[['BrainWave','BrainWave'],['VitalWave','VitalWave'],['Ultrasound','Ultrasound'],['Physician','Physician-performed testing or procedures'],['Other','Other configured services']];
+const blankAccess=()=>({username:'',pathway:'',sentDate:'',sentTo:'',sentBy:'',notes:''});
+const newLogin=(type,name)=>({id:uid(),type,name,website:'',admin:'',email:'',status:'not_started',access:{admin:blankAccess(),regular:blankAccess()},extra:[]});
+const uid=()=>'i'+Math.random().toString(36).slice(2,9);
+function npiOk(v){if(!/^\d{10}$/.test(v))return false;const d=('80840'+v.slice(0,9)).split('').map(Number);let s=0;for(let i=d.length-1,a=true;i>=0;i--,a=!a){let x=d[i];if(a){x*=2;if(x>9)x-=9;}s+=x;}return (10-s%10)%10===+v[9];}
+const blank=v=>v===undefined||v===null||String(v).trim()==='';
+
+function fresh(){
+  const loc={id:uid(),name:'Main Clinic',street:'',suite:'',city:'',state:'AZ',zip:'',tz:'America/Phoenix',phone:'',fax:'',days:[],open:'',close:'',primary:true};
+    return {v:4,clinic:'Sonoran Family Health',site:'Scottsdale Clinic',
+    org:{legalName:'',dba:'',npi:'',type:'',phone:'',fax:'',email:'',website:'',status:''},
+    locations:[loc],contacts:{primaryId:'',omId:''},clinicians:[],payers:[],logins:[newLogin('EMR',''),newLogin('Lab portal',''),newLogin('Clearinghouse','')],hours:{},visits:{ways:[],text:''},phone:{},room:{name:'',loc:''},
+    flows:{lab:{},imaging:{},example:'',labs:[],delivery:{}},emrs:[],team:[],vendors:[],
+    sched:{useFacility:true,days:[],from:'',to:'',tz:'',holidays:'',lead:'',sameDay:'',cancel:'',contactId:''},avail:[],
+    services:[{id:'s1',name:'BrainWave',line:'BrainWave',cat:'',performer:'technician',minutes:45,rooms:'Quiet room, door closes',authorized:true,selected:false},
+      {id:'s2',name:'VitalWave',line:'VitalWave',cat:'',performer:'technician',minutes:30,rooms:'Exam table, outlet',authorized:false,selected:false},
+      {id:'s3',name:'Ultrasound — Carotid',line:'Ultrasound',cat:'Carotid',performer:'technician',minutes:30,rooms:'Exam table, dimmable light',authorized:true,selected:false},
+      {id:'s4',name:'Ultrasound — Echocardiogram',line:'Ultrasound',cat:'Echocardiogram',performer:'technician',minutes:45,rooms:'Exam table, dimmable light',authorized:true,selected:false},
+      {id:'s5',name:'Physician-performed procedure',line:'Physician',cat:'',performer:'physician',minutes:null,rooms:'',authorized:true,selected:false}],
+    rooms:[],testing:{},billing:{},systems:{phone:{},fax:{},email:{},additional:{}},
+    tasks:Object.fromEntries(SECTIONS.map(([k])=>[k,{state:'not_started',reason:''}])),
+    settings:{payerInvite:'',emrInvite:'',labInvite:''},audit:[]};
+}
+const KEY='plexus-my-progress-v4';
+function load(){try{const s=JSON.parse(localStorage.getItem(KEY));if(s&&s.v===4){for(const t of ['Lab portal','Clearinghouse'])if(!s.logins.some(l=>l.type===t))s.logins.push(newLogin(t,''));s.logins.forEach(l=>{l.extra=l.extra||[];});s.payers=migratePayers(s.payers);for(const [k] of SECTIONS)if(!s.tasks[k])s.tasks[k]={state:'not_started',reason:''};s.clinicians.forEach(c=>{if(!c.lics){c.lics=c.licenses?[{number:c.licenses}]:[];}});return s;}}catch(e){}return fresh();}
+
+/* ---------------- completeness ---------------- */
+function compat(s){
+  const o=[];const auth=s.services.filter(x=>x.authorized);const sel=auth.some(x=>x.selected)?auth.filter(x=>x.selected):auth;
+  for(const v of sel){if(!s.rooms.some(r=>r.services.includes(v.id)))o.push(['clinic',`Assign a room for ${v.name}.`]);if(!v.minutes)o.push(['plexus',`Plexus has not configured scheduling for ${v.name} yet.`]);}
+  for(const r of s.rooms){const l=s.locations.find(x=>x.id===r.loc);if(l&&l.days.length&&r.days.some(d=>!l.days.includes(d)))o.push(['clinic',`${r.name||'A room'} is available on days ${l.name} is closed.`]);}
+  const f=s.testing.firstDate;if(f&&s.rooms.length){const d=DAYS[(new Date(f+'T12:00:00Z').getUTCDay()+6)%7];if(!s.rooms.some(r=>r.days.includes(d)))o.push(['clinic',`The first proposed testing date is a ${d}, but no room is available that day.`]);}
+  return o;
+}
+function checks(s,k){
+  const o=[];const c=m=>o.push(['clinic',m]);const act=s.clinicians.filter(x=>x.active);
+  if(k==='facility'){const g=s.org;if(blank(g.legalName))c('Enter the legal business name.');if(blank(g.phone))c('Enter the main clinic telephone.');if(blank(g.status))c('Confirm the clinic status.');
+    if(!s.locations.length)c('Add at least one clinic location.');for(const l of s.locations){const n=l.name||'a location';if([l.name,l.street,l.city,l.state,l.zip,l.tz].some(blank))c(`Complete the name, address and timezone for ${n}.`);if(!l.days.length||!l.open||!l.close)c(`Add operating days and hours for ${n}.`);}
+    if(!s.contacts.primaryId)c('Choose the primary office contact.');if(!s.contacts.omId)c('Choose the office manager.');}
+  if(k==='rosters'){if(!act.length)c('Add at least one clinician.');for(const x of act){const n=x.name||'a clinician';if(blank(x.name))c('Enter the provider’s full name on each card.');if(!x.creds.length)c(`Select credentials for ${n}.`);if(!npiOk(x.npi||''))c(`Enter a valid NPI for ${n}.`);if(!x.locs.length)c(`Select clinic locations for ${n}.`);}}
+  if(k==='payers'){if(!s.payers.length)c('Select at least one insurance or portal.');for(const p of s.payers){const m=portalMissing(p);if(m.length)c(`${portalTitle(p)}: ${m.join(', ')}, or check “Invitation sent”.`);}}
+  if(k==='flows'){const f=s.flows;const a=(g,q)=>q.filter(([key])=>!blank(f[g][key]?.choice)).length;const la=a('lab',LAB_Q),ia=a('imaging',IMG_Q);
+    if(la<8)c(`Answer the laboratory questions (${la} of 8 answered).`);if(ia<6)c(`Answer the imaging questions (${ia} of 6 answered).`);
+    const d=f.delivery;const miss=[['destination','preferred result destination'],['notification','provider notification method'],['critical','critical result workflow'],['responsibleId','responsible contact'],['escalation','escalation procedure']].filter(([x])=>blank(d[x])).map(x=>x[1]);
+    if(miss.length)c(`Complete result delivery: ${miss.join(', ')}.`);for(const l of f.labs)if(blank(l.website)||blank(l.username))c(`Add the portal website and username for ${l.key}.`);}
+  if(k==='emr'){if(!s.logins.length)c('Add at least one login.');for(const p of s.payers){const m=portalMissing(p);if(m.length)c(`${portalTitle(p)}: ${m.join(', ')}, or check “Invitation sent”.`);}for(const e of s.logins){const n=e.name||e.type||'a login';if(blank(e.name))c(`Choose the ${e.type==='EMR'?'EMR':e.type==='Lab portal'?'lab':'system'} for each login.`);if(blank(e.website))c(`Enter the website or login URL for ${n}.`);
+    {const a=e.access.admin;if(blank(a.username)&&!a.pathway)c(`Add administrator access for ${n}.`);}
+    for(const a of [e.access.admin,e.access.regular,...(e.extra||[])])if(a.pathway==='sent'&&(blank(a.sentDate)||blank(a.sentTo)))c(`Enter the date and recipient of each invitation for ${n}.`);}}
+  if(k==='team'){const om=s.team.find(m=>m.role==='Office Manager');if(!om)c('Add the office manager.');if(s.team.filter(m=>m!==om).length<1)c('Add at least one more team member.');for(const m of s.team){if(blank(m.name))c('Enter a name on each team card.');else if(blank(m.email)&&blank(m.phone))c(`Add an email or phone for ${m.name}.`);}}
+  if(k==='scheduling'){if(!s.visits.ways.length&&blank(s.visits.text))c('Tell us how you schedule patients for regular visits.');
+    for(const x of act){const h=s.hours[x.id]||{};if(blank(h.text)&&!(h.days&&h.days.length&&h.start&&h.end))c(`Add general hours for ${x.name||'each clinician'}.`);}}
+  if(k==='vendors'){for(const v of s.vendors)if(blank(v.name)&&(v.contact||v.email||v.phone||v.user))c('Enter the name on each vendor card.');}
+  if(k==='testing'){if(blank(s.room.name))c('Enter the dedicated room name.');if(blank(s.room.loc))c('Choose the room’s clinic location.');}
+  if(k==='billing'){const b=s.billing;if(blank(b.contact))c('Enter the billing contact.');if(blank(b.email)&&blank(b.phone))c('Add the billing contact’s email or phone.');}
+  if(k==='systems'){const t=s.phone;if(blank(t.system))c('Enter your phone system.');if(blank(t.adminUser))c('Enter the phone system admin username.');if(blank(t.regUser))c('Enter the phone system regular username.');if(blank(t.contactName))c('Tell us who the contact for your phone system is.');}
+  return o;
+}
+function status(s){
+  const secs=SECTIONS.map(([k,label])=>{const t=s.tasks[k]||{state:'not_started',reason:''};const bt=s.tasks[base(k)];const items=checks(s,base(k));return {k,label,state:t.state==='not_started'&&ALIAS[k]&&bt.state!=='not_started'?(bt.state==='submitted'?'saved':bt.state):t.state,reason:t.reason,items,clinic:items.filter(i=>i[0]==='clinic')};});
+  secs.forEach(x=>{x.complete=x.state==='na'||['verified','waived'].includes(x.state)||!x.clinic.length;});
+  const done=secs.filter(x=>x.complete).length,submitted=secs.every(x=>['submitted','na','verified','waived'].includes(x.state));
+  const stage=secs.every(x=>['verified','waived'].includes(x.state))?2:submitted?1:0;
+  return {secs,done,pct:Math.round(done/SECTIONS.length*100),stage,submitted,review:secs.filter(x=>['submitted','na'].includes(x.state)).length};
+}
+
+/* ---------------- primitives ---------------- */
+let fid=0;
+function Field({label,value,on,type='text',ph,hint,err,full,req,dis,num}){const id=useMemo(()=>'f'+(++fid),[]);
+  return html`<div class=${'field'+(full?' full':'')}><label for=${id}>${label}${req&&html`<span class="req" aria-hidden="true"> *</span>`}</label>
+  ${type==='textarea'?html`<textarea id=${id} value=${value||''} placeholder=${ph} disabled=${dis} onInput=${e=>on(e.target.value)}/>`:html`<input id=${id} type=${type} value=${value??''} placeholder=${ph} disabled=${dis} inputmode=${num?'numeric':undefined} aria-invalid=${!!err} onInput=${e=>on(e.target.value)}/>`}
+  ${(err||hint)&&html`<small class=${err?'err':''}>${err||hint}</small>`}</div>`;}
+function Sel({label,value,on,opts,ph='Select…',dis,full}){const id=useMemo(()=>'f'+(++fid),[]);
+  return html`<div class=${'field'+(full?' full':'')}><label for=${id}>${label}</label><select id=${id} value=${value||''} disabled=${dis} onChange=${e=>on(e.target.value)}><option value="">${ph}</option>${opts.map(o=>{const [v,l]=Array.isArray(o)?o:[o,o];return html`<option value=${v} selected=${v===value}>${l}</option>`;})}</select></div>`;}
+function Chips({label,opts,value,on,multi=true,dis}){const sel=Array.isArray(value)?value:value?[value]:[];
+  return html`<div class="field full" role="group" aria-label=${label}><span class="lbl">${label}</span><div class="chips">${opts.map(o=>{const [v,l]=Array.isArray(o)?o:[o,o];const ok=sel.includes(v);
+    return html`<button type="button" class=${'chip'+(ok?' on':'')} disabled=${dis} aria-pressed=${multi?ok:undefined} role=${multi?undefined:'radio'} aria-checked=${multi?undefined:ok}
+    onClick=${()=>on(multi?(ok?sel.filter(x=>x!==v):[...sel,v]):(ok?'':v))}>${ok?'✓ ':''}${l}</button>`;})}</div></div>`;}
+function Check({label,checked,on,dis}){return html`<label class="check"><input type="checkbox" checked=${!!checked} disabled=${dis} onChange=${e=>on(e.target.checked)}/><span>${label}</span></label>`;}
+function Pill({children,tone}){const t=String(children);const a=tone||(/verified|match|compatible|ready to launch/i.test(t)?'green':/review|pending|sent|progress|reported|entered/i.test(t)?'amber':/changes|required|action|config|not configured/i.test(t)?'red':/applicable/i.test(t)?'blue':'gray');return html`<span class=${'pill '+a}>${children}</span>`;}
+function Card({title,sub,meta,children,wide,isNew}){return html`<article class=${'card'+(wide?' wide':'')+(isNew?' new':'')}><header><div><h4>${title}</h4>${sub&&html`<p>${sub}</p>`}</div>${meta&&html`<div class="meta">${meta}</div>`}</header><div class="cb">${children}</div></article>`;}
+function Remove({label,onRemove,dis}){const [ask,setAsk]=useState(false);if(dis)return null;
+  return ask?html`<div class="confirm" role="alertdialog">Remove ${label}?<button class="btn danger sm" onClick=${onRemove}>Remove</button><button class="btn ghost sm" onClick=${()=>setAsk(false)}>Cancel</button></div>`:html`<button class="x" title=${'Remove '+label} aria-label=${'Remove '+label} onClick=${()=>setAsk(true)}>×</button>`;}
+function Copy({text,label='Copy'}){const [d,setD]=useState(false);return html`<button class="btn ghost sm" disabled=${!text} onClick=${async()=>{try{await navigator.clipboard.writeText(text);setD(true);setTimeout(()=>setD(false),1500);}catch(e){}}}>${d?'Copied':label}</button>`;}
+
+/* ---------------- shared access pieces ---------------- */
+function Secret(){return html`<div class="secret cfg"><div class="row"><${Pill} tone="red">Config Required</${Pill}><span class="small">Secure password submission needs Plexus’s approved credential vault.</span></div><span class="small muted">This preview never stores passwords. Use the invitation option or a named delegated account until the vault is connected.</span></div>`;}
+function Invitation({rec,item,patch,P,label='invitation'}){
+  const [open,setOpen]=useState(false),[note,setNote]=useState(''),[ok,setOk]=useState(false),[vn,setVn]=useState('');
+  const states=[['not_sent','Not Sent'],['sent','Sent'],['pending','Pending Acceptance'],['verified','Verified']];
+  return html`<div class="invite">
+    <div class="row small">Send the ${label} to ${rec?html`<code>${rec}</code><${Copy} text=${rec} label="Copy address"/>`:html`<${Pill} tone="red">Plexus has not configured this recipient yet</${Pill}>`}</div>
+    <span class="small muted">In the portal’s user-management area, invite the address above with the least access needed. Do not share your own password.</span>
+    <div class="row small"><span class="muted">Invitation:</span>${states.map(([v,l])=>html`<${Pill} tone=${item.invite===v?undefined:'gray'}>${l}${item.invite===v?' ✓':''}</${Pill}>`)}</div>
+    ${item.inviteNote&&item.invite!=='not_sent'&&html`<span class="small muted">Clinic confirmed: “${item.inviteNote}” · ${item.inviteAt}</span>`}
+    ${P.edit&&item.invite==='not_sent'&&(!open?html`<button class="btn sm" style="width:fit-content" onClick=${()=>setOpen(true)}>I sent the invitation</button>`:html`<div class="inline"><${Field} label="How and when did you send it?" value=${note} on=${setNote} ph="e.g. Added through the payer portal user page on Nov 16"/><${Check} label="I confirm the invitation was actually submitted." checked=${ok} on=${setOk}/><div class="row"><button class="btn pri sm" disabled=${!ok||!note.trim()} onClick=${()=>{patch(i=>{i.invite='sent';i.inviteNote=note;i.inviteAt=new Date().toLocaleString();},`Invitation confirmed sent: ${note}`);setOpen(false);}}>Record as sent</button><button class="btn ghost sm" onClick=${()=>setOpen(false)}>Cancel</button></div></div>`)}
+    ${P.edit&&item.invite==='sent'&&html`<button class="link" style="width:fit-content" onClick=${()=>patch(i=>{i.invite='not_sent';i.inviteNote='';},'Invitation marked not sent')}>Undo — not sent yet</button>`}
+    ${P.plexus&&['sent','pending'].includes(item.invite)&&html`<div class="inline"><${Field} label="Plexus verification note" value=${vn} on=${setVn}/><div class="row">${item.invite==='sent'&&html`<button class="btn sm" disabled=${!vn.trim()} onClick=${()=>{patch(i=>{i.invite='pending';},'Invitation pending acceptance: '+vn,true);setVn('');}}>Mark pending acceptance</button>`}<button class="btn pri sm" disabled=${!vn.trim()} onClick=${()=>{patch(i=>{i.invite='verified';i.status='verified';i.verifiedAt=new Date().toLocaleString();},'Access verified: '+vn,true);setVn('');}}>Verify access</button></div></div>`}
+  </div>`;}
+function Verify({item,patch,P}){const [n,setN]=useState('');
+  return html`<div class="row between small" style="border-top:1px dashed var(--line);padding-top:8px"><span>${item.status==='verified'?html`<${Pill}>Verified</${Pill}> <span class="muted">${item.verifiedAt} by Plexus</span>`:html`<${Pill} tone="gray">Access not verified</${Pill}> <span class="muted">A typed website or username is never treated as verified access.</span>`}</span>
+  ${P.plexus&&item.status!=='verified'&&html`<div class="row"><input style="width:220px;min-height:32px" placeholder="Verification note" value=${n} onInput=${e=>setN(e.target.value)}/><button class="btn pri sm" disabled=${!n.trim()} onClick=${()=>{patch(i=>{i.status='verified';i.verifiedAt=new Date().toLocaleString();},'Access verified: '+n,true);setN('');}}>Record verified access</button></div>`}</div>`;}
+
+/* ---------------- iOS bento design system ---------------- */
+const ICONS={clipboard:['M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2','M9 2h6v4H9z','m9 14 2 2 4-4'],building:['M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z','M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2','M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2','M10 6h4','M10 10h4','M10 14h4','M10 18h4'],
+pin:['M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z','M12 13a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z'],
+users:['M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2','M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z','M22 21v-2a4 4 0 0 0-3-3.87','M16 3.13a4 4 0 0 1 0 7.75'],
+user:['M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2','M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z'],
+steth:['M4.8 2.3A.3.3 0 1 0 5 2H4a2 2 0 0 0-2 2v5a6 6 0 0 0 12 0V4a2 2 0 0 0-2-2h-1a.2.2 0 1 0 .3.3','M8 15v1a6 6 0 0 0 12 0v-4','M20 10a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z'],
+shield:['M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z'],
+monitor:['M4 3h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z','M8 21h8','M12 17v4'],
+key:['M15.5 7.5 19 4','M21 2l-2 2','M17 6l2 2','M7.5 21a5.5 5.5 0 1 0 0-11 5.5 5.5 0 0 0 0 11Z','M11.4 11.6 15.5 7.5'],
+phone:['M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z'],
+calendar:['M8 2v4','M16 2v4','M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z','M3 10h18'],
+activity:['M22 12h-4l-3 9L9 3l-3 9H2'],
+receipt:['M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z','M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8','M12 17.5v-11'],
+flask:['M9 3h6','M10 3v7.4L4.6 19.2A1.2 1.2 0 0 0 5.6 21h12.8a1.2 1.2 0 0 0 1-1.8L14 10.4V3'],
+scan:['M3 7V5a2 2 0 0 1 2-2h2','M17 3h2a2 2 0 0 1 2 2v2','M21 17v2a2 2 0 0 1-2 2h-2','M7 21H5a2 2 0 0 1-2-2v-2','M7 12h10'],
+bell:['M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9','M10.3 21a1.94 1.94 0 0 0 3.4 0'],
+alert:['M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z','M12 9v4','M12 17h.01'],
+link:['M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71','M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71'],
+briefcase:['M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16','M4 6h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2Z'],
+door:['M13 4h3a2 2 0 0 1 2 2v14','M2 20h3','M13 20h9','M10 12v.01','M13 4.56v16.88a.5.5 0 0 1-.68.47L5 19V5.1a1 1 0 0 1 .76-.97l6.62-1.57a.5.5 0 0 1 .62.49Z'],
+lock:['M5 11h14a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2Z','M7 11V7a5 5 0 0 1 10 0v4'],
+clock:['M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20Z','M12 6v6l4 2'],
+plus:['M12 5v14','M5 12h14'],chev:['m9 18 6-6-6-6'],check:['M20 6 9 17l-5-5']};
+function Icon(n,size=18){return html`<svg width=${size} height=${size} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${(ICONS[n]||[]).map(d=>html`<path d=${d}/>`)}</svg>`;}
+const fmtTime=t=>{if(!t)return '';const [h,m]=t.split(':').map(Number);const ap=h>=12?'PM':'AM',hh=h%12||12;return m?`${hh}:${String(m).padStart(2,'0')} ${ap}`:`${hh} ${ap}`;};
+function fmtDays(days=[]){if(!days.length)return '';const idx=days.map(d=>DAYS.indexOf(d)).sort((a,b)=>a-b);const runs=[];let st=idx[0],pv=idx[0];
+  for(const i of idx.slice(1)){if(i===pv+1){pv=i;continue;}runs.push([st,pv]);st=pv=i;}runs.push([st,pv]);
+  return runs.map(([a,b])=>b-a>=2?`${DAYS[a]}–${DAYS[b]}`:a===b?DAYS[a]:`${DAYS[a]}, ${DAYS[b]}`).join(', ');}
+const hoursLine=(days,a,b)=>[fmtDays(days),a&&b?`${fmtTime(a)}–${fmtTime(b)}`:''].filter(Boolean).join(' · ');
+function Group({icon,title,sub,cols=2,children}){return html`<section class="grp"><div class="grp-h"><span class="ico">${Icon(icon)}</span><div><h3>${title}</h3>${sub&&html`<p>${sub}</p>`}</div></div><div class=${'bento c'+cols}>${children}</div></section>`;}
+function AddTile({label,onClick,dis,needed}){return html`<button type="button" class=${'addtile'+(needed?' need':'')} disabled=${dis} onClick=${onClick}><span class="plus">${Icon('plus',20)}</span><b>${label}</b></button>`;}
+function Flat({title,children}){return html`<div class="flat"><span class="flat-h">${title}</span><div class="grid">${children}</div></div>`;}
+function EGroup({title,open=true,children}){return html`<details class="eg" open=${open}><summary>${title}</summary><div class="grid">${children}</div></details>`;}
+/** Summary-first card. Tap to edit inline; Done returns to the updated summary. */
+function Tile({id,P,icon,title,req,badge,lines=[],empty,done,tone,missing=[],editor,onDone,span,foot}){
+  const tid=(P.pre||'')+id,open=P.ek===tid,ref=useRef(null);
+  if(done===undefined)done=tone==='ok'?true:tone==='warn'?false:null;
+  const shown=lines.filter(Boolean).slice(0,2);
+  useEffect(()=>{if(!open||!ref.current)return;ref.current.scrollIntoView({block:'nearest',behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});const f=ref.current.querySelector('.ed-b input,.ed-b select,.ed-b textarea,.ed-b button');f&&f.focus({preventScroll:true});},[open]);
+  const close=()=>{onDone&&onDone();P.setEk(null);requestAnimationFrame(()=>document.getElementById('tile-'+tid)?.focus());};
+  if(open)return html`<div ref=${ref} class="tile editing" role="group" aria-label=${'Editing '+title} onKeyDown=${e=>{if(e.key==='Escape'){e.stopPropagation();close();}}}>
+    <div class="ed-h">${icon&&html`<span class="ico">${Icon(icon)}</span>`}<div class="ed-t"><b>${title}</b>${missing.length>0&&html`<span class="ed-miss">Still needed: ${missing.join(', ')}</span>`}</div>${foot}<button type="button" class="btn pri" onClick=${close}>${Icon('check',16)} Done</button></div>
+    <div class="ed-b">${editor()}</div></div>`;
+  return html`<button type="button" id=${'tile-'+tid} class=${'tile'+(span?' span':'')+(done===false?' incomplete':'')} onClick=${()=>P.setEk(id)}>
+    <span class="tile-top">${icon&&html`<span class="ico sm">${Icon(icon,17)}</span>`}<span class="tile-title"><b>${title}${req&&html`<span class="req" aria-label="required"> *</span>`}</b>${badge&&html`<span class="badge">${badge}</span>`}</span>
+      ${done===true?html`<span class="ind ok" title="Complete" aria-label="Complete">${Icon('check',14)}</span>`:done===false?html`<span class="ind dot" title="Incomplete" aria-label="Incomplete"/>`:null}<span class="chev-r">${Icon('chev',18)}</span></span>
+    ${shown.length?html`<span class="tile-lines">${shown.map(l=>html`<span>${l}</span>`)}</span>`:empty&&html`<span class="tile-lines"><span class="ph">${empty}</span></span>`}
+  </button>`;}
+const need=(n)=>({done:!n});
+
+/* ---------------- sections ---------------- */
+function Facility({s,up,P}){
+  const o=s.org,setO=k=>v=>up(d=>{d.org[k]=v;},'facility');
+  const loc=(id,k)=>v=>up(d=>{const l=d.locations.find(x=>x.id===id);l[k]=v;if(k==='primary'&&v)d.locations.forEach(x=>{if(x.id!==id)x.primary=false;});},'facility');
+  const addLoc=()=>{const id=uid();up(d=>{d.locations.push({id,name:'',street:'',suite:'',city:'',state:'',zip:'',tz:'',phone:'',fax:'',days:[],open:'',close:'',primary:!d.locations.length,isNew:true});});P.setEk('loc-'+id);};
+  const doneLoc=id=>up(d=>{const l=d.locations.find(x=>x.id===id);if(!l)return;if(l.isNew&&!l.name&&!l.street)d.locations=d.locations.filter(x=>x!==l);else delete l.isNew;});
+  const orgNeed=need(['legalName','phone','status'].filter(k=>blank(o[k])).length);
+  return html`
+  <${Group} icon="building" title="Organization" cols="1">
+    <${Tile} id="org" P=${P} icon="building" span title="Your Practice" lines=${[o.dba||o.legalName]} empty="Add practice details" ...${orgNeed} missing=${[['legalName','Legal business name'],['phone','Main clinic telephone'],['status','Clinic status']].filter(([k])=>blank(o[k])).map(x=>x[1])}
+      editor=${()=>html`
+        <${EGroup} title="Practice">
+          <${Field} label="Legal business name" req value=${o.legalName} on=${setO('legalName')} dis=${!P.edit}/>
+          <${Field} label="Practice name / DBA" value=${o.dba} on=${setO('dba')} dis=${!P.edit}/>
+          <${Field} label="Organization NPI" num value=${o.npi} on=${v=>setO('npi')(v.replace(/\D/g,'').slice(0,10))} err=${o.npi&&!npiOk(o.npi)?'Enter a valid 10-digit NPI':''} dis=${!P.edit}/>
+          <${Field} label="Group taxonomy code" ph="e.g. 207Q00000X" value=${o.taxonomy} on=${v=>setO('taxonomy')(v.toUpperCase().replace(/[^0-9A-Z]/g,'').slice(0,10))} err=${o.taxonomy&&o.taxonomy.length!==10?'Taxonomy codes have 10 characters':''} dis=${!P.edit}/>
+          <${Sel} label="Practice type" value=${o.type} on=${setO('type')} opts=${['Primary care','Internal medicine','Family medicine','Cardiology','Neurology','Multispecialty','Skilled nursing','Other']} dis=${!P.edit}/>
+          <${Chips} label="Clinic status" multi=${false} opts=${['Running','Preparing to Open','Temporarily Closed']} value=${o.status} on=${setO('status')} dis=${!P.edit}/>
+        </${EGroup}>
+        <${EGroup} title="Contact">
+          <${Field} label="Main clinic telephone" req type="tel" value=${o.phone} on=${setO('phone')} dis=${!P.edit}/>
+          <${Field} label="Main fax" type="tel" value=${o.fax} on=${setO('fax')} dis=${!P.edit}/>
+          <${Field} label="Main email" type="email" value=${o.email} on=${setO('email')} dis=${!P.edit}/>
+          <${Field} label="Website" type="url" ph="https://" value=${o.website} on=${setO('website')} dis=${!P.edit}/>
+        </${EGroup}>`}/>
+  </${Group}>
+  <${Group} icon="pin" title="Locations">
+    ${s.locations.map(l=>{const miss=[l.name,l.street,l.city,l.state,l.zip,l.tz].filter(blank).length+(!l.days.length||!l.open||!l.close?1:0);
+      return html`<${Tile} key=${l.id} id=${'loc-'+l.id} P=${P} icon="pin" title=${l.name||'New location'} badge=${l.primary?'Primary':''}
+        lines=${l.street||l.city?[[[l.street,l.suite].filter(Boolean).join(' '),[l.city,[l.state,l.zip].filter(Boolean).join(' ')].filter(Boolean).join(', ')].filter(Boolean).join(', '),hoursLine(l.days,l.open,l.close)]:[]} empty="Add address" ...${need(miss)} missing=${[['name','Location name'],['street','Street address'],['city','City'],['state','State'],['zip','ZIP'],['tz','Timezone']].filter(([k])=>blank(l[k])).map(x=>x[1]).concat(!l.days.length||!l.open||!l.close?['Operating hours']:[])} onDone=${()=>doneLoc(l.id)}
+        foot=${html`<${Remove} label=${l.name||'this location'} dis=${!P.edit} onRemove=${()=>{P.setEk(null);up(d=>{d.locations=d.locations.filter(x=>x.id!==l.id);d.clinicians.forEach(c=>c.locs=c.locs.filter(x=>x!==l.id));d.team.forEach(c=>c.locs=c.locs.filter(x=>x!==l.id));if(d.room.loc===l.id)d.room.loc='';if(l.primary&&d.locations[0])d.locations[0].primary=true;},'facility');}}/>`}
+        editor=${()=>html`
+          <${EGroup} title="Address">
+            <${Field} label="Location name" req value=${l.name} on=${loc(l.id,'name')} dis=${!P.edit}/>
+            <${Field} label="Physical street address" req value=${l.street} on=${loc(l.id,'street')} dis=${!P.edit}/>
+            <${Field} label="Suite" value=${l.suite} on=${loc(l.id,'suite')} dis=${!P.edit}/>
+            <${Field} label="City" req value=${l.city} on=${loc(l.id,'city')} dis=${!P.edit}/>
+            <${Field} label="State" req ph="AZ" value=${l.state} on=${v=>loc(l.id,'state')(v.toUpperCase().slice(0,2))} dis=${!P.edit}/>
+            <${Field} label="ZIP" req num value=${l.zip} on=${loc(l.id,'zip')} err=${l.zip&&!/^\d{5}(-\d{4})?$/.test(l.zip)?'Use a 5-digit ZIP':''} dis=${!P.edit}/>
+          </${EGroup}>
+          <${EGroup} title="Contact" open=${!!(l.phone||l.fax)}>
+            <${Field} label="Main phone" type="tel" value=${l.phone} on=${loc(l.id,'phone')} dis=${!P.edit}/>
+            <${Field} label="Fax" type="tel" value=${l.fax} on=${loc(l.id,'fax')} dis=${!P.edit}/>
+          </${EGroup}>
+          <${EGroup} title="Operating Hours" open=${!l.isNew}>
+            <${Sel} label="Timezone" value=${l.tz} on=${loc(l.id,'tz')} opts=${TZ} dis=${!P.edit}/>
+            <${Chips} label="Operating days" opts=${DAYS} value=${l.days} on=${loc(l.id,'days')} dis=${!P.edit}/>
+            <${Field} label="Opens" type="time" value=${l.open} on=${loc(l.id,'open')} dis=${!P.edit}/>
+            <${Field} label="Closes" type="time" value=${l.close} on=${loc(l.id,'close')} err=${l.open&&l.close&&l.open>=l.close?'Closing must be after opening':''} dis=${!P.edit}/>
+          </${EGroup}>
+          ${!l.primary&&P.edit&&html`<button class="link" onClick=${()=>loc(l.id,'primary')(true)}>Make this the primary location</button>`}`}/>`;})}
+    <${AddTile} label=${s.locations.length?'Add another location':'Add a location'} dis=${!P.edit} onClick=${addLoc}/>
+  </${Group}>
+  <${Group} icon="users" title="Key Contacts">
+    ${[['omId','Office Manager','Office Manager'],['primaryId','Primary Office Contact','Other']].map(([k,label,role])=>{const m=s.team.find(x=>x.id===s.contacts[k]);
+      return html`<${Tile} key=${k} id=${'contact-'+k} P=${P} icon="user" title=${label} lines=${m?[m.name]:[]} empty="Add contact" done=${m?true:false}
+        editor=${()=>html`<${ContactPicker} s=${s} up=${up} P=${P} k=${k} label=${label} role=${role}/>`}/>`;})}
+  </${Group}>`;
+}
+function ContactPicker({s,up,P,k,label,role}){
+  const [adding,setAdding]=useState(false),[nm,setNm]=useState({name:'',email:'',phone:''});const m=s.team.find(x=>x.id===s.contacts[k]);
+  return html`<div class="grid">
+    <${Sel} label=${label} value=${s.contacts[k]} on=${v=>up(d=>{d.contacts[k]=v;},'facility')} opts=${s.team.map(x=>[x.id,`${x.name||x.email||'Unnamed'}${x.role?' · '+x.role:''}`])} ph=${s.team.length?'Choose from Team…':'Add a person below'} dis=${!P.edit}/>
+    <div class="field"><span class="lbl">Details from Team</span><span class="small">${m?[m.role,m.email,m.phone].filter(Boolean).join(' · ')||'No contact details yet — add them in Team.':'—'}</span></div>
+  </div>
+  ${P.edit&&!adding&&html`<button class="link" onClick=${()=>setAdding(true)}>+ Add a new person</button>`}
+  ${adding&&html`<div class="inline"><div class="grid"><${Field} label="Name" value=${nm.name} on=${v=>setNm({...nm,name:v})}/><${Field} label="Contact email" type="email" value=${nm.email} on=${v=>setNm({...nm,email:v})}/><${Field} label="Contact telephone" type="tel" value=${nm.phone} on=${v=>setNm({...nm,phone:v})}/></div>
+    <div class="row"><button class="btn pri sm" disabled=${!nm.name.trim()} onClick=${()=>{const id=uid();up(d=>{const r=role==='Office Manager'&&d.team.some(x=>x.role==='Office Manager')?'Other':role;d.team.push({id,name:nm.name,role:r,email:nm.email.toLowerCase(),phone:nm.phone,locs:[],resp:'',pref:'',backup:'',sections:[]});d.contacts[k]=id;},'facility');setNm({name:'',email:'',phone:''});setAdding(false);}}>Add to Team and link</button><button class="btn ghost sm" onClick=${()=>setAdding(false)}>Cancel</button></div></div>`}`;
+}
+
+function Rosters({s,up,P}){
+  const act=s.clinicians.filter(c=>c.active),inact=s.clinicians.filter(c=>!c.active);
+  const C=(id,f)=>up(d=>f(d.clinicians.find(x=>x.id===id)),'rosters');
+  const add=()=>{const id=uid();up(d=>{d.clinicians.push({id,name:'',creds:[],credOther:'',npi:'',specialty:'',licenses:'',locs:d.locations.length===1?[d.locations[0].id]:[],portals:[],active:true,reg:'not_checked',isNew:true});});P.setEk('clin-'+id);};
+  const done=id=>up(d=>{const c=d.clinicians.find(x=>x.id===id);if(!c)return;if(c.isNew&&!c.name.trim()&&!c.npi)d.clinicians=d.clinicians.filter(x=>x!==c);else delete c.isNew;});
+  return html`
+  <${Group} icon="steth" title="Clinicians">
+    ${act.map(c=>{const dupNpi=c.npi&&act.some(x=>x!==c&&x.npi===c.npi),dupName=c.name&&act.some(x=>x!==c&&x.name.trim().toLowerCase()===c.name.trim().toLowerCase());
+      const reg={not_checked:['Registry not checked','gray'],match:['NPPES name match','green'],unavailable:['Registry not reachable from this preview','amber']}[c.reg];
+      const miss=(blank(c.name)?1:0)+(!c.creds.length?1:0)+(!npiOk(c.npi||'')?1:0)+(!c.locs.length?1:0);
+      return html`<${Tile} key=${c.id} id=${'clin-'+c.id} P=${P} icon="user" title=${c.name||'New clinician'}
+        lines=${[[[...c.creds.filter(x=>x!=='Other'),c.credOther].filter(Boolean).join(', '),c.npi&&`NPI ${c.npi}`,c.taxonomy].filter(Boolean).join(' · '),s.locations.filter(l=>c.locs.includes(l.id)).map(l=>l.name).join(' · ')]} empty="Add credentials and NPI" ...${need(miss)}
+        missing=${[blank(c.name)&&'Full name',!c.creds.length&&'Credentials',!npiOk(c.npi||'')&&'Valid NPI',!c.locs.length&&'Locations'].filter(Boolean)} onDone=${()=>done(c.id)}
+        foot=${html`<${Remove} label=${c.name||'this clinician'} dis=${!P.edit} onRemove=${()=>{P.setEk(null);C(c.id,x=>{x.active=false;});}}/>`}
+        editor=${()=>html`
+          ${(dupNpi||dupName)&&html`<div class="note err">${dupNpi?'Another clinician already uses this NPI.':'A clinician with this name is already on your roster.'} Open the existing card instead of adding a duplicate.</div>`}
+          <${Flat} title="Identity">
+            <${Field} full label="Provider full name" req value=${c.name} on=${v=>C(c.id,x=>{x.name=v;})} dis=${!P.edit}/>
+            <${Chips} label="Credentials" opts=${CREDS} value=${c.creds} on=${v=>C(c.id,x=>{x.creds=v;})} dis=${!P.edit}/>
+            ${c.creds.includes('Other')&&html`<${Field} label="Other credential" value=${c.credOther} on=${v=>C(c.id,x=>{x.credOther=v;})} dis=${!P.edit}/>`}
+            <div class="field"><${Field} label="NPI" req num value=${c.npi} on=${v=>C(c.id,x=>{x.npi=v.replace(/\D/g,'').slice(0,10);x.reg='not_checked';})} err=${c.npi&&(c.npi.length<10?'NPI has 10 digits':!npiOk(c.npi)?'This NPI’s check digit is not valid':'')} dis=${!P.edit}/>
+              <div class="row"><${Pill} tone=${reg[1]}>${reg[0]}</${Pill}>${P.edit&&npiOk(c.npi||'')&&html`<button class="link" onClick=${()=>C(c.id,x=>{x.reg='unavailable';})}>Check NPPES registry</button>`}</div></div>
+          </${Flat}>
+          <${Flat} title="Practice">
+            <${Field} label="Specialty (optional)" value=${c.specialty} on=${v=>C(c.id,x=>{x.specialty=v;})} dis=${!P.edit}/>
+            <${Chips} label="Clinic locations" opts=${s.locations.map(l=>[l.id,l.name||'Unnamed location'])} value=${c.locs} on=${v=>C(c.id,x=>{x.locs=v;})} dis=${!P.edit}/>
+            <${Field} label="Taxonomy code" ph="e.g. 207R00000X" value=${c.taxonomy} on=${v=>C(c.id,x=>{x.taxonomy=v.toUpperCase().replace(/[^0-9A-Z]/g,'').slice(0,10);})} err=${c.taxonomy&&c.taxonomy.length!==10?'Taxonomy codes have 10 characters':''} dis=${!P.edit}/>
+          </${Flat}>
+          <${ProviderCreds} c=${c} C=${f=>C(c.id,f)} s=${s} P=${P}/>
+          `}/>`;})}
+    <${AddTile} label="Add clinician" needed=${!act.length} dis=${!P.edit} onClick=${add}/>
+  </${Group}>
+  ${inact.length>0&&html`<details class="disc"><summary>Removed clinicians (history retained) <span class="count">${inact.length}</span></summary><div><ul class="small">${inact.map(c=>html`<li>${c.name||'Unnamed'} ${c.npi&&html`<span class="muted">· NPI ${c.npi}</span>`} ${P.edit&&html`<button class="link" onClick=${()=>C(c.id,x=>{x.active=true;})}>Restore</button>`}</li>`)}</ul></div></details>`}`;
+}
+
+const BOARDS=['ABIM','ABFM','ABPN','ABEM','AOBIM','AOBFP','AANP','ANCC','NCCPA','Other','Not board certified'];
+const yn=['Yes','No','Not sure'];
+function Rows({label,items,fields,onAdd,onSet,onDel,addLabel,dis}){
+  return html`<div class="field full"><span class="lbl">${label}</span><div class="stack">${items.map((it,i)=>html`<div class="sub rowfields" key=${i}><div class="grid">${fields.map(([k,l,t,ph,opts])=>opts?html`<${Sel} label=${l} value=${it[k]} opts=${opts} on=${v=>onSet(i,k,v)} dis=${dis}/>`:html`<${Field} label=${l} type=${t||'text'} ph=${ph} value=${it[k]} on=${v=>onSet(i,k,v)} dis=${dis}/>`)}</div>${!dis&&html`<button type="button" class="link" onClick=${()=>onDel(i)}>Remove</button>`}</div>`)}
+    ${!dis&&html`<button type="button" class="btn ghost addacc" onClick=${onAdd}>${Icon('plus',16)} ${addLabel}</button>`}</div></div>`;}
+const STATES='AZ CA CO NM NV TX UT Other'.split(' ');
+function ProviderCreds({c,C,s,P}){
+  const dis=!P.edit,lics=c.lics||[],priv=c.privs||[],midlevel=c.creds.some(x=>['NP','PA'].includes(x));
+  const list=(key)=>({onAdd:()=>C(x=>{(x[key]=x[key]||[]).push({});}),onSet:(i,k,v)=>C(x=>{x[key][i][k]=v;}),onDel:i=>C(x=>{x[key].splice(i,1);})});
+  const others=s.clinicians.filter(x=>x.active&&x.id!==c.id&&x.creds.some(y=>['MD','DO'].includes(y)));
+  return html`
+  <${Flat} title="Hospital / Facility Privileges">
+    <${Rows} label="Privileges" items=${priv} fields=${[['facility','Hospital or facility'],['type','Privilege type','','',['Active','Courtesy','Consulting','Admitting','Telemedicine','Pending']],['exp','Reappointment date','date']]} addLabel="Add privileges" dis=${dis} ...${list('privs')}/>
+  </${Flat}>
+  ${midlevel&&html`<${Flat} title="Collaborating / Supervising Physician">
+    <${Sel} label="Physician" value=${c.supId} ph="Choose or enter below" opts=${[...others.map(x=>[x.id,x.name||'Unnamed']),['ext','Not on this roster']]} on=${v=>C(x=>{x.supId=v;})} dis=${dis}/>
+    ${c.supId==='ext'&&html`<${Field} label="Physician name" value=${c.supName} on=${v=>C(x=>{x.supName=v;})} dis=${dis}/><${Field} label="Physician NPI" num value=${c.supNpi} on=${v=>C(x=>{x.supNpi=v.replace(/\D/g,'').slice(0,10);})} err=${c.supNpi&&!npiOk(c.supNpi)?'Enter a valid 10-digit NPI':''} dis=${dis}/>`}
+    <${Chips} label="Relationship" multi=${false} opts=${['Collaborating','Supervising']} value=${c.supType} on=${v=>C(x=>{x.supType=v;})} dis=${dis}/>
+    <${Field} label="Agreement effective date" type="date" value=${c.supEff} on=${v=>C(x=>{x.supEff=v;})} dis=${dis}/>
+  </${Flat}>`}`;
+}
+const PLAN_TYPES=['Commercial','Medicare','Medicare Advantage','Medicaid','Medicaid managed care','Marketplace / Exchange','Workers’ comp','Other'];
+const PART={clinic_reported:'Clinic reported',verified:'Participation verified',not_participating:'Not participating'};
+function payerAccess(p){if(p.status==='verified')return 'Access verified';if(p.pathway==='portal')return p.username?`Portal · ${p.username}`:'Portal access · details needed';if(p.pathway==='invitation')return {not_sent:'Invitation · not sent yet',sent:'Invitation sent',pending:'Invitation pending acceptance',verified:'Invitation verified'}[p.invite];return 'Access not set up';}
+function PortalAccess({p,Pa,P}){
+  const multi=MULTI_ROWS[p.key];
+  return html`
+    <div class="note pl-note">${Icon('user',15)}<span>Add <b>${PLEXUS_BILLING}</b> as a user on this portal.</span><${Copy} text=${PLEXUS_BILLING} label="Copy"/></div>
+    <${Check} label=${'Invitation sent to '+PLEXUS_BILLING} checked=${p.invited} dis=${!P.edit} on=${v=>Pa(x=>{x.invited=v;})}/>
+    <div class="grid">
+      ${multi&&html`<${Field} full label=${multi[0]} req value=${p.name} on=${v=>Pa(x=>{x.name=v;})} dis=${!P.edit}/>`}
+      ${p.key==='State Medicaid'&&html`<${Field} full label="State Medicaid program" ph="e.g. AHCCCS (Arizona)" value=${p.state} on=${v=>Pa(x=>{x.state=v;})} dis=${!P.edit}/>`}
+      ${p.key==='Blue Cross Blue Shield'&&html`<${Field} full label="Local plan (optional)" ph="e.g. BCBS of Arizona" value=${p.localPlan} on=${v=>Pa(x=>{x.localPlan=v;})} dis=${!P.edit}/>`}
+      <${Field} full label="Portal URL" req=${!p.invited} type="url" ph=${SIGNIN[p.key]||'https://'} value=${p.website} on=${v=>Pa(x=>{x.website=v;})} err=${p.website&&!validUrl(p.website)?'Enter the portal’s sign-in address, starting with https://':''} dis=${!P.edit}/>
+      <${Field} label="Username" req=${!p.invited} value=${p.username} on=${v=>Pa(x=>{x.username=v;})} dis=${!P.edit}/>
+      <${Password} k=${'portal:'+p.id} dis=${!P.edit}/>
+    </div>
+    <div class="row between">${validUrl(p.website)?html`<a class="btn ghost sm" href=${p.website.trim()} target="_blank" rel="noopener noreferrer">${Icon('link',14)} Open Portal</a>`:html`<span/>`}<span class="small muted">${Icon('lock',12)} Passwords are never saved.</span></div>`;
+}
+/** Portal tile inside a group card: summary tile; tap to edit in place. */
+function PortalTile({p,Pa,P,icon,open,setOpen,onRemove}){
+  const m=portalMissing(p),ref=useRef(null),host=u=>(u||'').replace(/^https?:\/\//,'').replace(/\/.*$/,'');
+  useEffect(()=>{if(open&&ref.current){ref.current.scrollIntoView({block:'nearest',behavior:'smooth'});const f=ref.current.querySelector('input:not([type=checkbox])');f&&f.focus({preventScroll:true});}},[open]);
+  const sub=p.key==='State Medicaid'&&p.state?p.state:p.key==='Blue Cross Blue Shield'&&p.localPlan?p.localPlan:MULTI_ROWS[p.key]&&p.key!=='Other Portal'?(p.key==='Medicaid Managed Care'?'Managed care':'Commercial'):'';
+  if(open)return html`<div ref=${ref} class="tile editing ptile" role="group" aria-label=${'Editing '+portalTitle(p)} onKeyDown=${e=>{if(e.key==='Escape'){e.stopPropagation();setOpen(null);}}}>
+    <div class="ed-h"><span class="ico">${Icon(icon)}</span><div class="ed-t"><b>${portalTitle(p)}</b>${m.length>0&&html`<span class="ed-miss">Still needed: ${m.join(', ')}</span>`}</div><button type="button" class="btn pri sm" onClick=${()=>setOpen(null)}>${Icon('check',15)} Done</button></div>
+    <div class="ed-b"><${PortalAccess} p=${p} Pa=${Pa} P=${P}/>${onRemove&&P.edit&&html`<button type="button" class="link danger-link" onClick=${onRemove}>Remove ${portalTitle(p)}</button>`}</div></div>`;
+  return html`<button type="button" class=${'tile ptile'+(m.length?' incomplete':'')} onClick=${()=>setOpen(p.id)}>
+    <span class="tile-top"><span class="ico sm">${Icon(icon,17)}</span><span class="tile-title"><b>${portalTitle(p)}</b>${sub&&html`<span class="badge">${sub}</span>`}</span>
+      ${m.length?html`<span class="ind dot" aria-label="Incomplete"/>`:html`<span class="ind ok" aria-label="Complete">${Icon('check',14)}</span>`}<span class="chev-r">${Icon('chev',18)}</span></span>
+    <span class="tile-lines">${p.invited?html`<span>Invite sent</span>`:p.username?html`<span>${host(p.website)}</span><span>${p.username}</span>`:html`<span class="ph">Add portal login</span>`}</span></button>`;
+}
+function PortalEntry({p,Pa,P,open,onRemove}){
+  const m=portalMissing(p);
+  return html`<details class="eg pe" open=${open}><summary><span class="pe-t">${portalTitle(p)}${p.key==='State Medicaid'&&p.state?html`<small>${p.state}</small>`:p.key==='Blue Cross Blue Shield'&&p.localPlan?html`<small>${p.localPlan}</small>`:''}</span>
+    ${p.invited?html`<span class="pe-s ok">${Icon('check',13)} Invite sent</span>`:m.length?html`<span class="pe-s warn">${m.length} needed</span>`:html`<span class="pe-s ok">${Icon('check',13)} Login added</span>`}</summary>
+    <div class="stack pe-b"><${PortalAccess} p=${p} Pa=${Pa} P=${P}/>${onRemove&&P.edit&&html`<button type="button" class="link danger-link" onClick=${onRemove}>Remove ${portalTitle(p)}</button>`}</div></details>`;
+}
+/** Three summary cards (Insurance / Multi-Payer / Prior Auth). Tap a card to choose portals and fill each login. */
+function PortalCards({s,up,P,sec,required}){
+  const [ask,setAsk]=useState(null),[fresh,setFresh]=useState(null),[q,setQ]=useState('');
+  const Pa=(id,f)=>up(d=>f(d.payers.find(x=>x.id===id)),sec);
+  const entries=(g,k)=>s.payers.filter(p=>p.group===g&&p.key===k);
+  const add=(g,k)=>{const n=newPortal(g,k);up(d=>{d.payers.push(n);},sec,`Selected ${k}`);setFresh(n.id);};
+  const remove=(g,k)=>{up(d=>{d.payers=d.payers.filter(p=>!(p.group===g&&p.key===k));},sec,`Deselected ${k}`);setAsk(null);};
+  return PORTAL_GROUPS.map(([g,title,icon,rows])=>{const sel=s.payers.filter(p=>p.group===g);const inc=sel.filter(p=>portalMissing(p).length);
+    const inv=sel.filter(p=>p.invited).length;
+    return html`<${Tile} key=${g} id=${'pg-'+sec+'-'+g} P=${P} icon=${icon} title=${title}
+      lines=${sel.length?[sel.map(portalTitle).join(', '),[sel.length-inc.length+' of '+sel.length+' ready',inv?inv+' invite'+(inv>1?'s':'')+' sent':''].filter(Boolean).join(' · ')]:[]}
+      empty="Choose portals" done=${sel.length?!inc.length:null} missing=${inc.map(p=>`${portalTitle(p)} (${portalMissing(p).join(', ')})`)}
+      editor=${()=>html`
+        <div class="note pl-note">${Icon('user',15)}<span>Add <b>${PLEXUS_BILLING}</b> as a user on each portal.</span><${Copy} text=${PLEXUS_BILLING} label="Copy"/></div>
+        <div class="payers">
+          <aside class="plist" aria-label=${title+' checklist'}>
+            <div class="search">${Icon('scan',15)}<input aria-label=${'Search '+title} placeholder="Search" value=${q} onInput=${e=>setQ(e.target.value)}/></div>
+            <ul class="ioslist" aria-label=${title}>${rows.filter(k=>k.toLowerCase().includes(q.toLowerCase())).map(k=>{const on=entries(g,k).length>0,id=g+':'+k,n=entries(g,k).length;return html`<li key=${k}>${ask===id?html`<div class="confirm">Remove ${k}?<button class="btn danger sm" onClick=${()=>remove(g,k)}>Remove</button><button class="btn ghost sm" onClick=${()=>setAsk(null)}>Cancel</button></div>`:
+              html`<label class=${'iosrow'+(on?' on':'')}><input type="checkbox" checked=${on} disabled=${!P.edit} onChange=${e=>{if(e.target.checked)add(g,k);else if(entries(g,k).some(p=>p.username||p.invited||p.name||(p.website&&p.website!==SIGNIN[k])))setAsk(id);else remove(g,k);}}/><span>${k}${MULTI_ROWS[k]&&n>0?html` <small class="muted">(${n})</small>`:''}</span><i class="tick">${on?Icon('check',15):''}</i></label>`}</li>`;})}</ul>
+          </aside>
+          <div class="stack pe-list">
+            ${sel.length?html`<div class="bento c2 ptiles">${sel.map(p=>html`<${PortalTile} key=${p.id} p=${p} icon=${icon} Pa=${f=>Pa(p.id,f)} P=${P} open=${fresh===p.id} setOpen=${setFresh} onRemove=${MULTI_ROWS[p.key]?()=>{setFresh(null);up(d=>{d.payers=d.payers.filter(x=>x.id!==p.id);},sec);}:null}/>`)}
+              ${P.edit&&rows.filter(k=>MULTI_ROWS[k]&&entries(g,k).length>0).map(k=>html`<${AddTile} key=${'a'+k} label=${MULTI_ROWS[k][1]} onClick=${()=>add(g,k)}/>`)}</div>`:html`<div class="empty">${Icon(icon,22)}<span>Select from the list</span></div>`}
+          </div>
+        </div>`}/>`;});
+}
+function PortalReview({s,P}){
+  return P.plexus&&s.payers.length>0&&html`<div class="review"><h5>🛡 Portal access summary</h5><div class="tw"><table><thead><tr><th>Portal</th><th>Type</th><th>Status</th></tr></thead><tbody>
+    ${s.payers.map(p=>html`<tr key=${p.id}><td>${portalTitle(p)}</td><td>${PORTAL_GROUPS.find(x=>x[0]===p.group)[1]}</td><td>${p.invited?html`<${Pill} tone="green">Invite sent</${Pill}>`:portalMissing(p).length?html`<${Pill} tone="amber">${portalSummary(p)}</${Pill}>`:html`<${Pill} tone="blue">${portalSummary(p)}</${Pill}>`}</td></tr>`)}
+  </tbody></table></div><span class="small muted">Accept invitations from the ${PLEXUS_BILLING} inbox.</span></div>`;
+}
+function Payers({s,up,P}){
+  return html`<div class="instr pl-instr"><span>Select every insurance and portal you use, then add <b>${PLEXUS_BILLING}</b> as a user on each portal.</span><${Copy} text=${PLEXUS_BILLING} label="Copy email"/></div>
+  <${Group} icon="key" title="Logins"><${PortalCards} s=${s} up=${up} P=${P} sec="payers" required/></${Group}>
+  <${PortalReview} s=${s} P=${P}/>`;
+}
+
+const FLOW_TILES=[
+  ['lab','flask','Laboratory Results','How results arrive, where they go and who reviews them',[['lab','receipt'],['lab','destination'],['lab','reviewer'],['lab','acknowledgment'],['lab','unreviewed']],[]],
+  ['img','scan','Imaging Results','Every imaging question plus an optional example workflow',IMG_Q.map(q=>['imaging',q[0]]),['example']],
+  ['notify','bell','Provider Notifications','Result destination, notification method and contacts',[['lab','notification']],['destination','notification','routine','responsibleId','backupId']],
+  ['crit','alert','Abnormal & Critical Results','Who handles them and how they are escalated',[['lab','abnormal'],['lab','critical']],['abnormal','critical','escalation']]];
+const DELIV={destination:['Preferred result destination','text','e.g. Ordering provider’s EMR inbox'],notification:['Preferred provider notification method','select'],routine:['Routine result workflow','textarea'],abnormal:['Abnormal result workflow','textarea'],critical:['Critical result workflow','textarea'],escalation:['Escalation procedure','textarea'],responsibleId:['Responsible contact','team'],backupId:['Backup contact','team']};
+function Question({q,answer,onChoice,onOther,edit}){
+  return html`<div class="q"><${Chips} label=${q[1]} multi=${false} opts=${q[2]} value=${answer.choice||''} on=${onChoice} dis=${!edit}/>${(answer.choice||answer.other)&&html`<${Field} full label="Add detail (optional)" value=${answer.other} on=${onOther} dis=${!edit}/>`}</div>`;}
+function Flows({s,up,P}){
+  const f=s.flows,team=s.team.map(m=>[m.id,m.name||m.email||'Unnamed']);
+  const ans=(g,k,field)=>v=>up(d=>{d.flows[g][k]={...(d.flows[g][k]||{}),[field]:v};},'flows');
+  const del=k=>v=>up(d=>{d.flows.delivery[k]=v;},'flows');
+  const Q=(g,k)=>{const q=(g==='lab'?LAB_Q:IMG_Q).find(x=>x[0]===k);return html`<${Question} key=${g+k} q=${q} answer=${f[g][k]||{}} onChoice=${ans(g,k,'choice')} onOther=${ans(g,k,'other')} edit=${P.edit}/>`;};
+  const D=k=>{const [l,t,ph]=DELIV[k];return t==='select'?html`<${Sel} label=${l} value=${f.delivery[k]} opts=${['EMR task','EMR inbox','Phone','Secure message','Email (no patient details)','Other']} on=${del(k)} dis=${!P.edit}/>`:t==='team'?html`<${Sel} label=${l} value=${f.delivery[k]} opts=${team} ph=${team.length?'Choose from Team…':'Add people in Team first'} on=${del(k)} dis=${!P.edit}/>`:html`<${Field} label=${l} type=${t} ph=${ph} value=${f.delivery[k]} on=${del(k)} dis=${!P.edit}/>`;};
+  return html`<${Group} icon="activity" title="Results & Notifications">
+    ${FLOW_TILES.map(([id,icon,title,hint,qs,dk])=>{const total=qs.length+dk.filter(k=>k!=='example'&&k!=='routine'&&k!=='backupId').length;
+      const done=qs.filter(([g,k])=>!blank(f[g][k]?.choice)).length+dk.filter(k=>k!=='example'&&k!=='routine'&&k!=='backupId'&&!blank(f.delivery[k])).length;
+      const first=qs.map(([g,k])=>f[g][k]?.choice).find(Boolean)||dk.map(k=>k.endsWith('Id')?'':f.delivery[k]).find(Boolean);
+      return html`<${Tile} key=${id} id=${'flow-'+id} P=${P} icon=${icon} title=${title} lines=${[first]} empty="Add answers" done=${done===total}
+        editor=${()=>html`${qs.map(([g,k])=>Q(g,k))}${dk.length>0&&html`<div class="grid">${dk.filter(k=>k!=='example').map(D)}</div>`}
+          ${dk.includes('example')&&html`<${Field} full type="textarea" label="Example workflow (optional)" ph="Describe a typical imaging result from arrival to sign-off." value=${f.example} on=${v=>up(d=>{d.flows.example=v;},'flows')} dis=${!P.edit}/>
+            ${P.edit&&!f.example&&html`<button class="link" onClick=${()=>up(d=>{d.flows.example='Imaging results arrive by fax, are scanned into the chart by the front desk, and are routed as a task to the ordering provider. The provider reviews and signs within 2 business days. Abnormal findings are called to the patient by the nurse the same day. Results not signed after 3 days are escalated to the office manager.';},'flows')}>Start from an example</button>`}`}`}/>`;})}
+    <${Tile} id="flow-labs" P=${P} icon="link" title="External Lab Portals" lines=${[f.labs.map(l=>l.key).join(' · ')]} empty="Optional" done=${f.labs.length?f.labs.every(l=>l.website&&l.username):null}
+      editor=${()=>html`<div class="row" style="gap:16px">${LABS.map(([k,w])=>{const has=f.labs.some(l=>l.key===k);return html`<${Check} label=${k} checked=${has} dis=${!P.edit} on=${v=>up(d=>{if(v)d.flows.labs.push({id:uid(),key:k,website:w,username:'',contactId:'',status:'not_started',invite:'not_sent'});else d.flows.labs=d.flows.labs.filter(l=>l.key!==k);},'flows')}/>`;})}</div>
+        <div class="stack">${f.labs.map(l=>{const L=fn=>up(d=>fn(d.flows.labs.find(x=>x.id===l.id)),'flows');return html`<div class="sub" key=${l.id}><b>${l.key}</b>
+          <div class="grid"><${Field} label="Portal website" type="url" value=${l.website} on=${v=>L(x=>{x.website=v;})} dis=${!P.edit}/><${Field} label="Account username" value=${l.username} on=${v=>L(x=>{x.username=v;})} dis=${!P.edit}/>
+          <${Sel} label="Responsible clinic contact" value=${l.contactId} opts=${team} on=${v=>L(x=>{x.contactId=v;})} dis=${!P.edit}/></div><${Secret}/><${Verify} item=${l} P=${P} patch=${(f2,m)=>up(d=>f2(d.flows.labs.find(x=>x.id===l.id)),null,`${l.key}: ${m}`)}/></div>`;})}</div>`}/>
+  </${Group}>`;
+}
+
+const LOGIN_TYPES=['EMR','Lab portal','Clearinghouse','Availity','Payer portal','Practice management','Other'];
+const LAB_NAMES=['Quest Diagnostics','Labcorp','Sonora Quest','BioReference','Other'];
+const CLEARINGHOUSES=['Availity Essentials','Change Healthcare','Office Ally','Waystar','Trizetto','Other'];
+const LOGIN_NAMES={EMR:EMRS,'Lab portal':LAB_NAMES,Clearinghouse:CLEARINGHOUSES,Availity:['Availity Essentials'],'Payer portal':[],'Practice management':[],Other:[]};
+const LOGIN_META={EMR:['EMR','Which EMR do you use?','Choose your EMR'],'Lab portal':['Lab Portal','Which lab?','Choose your lab'],Clearinghouse:['Clearinghouse','Which clearinghouse?','Choose your clearinghouse']};
+/* Passwords live only in page memory: never written to browser storage or the audit log. */
+const SECRETS={};
+function Password({k,label='Password',dis}){
+  const [v,setV]=useState(SECRETS[k]||''),[show,setShow]=useState(false);const id=useMemo(()=>'f'+(++fid),[]);
+  return html`<div class="field"><label for=${id}>${label}</label><div class="pw"><input id=${id} type=${show?'text':'password'} autocomplete="new-password" value=${v} disabled=${dis} onInput=${e=>{SECRETS[k]=e.target.value;setV(e.target.value);}}/><button type="button" class="link" onClick=${()=>setShow(!show)}>${show?'Hide':'Show'}</button></div></div>`;
+}
+function AccessPanel({a,A,cls,label,req,sk,s,P,onRemove}){
+  return html`<div class=${'access '+cls}><div class="access-h"><b>${label}${req&&html`<span class="req" aria-label="required"> *</span>`}</b>${onRemove&&P.edit&&html`<button type="button" class="link" onClick=${onRemove}>Remove</button>`}</div>
+    <div class="pathways" role="radiogroup" aria-label=${label}>${[['will_send','Invitation will be sent'],['sent','Invitation sent'],['','Fill this out']].map(([v,l])=>html`<button type="button" class=${'choice'+((a.pathway||'')===v?' on':'')} role="radio" aria-checked=${(a.pathway||'')===v} disabled=${!P.edit} onClick=${()=>A(x=>{x.pathway=v;})}><b>${l}</b></button>`)}</div>
+    ${!a.pathway&&html`<div class="grid"><${Field} label="Username" req=${req} value=${a.username} on=${v=>A(x=>{x.username=v;})} dis=${!P.edit}/><${Password} k=${sk} dis=${!P.edit}/></div>`}
+    ${a.pathway==='will_send'&&html`<div class="row small">Send to ${s.settings.emrInvite?html`<code>${s.settings.emrInvite}</code><${Copy} text=${s.settings.emrInvite} label="Copy"/>`:html`<span class="muted">Plexus will share the invitation address</span>`}</div>`}
+    ${a.pathway==='sent'&&html`<div class="grid">
+      <${Field} label="Date sent" type="date" req value=${a.sentDate} on=${v=>A(x=>{x.sentDate=v;})} dis=${!P.edit}/>
+      <${Field} label="Sent to (email)" type="email" req value=${a.sentTo} on=${v=>A(x=>{x.sentTo=v;})} dis=${!P.edit}/></div>`}
+  </div>`;
+}
+const accState=a=>a.username?'✓':a.pathway==='will_send'?'invite pending':a.pathway==='sent'?'invite sent':'';
+function Logins({s,up,P}){
+  const L=(id,f)=>up(d=>f(d.logins.find(x=>x.id===id)),'emr');
+  const add=()=>{const l=newLogin('Other','');l.isNew=true;up(d=>{d.logins.push(l);});P.setEk('login-'+l.id);};
+  const done=id=>up(d=>{const l=d.logins.find(x=>x.id===id);if(!l)return;if(l.isNew&&!l.name&&!l.website&&!l.access.admin.username&&!l.access.admin.pathway)d.logins=d.logins.filter(x=>x!==l);else delete l.isNew;});
+  return html`<${Group} icon="key" title="Logins">
+    ${s.logins.map(e=>{const names=LOGIN_NAMES[e.type]||[];const meta=LOGIN_META[e.type];const ad=e.access.admin;const adminOk=!blank(ad.username)||!!ad.pathway;
+      const regs=[e.access.regular,...(e.extra||[])].filter(a=>a.username||a.pathway).length;
+      const miss=[blank(e.name)&&(meta?meta[2]:'System name'),blank(e.website)&&'Website',!adminOk&&'Administrator access'].filter(Boolean);
+      return html`<${Tile} key=${e.id} id=${'login-'+e.id} P=${P} icon=${e.type==='Lab portal'?'flask':e.type==='Clearinghouse'?'receipt':'monitor'} title=${meta?meta[0]:(e.name||e.type||'New login')}
+        lines=${[meta?e.name:e.website.replace(/^https?:\/\//,''),adminOk?['Admin '+accState(ad),regs?`${regs} regular`:''].filter(Boolean).join(' · '):'']} empty=${meta?meta[2]:'Add website and access'} done=${!miss.length} missing=${miss} onDone=${()=>done(e.id)}
+        foot=${!meta&&html`<${Remove} label=${e.name||'this login'} dis=${!P.edit} onRemove=${()=>{P.setEk(null);up(d=>{d.logins=d.logins.filter(x=>x.id!==e.id);},'emr');}}/>`}
+        editor=${()=>html`
+          <div class="grid">
+            ${!meta&&html`<${Sel} label="Login type" value=${e.type} opts=${LOGIN_TYPES} on=${v=>L(e.id,x=>{x.type=v;})} dis=${!P.edit}/>`}
+            ${names.length?html`<${Sel} label=${meta?meta[1]:'System'} req value=${names.includes(e.name)?e.name:(e.name||e.other?'Other':'')} opts=${names} on=${v=>L(e.id,x=>{x.name=v==='Other'?'':v;x.other=v==='Other';})} dis=${!P.edit}/>`:html`<${Field} label="System name" req value=${e.name} on=${v=>L(e.id,x=>{x.name=v;})} dis=${!P.edit}/>`}
+            ${names.length>0&&(e.other||(e.name&&!names.includes(e.name)))&&html`<${Field} label="Name" value=${e.name} on=${v=>L(e.id,x=>{x.name=v;})} dis=${!P.edit}/>`}
+            <${Field} label="Website / login URL" req type="url" ph="https://" value=${e.website} on=${v=>L(e.id,x=>{x.website=v;if(x.status==='verified')x.status='entered';})} dis=${!P.edit}/>
+          </div>
+          <${AccessPanel} a=${ad} A=${f=>L(e.id,x=>f(x.access.admin))} cls="admin" label="Administrator access" req sk=${e.id+':admin'} s=${s} P=${P}/>
+          ${(e.access.regular.username||e.access.regular.pathway||e.showReg)&&html`<${AccessPanel} a=${e.access.regular} A=${f=>L(e.id,x=>f(x.access.regular))} cls="regular" label="Regular access" sk=${e.id+':regular'} s=${s} P=${P} onRemove=${()=>L(e.id,x=>{x.access.regular=blankAccess();x.showReg=false;})}/>`}
+          ${(e.extra||[]).map((a,i)=>html`<${AccessPanel} key=${i} a=${a} A=${f=>L(e.id,x=>f(x.extra[i]))} cls="regular" label=${'Regular access '+(i+2)} sk=${e.id+':reg'+i} s=${s} P=${P} onRemove=${()=>L(e.id,x=>{x.extra.splice(i,1);})}/>`)}
+          ${P.edit&&html`<button type="button" class="btn ghost addacc" onClick=${()=>L(e.id,x=>{if(!x.showReg&&!x.access.regular.username&&!x.access.regular.pathway)x.showReg=true;else (x.extra=x.extra||[]).push(blankAccess());})}>${Icon('plus',16)} Add regular access</button>`}
+          <span class="small muted">${Icon('lock',12)} Passwords clear on reload and never appear on cards.</span>
+          <${Verify} item=${e} P=${P} patch=${(f,m)=>up(d=>f(d.logins.find(x=>x.id===e.id)),null,`${e.name||e.type} login: ${m}`)}/>`}/>`;})}
+    <${PortalCards} s=${s} up=${up} P=${P} sec="emr"/>
+    <${AddTile} label="Add another login" needed=${!s.logins.length} dis=${!P.edit} onClick=${add}/>
+  </${Group}>
+  <${PortalReview} s=${s} P=${P}/>`;
+}
+
+function Systems({s,up,P}){
+  const t=s.phone,set=k=>v=>up(d=>{d.phone[k]=v;},'systems');
+  return html`<${Group} icon="phone" title="Telephone System">
+    <${Tile} id="ph-system" P=${P} icon="phone" title="Phone System" lines=${[t.system]} empty="Add phone system" done=${!blank(t.system)}
+      editor=${()=>html`<div class="grid"><${Field} label="Phone system" req ph="e.g. RingCentral, 8x8, Weave" value=${t.system} on=${set('system')} dis=${!P.edit}/><${Field} label="Login website (optional)" type="url" ph="https://" value=${t.website} on=${set('website')} dis=${!P.edit}/></div>`}/>
+    <${Tile} id="ph-contact" P=${P} icon="user" title="Phone System Contact" lines=${[t.contactName,[t.contactPhone,t.contactEmail].filter(Boolean).join(' · ')]} empty="Add contact" done=${!blank(t.contactName)}
+      editor=${()=>html`<div class="grid">
+        <${Field} label="Contact name" req value=${t.contactName} on=${set('contactName')} dis=${!P.edit}/>
+        <${Field} label="Contact phone" type="tel" value=${t.contactPhone} on=${set('contactPhone')} dis=${!P.edit}/>
+        <${Field} label="Contact email" type="email" value=${t.contactEmail} on=${set('contactEmail')} dis=${!P.edit}/>
+        <${Field} label="Company (if an outside vendor)" value=${t.contactCompany} on=${set('contactCompany')} dis=${!P.edit}/></div>`}/>
+    ${[['adminUser','phone:admin','Administrator Access','Can manage users, routing and settings','Admin'],['regUser','phone:regular','Regular Access','Standard user / extension','Regular']].map(([k,sk,title,hint,lbl])=>html`<${Tile} key=${k} id=${'ph-'+k} P=${P} icon="key" title=${title} req=${k==='adminUser'} lines=${t[k]?[t[k]]:[]} empty="Add username and password" done=${!blank(t[k])}
+      editor=${()=>html`<div class="grid"><${Field} label=${lbl+' username'} value=${t[k]} on=${set(k)} dis=${!P.edit}/><${Password} k=${sk} label=${lbl+' password'} dis=${!P.edit}/></div><span class="small muted">${Icon('lock',12)} Passwords aren’t saved in this preview. In the live portal they go to the secure credential vault.</span>`}/>`)}
+  </${Group}>`;
+}
+
+function Team({s,up,P}){
+  const M=(id,f)=>up(d=>f(d.team.find(x=>x.id===id)),'team');
+  const add=role=>{const id=uid();up(d=>{d.team.push({id,name:'',role,email:'',phone:'',locs:d.locations.length===1?[d.locations[0].id]:[],resp:'',pref:'',backup:'',sections:[],isNew:true});});P.setEk('tm-'+id);};
+  const done=id=>up(d=>{const m=d.team.find(x=>x.id===id);if(!m)return;if(m.isNew&&!m.name.trim()&&!m.email)d.team=d.team.filter(x=>x!==m);else delete m.isNew;});
+  const remaining=['Office Manager','Medical Assistant','Medical Assistant'];
+  for(const m of s.team){const i=remaining.indexOf(m.role);if(i>=0)remaining.splice(i,1);}
+  const [inv,setInv]=useState({});
+  return html`<${Group} icon="users" title="Team">
+    ${s.team.map(m=>{const dupEmail=m.email&&s.team.some(x=>x!==m&&x.email&&x.email.toLowerCase()===m.email.toLowerCase());const dupOm=m.role==='Office Manager'&&s.team.find(x=>x.role==='Office Manager')!==m;
+      return html`<${Tile} key=${m.id} id=${'tm-'+m.id} P=${P} icon="user" title=${m.name||m.role||'New team member'} badge=${m.name?m.role:''}
+        lines=${[[m.email,m.phone].filter(Boolean).join(' · '),s.locations.filter(l=>m.locs.includes(l.id)).map(l=>l.name).join(' · ')]} empty="Add contact details" done=${!blank(m.name)&&!(blank(m.email)&&blank(m.phone))} missing=${[blank(m.name)&&'Name',blank(m.email)&&blank(m.phone)&&'Email or phone'].filter(Boolean)} onDone=${()=>done(m.id)}
+        foot=${html`<${Remove} label=${m.name||'this contact'} dis=${!P.edit} onRemove=${()=>{P.setEk(null);up(d=>{d.team=d.team.filter(x=>x.id!==m.id);d.team.forEach(x=>{if(x.backup===m.id)x.backup='';});for(const k of ['primaryId','omId'])if(d.contacts[k]===m.id)d.contacts[k]='';},'team');}}/>`}
+        editor=${()=>html`
+          ${(dupEmail||dupOm)&&html`<div class="note err">${dupEmail?'Another contact already uses this email. Reuse that card instead of creating a copy.':'An office manager already exists. Edit that card, or choose a different role.'}</div>`}
+          <${EGroup} title="Contact">
+            <${Field} label="Name" req value=${m.name} on=${v=>M(m.id,x=>{x.name=v;})} dis=${!P.edit}/>
+            <${Sel} label="Role" value=${m.role} opts=${ROLES} on=${v=>M(m.id,x=>{x.role=v;})} dis=${!P.edit}/>
+            <${Field} label="Email" type="email" value=${m.email} on=${v=>M(m.id,x=>{x.email=v.toLowerCase();})} dis=${!P.edit}/>
+            <${Field} label="Telephone" type="tel" value=${m.phone} on=${v=>M(m.id,x=>{x.phone=v;})} dis=${!P.edit}/>
+            <${Sel} label="Preferred contact method" value=${m.pref} opts=${['Email','Phone','Text']} on=${v=>M(m.id,x=>{x.pref=v;})} dis=${!P.edit}/>
+          </${EGroup}>
+          ${m.email&&html`<div class="row small">${m.invited?html`<span class="muted">Portal invitation: <${Pill}>Invitation queued</${Pill}> — delivery is confirmed separately</span>`:inv[m.id]?html`<select style="width:auto;min-height:32px" onChange=${e=>setInv({...inv,[m.id]:e.target.value})}>${['Clinic staff','Clinic administrator','Clinician','Biller'].map(r=>html`<option selected=${inv[m.id]===r}>${r}</option>`)}</select><button class="btn pri sm" onClick=${()=>{M(m.id,x=>{x.invited=inv[m.id];});setInv({...inv,[m.id]:''});}}>Send invitation to ${m.email}</button><button class="btn ghost sm" onClick=${()=>setInv({...inv,[m.id]:''})}>Cancel</button>`:P.edit&&html`<button class="link" onClick=${()=>setInv({...inv,[m.id]:'Clinic staff'})}>Invite to the portal</button>`}</div>`}`}/>`;})}
+    ${remaining.map((r,i)=>html`<${AddTile} key=${r+i} label=${'Add '+r} needed=${r==='Office Manager'||(i===0&&s.team.length<2)} dis=${!P.edit} onClick=${()=>add(r)}/>`)}
+    <${AddTile} label="Add team member" dis=${!P.edit} onClick=${()=>add('')}/>
+  </${Group}>`;
+}
+
+function Vendors({s,up,P}){
+  const V=(id,f)=>up(d=>f(d.vendors.find(x=>x.id===id)),'vendors');
+  const add=()=>{const id=uid();up(d=>{d.vendors.push({id,name:'',contact:'',email:'',user:'',phone:'',isNew:true});});P.setEk('vd-'+id);};
+  const done=id=>up(d=>{const v=d.vendors.find(x=>x.id===id);if(!v)return;if(v.isNew&&!v.name.trim()&&!v.contact&&!v.email)d.vendors=d.vendors.filter(x=>x!==v);else delete v.isNew;});
+  return html`<${Group} icon="briefcase" title="Vendors">
+    ${s.vendors.map(v=>html`<${Tile} key=${v.id} id=${'vd-'+v.id} P=${P} icon="briefcase" title=${v.name||'New vendor'} lines=${[v.contact,[v.email,v.phone].filter(Boolean).join(' · ')]} empty="Add contact" done=${blank(v.name)?false:null} onDone=${()=>done(v.id)}
+      foot=${html`<${Remove} label=${v.name||'this vendor'} dis=${!P.edit} onRemove=${()=>{P.setEk(null);up(d=>{d.vendors=d.vendors.filter(x=>x.id!==v.id);},'vendors');}}/>`}
+      editor=${()=>html`<div class="grid">
+        <${Field} label="Name" req value=${v.name} on=${x=>V(v.id,y=>{y.name=x;})} dis=${!P.edit}/>
+        <${Field} label="Contact information (person)" value=${v.contact} on=${x=>V(v.id,y=>{y.contact=x;})} dis=${!P.edit}/>
+        <${Field} label="Email" type="email" value=${v.email} on=${x=>V(v.id,y=>{y.email=x;})} dis=${!P.edit}/>
+        <${Field} label="User (username)" value=${v.user} on=${x=>V(v.id,y=>{y.user=x;})} dis=${!P.edit}/>
+        <${Field} label="Phone" type="tel" value=${v.phone} on=${x=>V(v.id,y=>{y.phone=x;})} dis=${!P.edit}/></div>`}/>`)}
+    <${AddTile} label="Add vendor" dis=${!P.edit} onClick=${add}/>
+  </${Group}>`;
+}
+
+const VISIT_WAYS=['Front desk books in the EMR scheduler','Patients call in','Online self-scheduling','Providers book their own follow-ups','Walk-ins','Other'];
+function Scheduling({s,up,P}){
+  const v=s.visits,H=(cid,f)=>up(x=>{x.hours[cid]=x.hours[cid]||{text:'',days:[],start:'',end:'',how:''};f(x.hours[cid]);},'scheduling');
+  const act=s.clinicians.filter(c=>c.active);
+  return html`
+  <${Group} icon="calendar" title="Regular Patient Visits">
+    <${Tile} id="visits" P=${P} icon="calendar" title="Regular Visits" lines=${[v.ways.join(' · ')||(v.text&&(v.text.length>90?v.text.slice(0,90)+'…':v.text))]} empty="Add how you schedule" done=${!(!v.ways.length&&blank(v.text))}
+      editor=${()=>html`<${Chips} label="How do you schedule patients in your clinic for regular visits?" opts=${VISIT_WAYS} value=${v.ways} on=${x=>up(d=>{d.visits.ways=x;},'scheduling')} dis=${!P.edit}/>
+        <${Field} full type="textarea" label="Tell us how a regular visit is booked and run" ph="e.g. Front desk books 20-minute slots in eCW; new patients get 40 minutes; MAs room patients and take vitals" value=${v.text} on=${x=>up(d=>{d.visits.text=x;},'scheduling')} dis=${!P.edit}/>`}/>
+  </${Group}>
+  <${Group} icon="clock" title="Provider Availability">
+    ${act.length?act.map(c=>{const h=s.hours[c.id]||{text:'',days:[],start:'',end:'',how:''};const ok=!blank(h.text)||(h.days.length&&h.start&&h.end);
+      return html`<${Tile} key=${c.id} id=${'hrs-'+c.id} P=${P} icon="clock" title=${c.name||'Clinician'} badge=${c.creds.filter(x=>x!=='Other').join(', ')}
+        lines=${[hoursLine(h.days,h.start,h.end)||h.text,h.how]} empty="Add hours" done=${!!ok}
+        editor=${()=>html`<${Field} full type="textarea" label="What general hours do they work?" ph="e.g. Mon–Thu mornings at Main Clinic, Fridays off" value=${h.text} on=${x=>H(c.id,y=>{y.text=x;})} dis=${!P.edit}/>
+          <span class="small muted">And/or choose days and hours:</span>
+          <div class="grid"><${Chips} label="Days" opts=${DAYS} value=${h.days} on=${x=>H(c.id,y=>{y.days=x;})} dis=${!P.edit}/>
+            <${Field} label="Start" type="time" value=${h.start} on=${x=>H(c.id,y=>{y.start=x;})} dis=${!P.edit}/>
+            <${Field} label="End" type="time" value=${h.end} on=${x=>H(c.id,y=>{y.end=x;})} err=${h.start&&h.end&&h.start>=h.end?'End must be after start':''} dis=${!P.edit}/></div>
+          <${Field} full type="textarea" label="How do you schedule patients for regular visits with this provider?" ph="e.g. 20-minute follow-ups, 40-minute new patients, no new patients on Fridays" value=${h.how} on=${x=>H(c.id,y=>{y.how=x;})} dis=${!P.edit}/>`}/>`;})
+    :html`<div class="empty">${Icon('steth',22)}<span>Add clinicians first</span></div>`}
+  </${Group}>`;
+}
+
+function Testing({s,up,P}){
+  const r=s.room,set=k=>v=>up(d=>{d.room[k]=v;},'testing');const l=s.locations.find(x=>x.id===r.loc);
+  return html`<p class="instr">Plexus needs one dedicated room during testing sessions. What is the room name and location?</p>
+  <${Group} icon="door" title="Testing Room">
+    <${Tile} id="room" P=${P} icon="door" title=${r.name||'Testing Room'} lines=${[l&&l.name]} empty="Add room and location" ...${need([r.name,r.loc].filter(blank).length)} missing=${[blank(r.name)&&'Room name',blank(r.loc)&&'Location'].filter(Boolean)}
+      editor=${()=>html`<div class="grid"><${Field} label="Room name or number" req value=${r.name} on=${set('name')} dis=${!P.edit}/><${Sel} label="Clinic location" value=${r.loc} opts=${s.locations.map(x=>[x.id,x.name||'Location'])} on=${set('loc')} dis=${!P.edit}/></div>`}/>
+  </${Group}>`;
+}
+
+function Billing({s,up,P}){
+  const b=s.billing,set=k=>v=>up(d=>{d.billing[k]=v;},'billing');
+  return html`<${Group} icon="receipt" title="Billing">
+    <${Tile} id="billing" P=${P} icon="receipt" title="Billing Contact" lines=${[[b.contact,b.company].filter(Boolean).join(' · '),[b.email,b.phone].filter(Boolean).join(' · ')]} empty="Add contact" ...${need((blank(b.contact)?1:0)+(blank(b.email)&&blank(b.phone)?1:0))} missing=${[blank(b.contact)&&'Contact name',blank(b.email)&&blank(b.phone)&&'Email or phone'].filter(Boolean)}
+      editor=${()=>html`<div class="grid">
+        <${Field} label="Billing contact name" req value=${b.contact} on=${set('contact')} dis=${!P.edit}/>
+        <${Field} label="Billing company or department" value=${b.company} on=${set('company')} dis=${!P.edit}/>
+        <${Field} label="Email" type="email" value=${b.email} on=${set('email')} dis=${!P.edit}/>
+        <${Field} label="Phone" type="tel" value=${b.phone} on=${set('phone')} dis=${!P.edit}/>
+        <${Field} label="Role / title" value=${b.role} on=${set('role')} dis=${!P.edit}/>
+        <${Field} label="Best time to reach (optional)" value=${b.hours} on=${set('hours')} dis=${!P.edit}/></div>`}/>
+  </${Group}>`;
+}
+const BODIES={facility:Facility,rosters:Rosters,bfacility:Facility,brosters:Rosters,payers:Payers,flows:Flows,emr:Logins,systems:Systems,team:Team,vendors:Vendors,scheduling:Scheduling,testing:Testing,billing:Billing};
+
+
+/* ---------------- footer ---------------- */
+function Footer({k,sec,P,act,flag}){
+  const [na,setNa]=useState(false),[why,setWhy]=useState(''),[note,setNote]=useState('');const done=['verified','waived'].includes(sec.state);
+  return html`<div class="foot">
+    ${flag&&!sec.complete&&html`<div class="flagmsg" role="status">${Icon('alert',16)}<span>A few details are still needed. Tap a highlighted card to finish.</span></div>`}
+    ${P.edit&&!done&&!sec.complete&&NA_ALLOWED.includes(k)&&!na&&html`<div class="row foot-row"><button class="btn ghost" onClick=${()=>setNa(true)}>Not applicable</button></div>`}
+  ${na&&html`<div class="inline"><${Field} type="textarea" label="Why doesn’t this apply to your clinic?" value=${why} on=${setWhy}/><div class="row"><button class="btn pri sm" disabled=${why.trim().length<3} onClick=${()=>{act(k,'na',why);setNa(false);}}>Mark Not Applicable</button><button class="btn ghost sm" onClick=${()=>setNa(false)}>Cancel</button></div></div>`}
+    ${P.plexus&&html`<div class="review"><h5>🛡 Plexus review</h5><${Field} type="textarea" label="Decision note (shared with the clinic when requesting changes)" value=${note} on=${setNote}/>
+      <div class="row"><button class="btn pri sm" disabled=${!note.trim()||!['submitted','na'].includes(sec.state)} onClick=${()=>{act(k,sec.state==='na'?'waived':'verified',note);setNote('');}}>✓ Approve section</button>
+      <button class="btn sm" disabled=${!note.trim()||sec.state==='not_started'} onClick=${()=>{act(k,'changes',note);setNote('');}}>Request changes</button>
+      <button class="btn ghost sm" onClick=${()=>{act(k,null,'Reminder sent to clinic contacts'+(note?`: ${note}`:''));setNote('');}}>🔔 Send reminder</button></div></div>`}
+  </div>`;
+}
+
+const secLabel=x=>x.state==='submitted'?'Submitted':x.state==='na'?'Not applicable':['verified','waived'].includes(x.state)?'Verified':x.complete?'Complete':x.state==='not_started'?'Not started':'In progress';
+/* ---------------- app ---------------- */
+function App(){
+  const [s,setS]=useState(load),[view,setView]=useState('clinic'),[saved,setSaved]=useState(null),[saving,setSaving]=useState(false);
+  const [open,setOpen]=useState({}),[active,setActive]=useState(location.hash.slice(1)||'facility');
+  const prog=useRef(0),tabsRef=useRef(null),heads=useRef({});
+  const plexus=view!=='clinic';
+  const [ek,setEk]=useState(null),[flags,setFlags]=useState({}),[tried,setTried]=useState(false);
+  const P={edit:true,plexus,settlement:true,ek,setEk};
+  const who=plexus?'Morgan Lee (Plexus coordinator)':'Jamie Chen (Clinic admin)';
+  useEffect(()=>{setSaving(true);const t=setTimeout(()=>{try{localStorage.setItem(KEY,JSON.stringify(s));setSaved(new Date());}catch(e){setSaved('mem');}setSaving(false);},600);return()=>clearTimeout(t);},[s]);
+  const up=useCallback((fn,section,msg)=>setS(prev=>{const n=structuredClone(prev);fn(n);
+    if(section){const t=n.tasks[section];if(['verified','waived','submitted','na'].includes(t.state)){n.audit.unshift({t:new Date().toLocaleString(),who,ev:`${LABEL[section]} reopened`,d:`${STATE_LABEL[t.state]} → In Progress (information changed)`});t.reason=['verified','waived'].includes(t.state)?'Information changed after verification. Resubmit for Plexus review.':'Edited after submission. Resubmit when ready.';t.state='saved';}else if(t.state==='not_started')t.state='saved';}
+    if(msg)n.audit.unshift({t:new Date().toLocaleString(),who,ev:msg,d:section?LABEL[section]:''});return n;}),[who]);
+  const act=(k,state,reason)=>setS(prev=>{const n=structuredClone(prev);const t=n.tasks[k];
+    if(state){n.audit.unshift({t:new Date().toLocaleString(),who,ev:`${LABEL[k]}: ${STATE_LABEL[t.state]} → ${STATE_LABEL[state]}`,d:reason});t.state=state;t.reason=['changes','na'].includes(state)?reason:'';}
+    else n.audit.unshift({t:new Date().toLocaleString(),who,ev:`${LABEL[k]}: reminder`,d:reason});return n;});
+  const st=useMemo(()=>status(s),[s]);
+  const submitAll=()=>{const inc=st.secs.filter(x=>!x.complete);
+    if(inc.length){setTried(true);setFlags(Object.fromEntries(inc.map(x=>[x.k,true])));setOpen(o=>({...o,...Object.fromEntries(inc.map(x=>[x.k,true]))}));return;}
+    setTried(false);setFlags({});setS(prev=>{const n=structuredClone(prev);for(const [k] of SECTIONS){const t=n.tasks[k];if(!['na','verified','waived'].includes(t.state)){t.state='submitted';t.reason='';}}n.audit.unshift({t:new Date().toLocaleString(),who,ev:'Onboarding submitted for review',d:'All sections'});return n;});};
+  const goTo=k=>{setOpen(o=>({...o,[k]:true}));setActive(k);prog.current=Date.now()+1200;try{history.replaceState(null,'','#'+k);}catch(e){}
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{const el=document.getElementById('sec-'+k);if(!el)return;const off=56+(tabsRef.current?.offsetHeight||56)+10;
+      window.scrollTo({top:el.getBoundingClientRect().top+scrollY-off,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});heads.current[k]?.focus({preventScroll:true});}));};
+  useEffect(()=>{const h=location.hash.slice(1);if(BODIES[h])goTo(h);
+    const on=()=>{if(Date.now()<prog.current)return;const off=56+(tabsRef.current?.offsetHeight||56)+14;let cur='facility';for(const [k] of SECTIONS){const el=document.getElementById('sec-'+k);if(el&&el.getBoundingClientRect().top-off<=4)cur=k;}setActive(a=>a===cur?a:cur);};
+    const end=()=>{prog.current=0;on();};addEventListener('scroll',on,{passive:true});addEventListener('scrollend',end);return()=>{removeEventListener('scroll',on);removeEventListener('scrollend',end);};},[]);
+  useEffect(()=>{const sc=tabsRef.current?.firstElementChild,t=sc?.querySelector(`[data-k="${active}"]`);if(!sc||!t)return;if(t.offsetLeft<sc.scrollLeft)sc.scrollLeft=t.offsetLeft-8;else if(t.offsetLeft+t.offsetWidth>sc.scrollLeft+sc.clientWidth)sc.scrollLeft=t.offsetLeft+t.offsetWidth-sc.clientWidth+8;},[active]);
+  const keys=SECTIONS.map(x=>x[0]);
+  const hk=(e,i)=>{let n=-1;const N=SECTIONS.length;if(e.key==='ArrowDown')n=(i+1)%N;if(e.key==='ArrowUp')n=(i+N-1)%N;if(e.key==='Home')n=0;if(e.key==='End')n=N-1;if(n>=0){e.preventDefault();heads.current[keys[n]]?.focus();}};
+  const tk=(e,i)=>{let n=-1;const N=SECTIONS.length;if(e.key==='ArrowRight')n=(i+1)%N;if(e.key==='ArrowLeft')n=(i+N-1)%N;if(n>=0){e.preventDefault();tabsRef.current.querySelector(`[data-k="${keys[n]}"]`)?.focus();}};
+  const reset=()=>{if(confirmReset){setS(fresh());setConfirmReset(false);}else setConfirmReset(true);};
+  const [confirmReset,setConfirmReset]=useState(false);
+
+  const bar=html`<header class="bar"><div class="ctx"><small>Plexus Onboarding / ${plexus?'Workspace':'Clinic'}</small><strong>${view==='console'?'Clinic onboarding':'My Progress'}</strong></div>
+    <div class="views" role="tablist" aria-label="View as">${[['clinic','Clinic view'],['review','Plexus review'],['console','Plexus console']].map(([v,l])=>html`<button role="tab" aria-selected=${view===v} class=${view===v?'on':''} onClick=${()=>{setView(v);scrollTo(0,0);}}>${l}</button>`)}</div>
+    <button class="reset" onClick=${reset} onBlur=${()=>setConfirmReset(false)}>${confirmReset?'Click again to erase':'Reset demo'}</button></header>`;
+
+  if(view==='console')return html`${bar}<main><${Console} s=${s} st=${st} setS=${setS} openReview=${()=>{setView('review');scrollTo(0,0);}}/></main>`;
+  return html`${bar}<main>
+    <section class="hero">
+      <div class="hero-top"><div><p class="eyebrow">${s.clinic}${plexus?' · Plexus review':''}</p><h1>My Progress</h1></div>
+        <label class="field" style="min-width:210px"><span class="lbl">Facility</span><select><option>${s.site}</option></select></label></div>
+      <div class="stats">
+        <div class="pct"><strong>${st.pct}%</strong><span>complete</span></div>
+        <div><div class="track" role="progressbar" aria-label="Completed sections" aria-valuenow=${st.pct} aria-valuemin="0" aria-valuemax="100"><span style=${`width:${st.pct}%`}/></div>
+          <p><b>${st.done}</b> of ${SECTIONS.length} sections complete${st.submitted?' · submitted for review':''}</p></div>
+        <ol class="stages" aria-label="Onboarding stage">${['Clinic Completing','Plexus Reviewing','Ready to Launch'].map((x,i)=>html`<li class=${i<st.stage?'done':i===st.stage?'cur':''} aria-current=${i===st.stage?'step':undefined}><i>${i<st.stage?'✓':i+1}</i>${x}</li>`)}</ol>
+        <div class=${'save'+(!saving&&saved?' ok':'')} aria-live="polite">${saving?'Saving…':saved==='mem'?'Saved for this session (browser storage unavailable)':saved?`✓ All changes saved · ${saved.toLocaleTimeString([],{hour:'numeric',minute:'2-digit'})} · this browser only`:'Changes save automatically'}</div>
+      </div>
+      ${st.stage===2&&html`<div class="note ok" style="margin-top:10px">Every section is verified. Launch approval still requires startup, training and the Plexus launch dry run.</div>`}
+    </section>
+    <nav class="tabs" ref=${tabsRef} aria-label="My Progress sections"><div>${SECTIONS.map(([k,l],i)=>{const x=st.secs[i];return html`${k===BILLING_KEYS[0]&&html`<span class="tab-sep" aria-hidden="true"/>`}<button data-k=${k} class=${(active===k?'on':'')+(BILLING_KEYS.includes(k)?' bill':'')} aria-current=${active===k?'true':undefined} onKeyDown=${e=>tk(e,i)} onClick=${()=>goTo(k)}><i class=${'dot '+(x.complete?'verified':x.state==='not_started'?'not_started':'saved')}/>${l}<span class="sr">, ${secLabel(x)}</span></button>`;})}</div></nav>
+    <div class="secs">${SECTIONS.map(([k,l],i)=>{const x=st.secs[i],isOpen=!!open[k],B=BODIES[k],done=x.complete;
+      const bill=BILLING_KEYS.includes(k),num=bill?BILLING_KEYS.indexOf(k)+1:i+1;
+      return html`${i===0&&html`<div class="phase"><b>Clinic Onboarding</b><span>${st.secs.filter(x=>!BILLING_KEYS.includes(x.k)&&x.complete).length} of ${SECTIONS.length-BILLING_KEYS.length} complete</span></div>`}
+      ${k===BILLING_KEYS[0]&&html`<div class="phase bill"><b>Billing Onboarding</b><span>${st.secs.filter(x=>BILLING_KEYS.includes(x.k)&&x.complete).length} of ${BILLING_KEYS.length} complete</span></div>`}
+      <section key=${k} id=${'sec-'+k} class=${'sec'+(isOpen?' open':'')+(bill?' bill':'')} style=${`--h1:${SHADES[i][0]};--h2:${SHADES[i][1]}`} aria-labelledby=${'h-'+k}>
+        <h2><button id=${'h-'+k} ref=${el=>heads.current[k]=el} aria-expanded=${isOpen} aria-controls=${'p-'+k} onKeyDown=${e=>hk(e,i)} onClick=${()=>setOpen(o=>({...o,[k]:!o[k]}))}>
+          <span class=${'step'+(done?' done':'')}>${done?'✓':num}</span><span class="title">${l}</span><${Pill}>${secLabel(x)}</${Pill}><span class=${'chev'+(isOpen?' open':'')}>⌄</span></button></h2>
+        <div id=${'p-'+k} role="region" aria-labelledby=${'h-'+k} hidden=${!isOpen} class=${'body'+(flags[k]&&!x.complete?' flagged':'')}>
+          ${x.state==='changes'&&x.reason&&html`<div class="note warn"><div><b>Plexus requested changes:</b> ${x.reason}</div></div>`}
+          ${x.state==='saved'&&x.reason&&html`<div class="note">${x.reason}</div>`}
+          <${B} s=${s} up=${up} P=${{...P,pre:k+':',setEk:v=>setEk(v==null?null:(String(v).includes(':')?v:k+':'+v))}}/>
+          <${Footer} k=${k} sec=${x} P=${P} act=${act} flag=${!!flags[k]}/>
+        </div></section>`;})}</div>
+    ${!plexus&&html`<section class="final">
+      ${st.submitted?html`<div class="final-done">${Icon('check',20)}<div><b>Submitted for review</b><span>Plexus will reach out if anything needs changes.</span></div></div>`:html`
+      <div class="final-h"><div><b>Submit for Review</b><span>${st.done===SECTIONS.length?'Everything is complete.':`${SECTIONS.length-st.done} section${SECTIONS.length-st.done>1?'s':''} left`}</span></div>
+        <button class="btn pri big" onClick=${submitAll}>Submit for Review</button></div>
+      ${tried&&st.done<SECTIONS.length&&html`<div class="flagmsg" role="status">${Icon('alert',16)}<span>Finish these first:</span></div>
+        <div class="chips">${st.secs.filter(x=>!x.complete).map(x=>html`<button type="button" class="chip warn" onClick=${()=>goTo(x.k)}>${x.label}</button>`)}</div>`}`}
+    </section>`}
+    <details class="audit"><summary>🕘 Audit history (${s.audit.length})</summary>${s.audit.length?html`<ol>${s.audit.slice(0,200).map(a=>html`<li><b>${a.ev}</b>${a.d?` — ${a.d}`:''}<br/><span class="small muted">${a.who} · ${a.t}</span></li>`)}</ol>`:html`<p class="small muted">No events yet.</p>`}</details>
+    <p class="small muted" style="text-align:center;margin-top:18px">Interactive preview · data stays in this browser · no passwords are stored</p>
+  </main>`;
+}
+
+function Console({s,st,setS,openReview}){
+  const access=[...s.payers,...s.logins,...s.flows.labs,...s.clinicians.flatMap(c=>c.portals)].filter(a=>a.status!=='verified'&&(a.invite==='sent'||a.invite==='pending'||a.website||a.username||a.login)).length;
+  const others=[['Mesa Clinic','Sonoran Family Health',30,'Clinic Completing',7,1,'Jordan Ellis','Dec 8, 2026'],['Lakeside Clinic','Lakeside Medical',80,'Plexus Reviewing',2,3,'Jordan Ellis','Nov 30, 2026']];
+  const set=k=>e=>setS(p=>{const n=structuredClone(p);n.settings[k]=e.target.value.trim();return n;});
+  return html`
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><h1>Clinic onboarding</h1></div>
+  <div class="kpis"><div class="kpi"><b>3</b><span>Assigned clinics</span></div><div class="kpi"><b>${st.review+5}</b><span>Sections awaiting review</span></div><div class="kpi"><b>${access+4}</b><span>Access requests to verify</span></div><div class="kpi"><b>${st.stage===2?1:0}</b><span>Ready to launch</span></div></div>
+  <div class="panel"><div class="tw"><table><thead><tr><th>Facility / organization</th><th>Stage</th><th>Completion</th><th>Outstanding</th><th>Access to verify</th><th>Coordinator</th><th>Target date</th><th>Launch readiness</th><th></th></tr></thead><tbody>
+    <tr><td><b style="font-weight:500">${s.site}</b><div class="small muted">${s.clinic} · ${s.locations.length} location${s.locations.length===1?'':'s'}</div></td><td><${Pill}>${['Clinic Completing','Plexus Reviewing','Ready to Launch'][st.stage]}</${Pill}></td>
+      <td><span class="mini"><span style=${`width:${st.pct}%`}/></span>${st.done}/${SECTIONS.length}</td><td title=${st.secs.filter(x=>!['verified','waived'].includes(x.state)).map(x=>x.label).join(', ')}>${SECTIONS.length-st.done} sections${st.review?html`<div class="small muted">${st.review} awaiting review</div>`:''}</td><td>${access}</td><td>Morgan Lee</td><td>Dec 15, 2026</td>
+      <td>${st.stage===2?html`<${Pill} tone="green">Sections verified</${Pill}>`:html`<${Pill} tone="gray">Not ready</${Pill}>`}</td><td><button class="btn sm pri" onClick=${openReview}>Open review</button></td></tr>
+    ${others.map(o=>html`<tr><td><b style="font-weight:500">${o[0]}</b><div class="small muted">${o[1]} · sample row</div></td><td><${Pill}>${o[3]}</${Pill}></td><td><span class="mini"><span style=${`width:${o[2]}%`}/></span>${o[2]/10}/10</td><td>${o[4]} sections</td><td>${o[5]}</td><td>${o[6]}</td><td>${o[7]}</td><td><${Pill} tone="gray">Not ready</${Pill}></td><td></td></tr>`)}
+  </tbody></table></div></div>
+  <div class="panel" style="margin-top:16px;padding:16px 18px"><h3 style="margin:0 0 4px;font-size:15px">Access invitation recipients</h3><p class="small muted" style="margin:0 0 12px">Plexus-managed addresses clinics use for payer, EMR and lab portal invitations. Leave blank until the mailbox is verified.</p>
+    <div class="grid">${[['payerInvite','Payer portal invitation recipient'],['emrInvite','Login invitation recipient (EMR, clearinghouse, Availity)'],['labInvite','Lab portal invitation recipient']].map(([k,l])=>html`<div class="field"><label>${l}</label><input type="email" placeholder="Not configured" value=${s.settings[k]} onChange=${set(k)}/></div>`)}</div></div>`;
+}
+render(html`<${App}/>`,document.getElementById('app'));
+</script>
+</body>
+</html>
