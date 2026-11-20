@@ -86,6 +86,11 @@ main{position:relative;z-index:1}
 @media(prefers-reduced-motion:reduce){.tile,.addtile,.chev-r{transition:none}.tile:hover,.addtile:hover{transform:none}}
 
 /* ---- typography & density refinement ---- */
+.acts{display:flex;flex-direction:column;gap:6px;align-items:stretch;min-width:118px}.acts .btn{justify-content:center;white-space:nowrap}.invpanel{margin-top:16px;padding:16px 18px;display:flex;flex-direction:column;gap:12px}.invpanel h3{margin:0;font-size:18px}.invgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px}@media(max-width:860px){.invgrid{grid-template-columns:1fr}}
+.invbox{background:#fff;border:1px solid var(--line);border-left:4px solid hsl(214 64% 45%);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:10px}.invbox.billing{border-left-color:hsl(270 52% 50%)}
+.invbox-h{display:flex;justify-content:space-between;align-items:baseline}.invbox-h b{font-size:16px}.invbox-h span{font-size:13.5px;color:var(--bluegray)}
+.inv-add{flex-wrap:nowrap;gap:8px}.inv-add input{flex:1;min-width:0}.invbox.billing .btn.pri{background:hsl(270 52% 44%);border-color:hsl(270 52% 44%)}
+.invlist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}.invlist li{display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid hsl(210 30% 93%);flex-wrap:wrap}.inv-e{flex:1;font-size:15px;min-width:160px}
 .phase.bill.first{margin-top:0;border-top:0;padding-top:14px}.link.back{display:inline-block;margin-bottom:6px;color:var(--blue);font-weight:600;font-size:14.5px;padding:0}.final.bill .btn.pri{background:hsl(270 52% 44%);border-color:hsl(270 52% 44%)}
 .flat{display:flex;flex-direction:column;gap:10px}.flat+.flat{border-top:1px solid hsl(210 30% 92%);padding-top:14px}.flat-h{font-size:13px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--bluegray)}
 .ptiles{align-content:start}.ptiles .tile.editing{grid-column:1/-1;box-shadow:0 8px 26px hsla(215,50%,30%,.12)}.ptiles .addtile{min-height:96px}@media(max-width:1100px){.tile.editing .ptiles{grid-template-columns:1fr}}
@@ -891,7 +896,7 @@ function Footer({k,sec,P,act,flag}){
 const secLabel=x=>x.state==='submitted'?'Submitted':x.state==='na'?'Not applicable':['verified','waived'].includes(x.state)?'Verified':x.complete?'Complete':x.state==='not_started'?'Not started':'In progress';
 /* ---------------- app ---------------- */
 function App(){
-  const [s,setS]=useState(load),[view,setView]=useState('clinic'),[saved,setSaved]=useState(null),[saving,setSaving]=useState(false);
+  const [s,setS]=useState(load),[view,setView]=useState(()=>{try{const v=new URLSearchParams(location.search).get('view');return ['clinic','billing'].includes(v)?v:'clinic';}catch(e){return 'clinic';}}),[saved,setSaved]=useState(null),[saving,setSaving]=useState(false);
   const [open,setOpen]=useState({}),[active,setActive]=useState(location.hash.slice(1)||'facility');
   const prog=useRef(0),tabsRef=useRef(null),heads=useRef({});
   const plexus=view==='review'||view==='console';
@@ -970,19 +975,44 @@ function App(){
   </main>`;
 }
 
+const emailOk=e=>/^[^\s@,;]+@[^\s@,;]+\.[^\s@,;]+$/.test(e);
+function InviteBox({fac,team,list,setS}){
+  const [txt,setTxt]=useState(''),[err,setErr]=useState(''),[copied,setCopied]=useState(false);
+  const label=team==='clinic'?'Clinic onboarding':'Billing onboarding';
+  const now=()=>new Date().toLocaleString([], {month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});
+  const mut=f=>setS(p=>{const n=structuredClone(p);n.invites=n.invites||{};n.invites[fac]=n.invites[fac]||{clinic:[],billing:[]};f(n.invites[fac][team],n);return n;});
+  const send=()=>{const emails=[...new Set(txt.split(/[\s,;]+/).map(x=>x.trim().toLowerCase()).filter(Boolean))];
+    const bad=emails.filter(e=>!emailOk(e));if(!emails.length){setErr('Enter at least one email.');return;}if(bad.length){setErr('Check: '+bad.join(', '));return;}
+    mut((l,n)=>{for(const e of emails){const ex=l.find(x=>x.email===e);if(ex)ex.sent=now();else l.push({id:uid(),email:e,sent:now()});}n.audit.unshift({t:new Date().toLocaleString(),who:'Morgan Lee (Plexus coordinator)',ev:`${label} invitation sent — ${fac}`,d:emails.join(', ')});});
+    setTxt('');setErr('');};
+  const link=(()=>{try{return location.origin+location.pathname+'?view='+team;}catch(e){return '?view='+team;}})();
+  return html`<div class=${'invbox '+team}><div class="invbox-h"><b>${label}</b><span>${list.length} invited</span></div>
+    <div class="row inv-add"><input aria-label=${label+' emails'} placeholder="name@clinic.com, another@clinic.com" value=${txt} onInput=${e=>{setTxt(e.target.value);setErr('');}} onKeyDown=${e=>{if(e.key==='Enter'){e.preventDefault();send();}}}/><button class="btn pri sm" onClick=${send}>Send invitations</button></div>
+    ${err&&html`<span class="small" style="color:var(--red)">${err}</span>`}
+    ${list.length?html`<ul class="invlist">${list.map(x=>html`<li key=${x.id}><span class="inv-e">${x.email}</span><span class="small muted">Sent ${x.sent}</span>
+      <button class="link" onClick=${()=>mut(l=>{const y=l.find(z=>z.id===x.id);if(y)y.sent=now();})}>Resend</button><button class="link danger-link" onClick=${()=>mut(l=>{l.splice(l.findIndex(z=>z.id===x.id),1);})}>Remove</button></li>`)}</ul>`:html`<span class="small muted">No one invited yet.</span>`}
+    <div class="row small"><span class="muted">Invite link opens ${team==='clinic'?'Clinic':'Billing'} view</span><button class="link" onClick=${()=>{try{navigator.clipboard.writeText(link);setCopied(true);setTimeout(()=>setCopied(false),1500);}catch(e){}}}>${copied?'Copied':'Copy link'}</button></div>
+  </div>`;
+}
 function Console({s,st,setS,openReview}){
   const access=[...s.payers,...s.logins,...s.flows.labs,...s.clinicians.flatMap(c=>c.portals)].filter(a=>a.status!=='verified'&&(a.invite==='sent'||a.invite==='pending'||a.website||a.username||a.login)).length;
   const others=[['Mesa Clinic','Sonoran Family Health',30,'Clinic Completing',7,1,'Jordan Ellis','Dec 8, 2026'],['Lakeside Clinic','Lakeside Medical',80,'Plexus Reviewing',2,3,'Jordan Ellis','Nov 30, 2026']];
   const set=k=>e=>setS(p=>{const n=structuredClone(p);n.settings[k]=e.target.value.trim();return n;});
+  const [open,setOpen]=useState(null);
+  const invs=f=>(s.invites||{})[f]||{clinic:[],billing:[]};
+  const invBtn=f=>{const v=invs(f);return html`<button class=${'btn sm'+(open===f?' pri':'')} aria-expanded=${open===f} onClick=${()=>setOpen(open===f?null:f)}>${Icon('user',14)} Invite${v.clinic.length+v.billing.length?` · ${v.clinic.length} / ${v.billing.length}`:''}</button>`;};
+  const invPanel=f=>html`<div class="panel invpanel" id="invpanel"><div class="row between"><h3>Invitations · ${f}</h3><button class="link" onClick=${()=>setOpen(null)}>Close</button></div><div class="invgrid">${['clinic','billing'].map(t=>html`<${InviteBox} key=${f+t} fac=${f} team=${t} list=${invs(f)[t]} setS=${setS}/>`)}</div></div>`;
+  useEffect(()=>{if(open)document.getElementById('invpanel')?.scrollIntoView({block:'nearest',behavior:'smooth'});},[open]);
   return html`
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><h1>Clinic onboarding</h1></div>
   <div class="kpis"><div class="kpi"><b>3</b><span>Assigned clinics</span></div><div class="kpi"><b>${st.review+5}</b><span>Sections awaiting review</span></div><div class="kpi"><b>${access+4}</b><span>Access requests to verify</span></div><div class="kpi"><b>${st.stage===2?1:0}</b><span>Ready to launch</span></div></div>
   <div class="panel"><div class="tw"><table><thead><tr><th>Facility / organization</th><th>Stage</th><th>Clinic team</th><th>Billing team</th><th>Outstanding</th><th>Access to verify</th><th>Coordinator</th><th>Target date</th><th>Launch readiness</th><th></th></tr></thead><tbody>
     <tr><td><b style="font-weight:500">${s.site}</b><div class="small muted">${s.clinic} · ${s.locations.length} location${s.locations.length===1?'':'s'}</div></td><td><${Pill}>${['Clinic Completing','Plexus Reviewing','Ready to Launch'][st.stage]}</${Pill}></td>
       ${[st.secs.filter(x=>!BILLING_KEYS.includes(x.k)),st.secs.filter(x=>BILLING_KEYS.includes(x.k))].map(g=>{const d=g.filter(x=>x.complete).length,sub=g.every(x=>['submitted','na','verified','waived'].includes(x.state));return html`<td><span class="mini"><span style=${`width:${Math.round(d/g.length*100)}%`}/></span>${d}/${g.length}${sub?html`<div class="small muted">Submitted</div>`:''}</td>`;})}<td title=${st.secs.filter(x=>!['verified','waived'].includes(x.state)).map(x=>x.label).join(', ')}>${SECTIONS.length-st.done} sections${st.review?html`<div class="small muted">${st.review} awaiting review</div>`:''}</td><td>${access}</td><td>Morgan Lee</td><td>Dec 15, 2026</td>
-      <td>${st.stage===2?html`<${Pill} tone="green">Sections verified</${Pill}>`:html`<${Pill} tone="gray">Not ready</${Pill}>`}</td><td><button class="btn sm pri" onClick=${openReview}>Open review</button></td></tr>
-    ${others.map(o=>html`<tr><td><b style="font-weight:500">${o[0]}</b><div class="small muted">${o[1]} · sample row</div></td><td><${Pill}>${o[3]}</${Pill}></td><td><span class="mini"><span style=${`width:${o[2]}%`}/></span>${Math.round(o[2]/100*9)}/9</td><td><span class="mini"><span style=${`width:${o[2]>50?100:25}%`}/></span>${o[2]>50?4:1}/4</td><td>${o[4]} sections</td><td>${o[5]}</td><td>${o[6]}</td><td>${o[7]}</td><td><${Pill} tone="gray">Not ready</${Pill}></td><td></td></tr>`)}
+      <td>${st.stage===2?html`<${Pill} tone="green">Sections verified</${Pill}>`:html`<${Pill} tone="gray">Not ready</${Pill}>`}</td><td><div class="acts"><button class="btn sm pri" onClick=${openReview}>Open review</button>${invBtn(s.site)}</div></td></tr>
+    ${others.map(o=>html`<tr><td><b style="font-weight:500">${o[0]}</b><div class="small muted">${o[1]} · sample row</div></td><td><${Pill}>${o[3]}</${Pill}></td><td><span class="mini"><span style=${`width:${o[2]}%`}/></span>${Math.round(o[2]/100*9)}/9</td><td><span class="mini"><span style=${`width:${o[2]>50?100:25}%`}/></span>${o[2]>50?4:1}/4</td><td>${o[4]} sections</td><td>${o[5]}</td><td>${o[6]}</td><td>${o[7]}</td><td><${Pill} tone="gray">Not ready</${Pill}></td><td><div class="acts">${invBtn(o[0])}</div></td></tr>`)}
   </tbody></table></div></div>
+  ${open&&invPanel(open)}
   <div class="panel" style="margin-top:16px;padding:16px 18px"><h3 style="margin:0 0 4px;font-size:15px">Access invitation recipients</h3><p class="small muted" style="margin:0 0 12px">Plexus-managed addresses clinics use for payer, EMR and lab portal invitations. Leave blank until the mailbox is verified.</p>
     <div class="grid">${[['payerInvite','Payer portal invitation recipient'],['emrInvite','Login invitation recipient (EMR, clearinghouse, Availity)'],['labInvite','Lab portal invitation recipient']].map(([k,l])=>html`<div class="field"><label>${l}</label><input type="email" placeholder="Not configured" value=${s.settings[k]} onChange=${set(k)}/></div>`)}</div></div>`;
 }
