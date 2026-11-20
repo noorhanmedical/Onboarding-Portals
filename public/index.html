@@ -86,6 +86,15 @@ main{position:relative;z-index:1}
 @media(prefers-reduced-motion:reduce){.tile,.addtile,.chev-r{transition:none}.tile:hover,.addtile:hover{transform:none}}
 
 /* ---- typography & density refinement ---- */
+.access.admin{border:2px solid hsl(224 72% 40%);background:linear-gradient(180deg,hsl(224 90% 96%),hsl(224 80% 99%))}
+.access.regular{border:2px solid hsl(168 58% 34%);background:linear-gradient(180deg,hsl(160 60% 95%),hsl(160 50% 99%))}
+.access.admin .access-h b{color:hsl(224 70% 28%)}.access.regular .access-h b{color:hsl(168 65% 22%)}
+.access-h b{display:flex;align-items:center;gap:8px}
+.acc-tag{font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;border-radius:6px;color:#fff!important}.acc-tag.admin{background:hsl(224 72% 40%)}.acc-tag.regular{background:hsl(168 58% 34%)}
+.access.admin .choice.on{border-color:hsl(224 72% 40%);background:hsl(224 90% 93%)}.access.regular .choice.on{border-color:hsl(168 58% 34%);background:hsl(160 60% 90%)}
+.tile.acc-admin{border:2px solid hsl(224 72% 40%);background:linear-gradient(180deg,hsl(224 90% 97%),#fff)}.tile.acc-regular{border:2px solid hsl(168 58% 34%);background:linear-gradient(180deg,hsl(160 60% 96%),#fff)}
+.tile.acc-admin .ico{background:hsl(224 72% 40%);color:#fff}.tile.acc-regular .ico{background:hsl(168 58% 34%);color:#fff}
+.tile.acc-admin .tile-title b{color:hsl(224 70% 28%)}.tile.acc-regular .tile-title b{color:hsl(168 65% 22%)}
 .pref-note{grid-column:1/-1;display:flex;align-items:flex-start;gap:9px;padding:12px 14px;border-radius:14px;background:hsl(205 100% 95%);border:1px solid hsl(205 80% 82%);color:hsl(212 70% 28%);font-size:15px;line-height:1.45}.pref-note b{font-weight:600}.pref-note svg{margin-top:2px;flex-shrink:0}
 .access-pair{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start}.access-pair .access{height:100%;box-sizing:border-box}@media(max-width:760px){.access-pair{grid-template-columns:1fr}}
 .rdash .hero-top{align-items:flex-start}.rcards{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}@media(max-width:760px){.rcards{grid-template-columns:1fr}}
@@ -480,16 +489,16 @@ function AddTile({label,onClick,dis,needed}){return html`<button type="button" c
 function Flat({title,children}){return html`<div class="flat"><span class="flat-h">${title}</span><div class="grid">${children}</div></div>`;}
 function EGroup({title,open=true,children}){return html`<details class="eg" open=${open}><summary>${title}</summary><div class="grid">${children}</div></details>`;}
 /** Summary-first card. Tap to edit inline; Done returns to the updated summary. */
-function Tile({id,P,icon,title,req,badge,lines=[],empty,done,tone,missing=[],editor,onDone,span,foot}){
+function Tile({id,P,icon,title,req,badge,lines=[],empty,done,tone,missing=[],editor,onDone,span,foot,cls=''}){
   const tid=(P.pre||'')+id,open=P.ek===tid,ref=useRef(null);
   if(done===undefined)done=tone==='ok'?true:tone==='warn'?false:null;
   const shown=lines.filter(Boolean).slice(0,2);
   useEffect(()=>{if(!open||!ref.current)return;ref.current.scrollIntoView({block:'nearest',behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});const f=ref.current.querySelector('.ed-b input,.ed-b select,.ed-b textarea,.ed-b button');f&&f.focus({preventScroll:true});},[open]);
   const close=()=>{onDone&&onDone();P.setEk(null);requestAnimationFrame(()=>document.getElementById('tile-'+tid)?.focus());};
-  if(open)return html`<div ref=${ref} class="tile editing" role="group" aria-label=${'Editing '+title} onKeyDown=${e=>{if(e.key==='Escape'){e.stopPropagation();close();}}}>
+  if(open)return html`<div ref=${ref} class=${'tile editing'+(cls?' '+cls:'')} role="group" aria-label=${'Editing '+title} onKeyDown=${e=>{if(e.key==='Escape'){e.stopPropagation();close();}}}>
     <div class="ed-h">${icon&&html`<span class="ico">${Icon(icon)}</span>`}<div class="ed-t"><b>${title}</b>${missing.length>0&&html`<span class="ed-miss">Still needed: ${missing.join(', ')}</span>`}</div>${foot}<button type="button" class="btn pri" onClick=${close}>${Icon('check',16)} Done</button></div>
     <div class="ed-b">${editor()}</div></div>`;
-  return html`<button type="button" id=${'tile-'+tid} class=${'tile'+(span?' span':'')+(done===false?' incomplete':'')} onClick=${()=>P.setEk(id)}>
+  return html`<button type="button" id=${'tile-'+tid} class=${'tile'+(span?' span':'')+(done===false?' incomplete':'')+(cls?' '+cls:'')} onClick=${()=>P.setEk(id)}>
     <span class="tile-top">${icon&&html`<span class="ico sm">${Icon(icon,17)}</span>`}<span class="tile-title"><b>${title}${req&&html`<span class="req" aria-label="required"> *</span>`}</b>${badge&&html`<span class="badge">${badge}</span>`}</span>
       ${done===true?html`<span class="ind ok" title="Complete" aria-label="Complete">${Icon('check',14)}</span>`:done===false?html`<span class="ind dot" title="Incomplete" aria-label="Incomplete"/>`:null}<span class="chev-r">${Icon('chev',18)}</span></span>
     ${shown.length?html`<span class="tile-lines">${shown.map(l=>html`<span>${l}</span>`)}</span>`:empty&&html`<span class="tile-lines"><span class="ph">${empty}</span></span>`}
@@ -740,7 +749,7 @@ function Password({k,label='Password',dis}){
   return html`<div class="field"><label for=${id}>${label}</label><div class="pw"><input id=${id} type=${show?'text':'password'} autocomplete="new-password" value=${v} disabled=${dis} onInput=${e=>{SECRETS[k]=e.target.value;setV(e.target.value);}}/><button type="button" class="link" onClick=${()=>setShow(!show)}>${show?'Hide':'Show'}</button></div></div>`;
 }
 function AccessPanel({a,A,cls,label,req,sk,s,P,onRemove}){
-  return html`<div class=${'access '+cls}><div class="access-h"><b>${label}${req&&html`<span class="req" aria-label="required"> *</span>`}</b>${onRemove&&P.edit&&html`<button type="button" class="link" onClick=${onRemove}>Remove</button>`}</div>
+  return html`<div class=${'access '+cls}><div class="access-h"><b><span class=${'acc-tag '+cls}>${cls==='admin'?'Admin':'Regular'}</span>${label}${req&&html`<span class="req" aria-label="required"> *</span>`}</b>${onRemove&&P.edit&&html`<button type="button" class="link" onClick=${onRemove}>Remove</button>`}</div>
     <div class="pathways" role="radiogroup" aria-label=${label}>${[['will_send','Invitation will be sent'],['sent','Invitation sent'],['','Fill this out']].map(([v,l])=>html`<button type="button" class=${'choice'+((a.pathway||'')===v?' on':'')} role="radio" aria-checked=${(a.pathway||'')===v} disabled=${!P.edit} onClick=${()=>A(x=>{x.pathway=v;})}><b>${l}</b></button>`)}</div>
     ${!a.pathway&&html`<div class="grid"><${Field} label="Username" req=${req} value=${a.username} on=${v=>A(x=>{x.username=v;})} dis=${!P.edit}/><${Password} k=${sk} dis=${!P.edit}/></div>`}
     ${a.pathway==='will_send'&&html`<div class="row small">Send to <code>${PLEXUS_BILLING}</code><${Copy} text=${PLEXUS_BILLING} label="Copy"/></div>`}
@@ -793,7 +802,7 @@ function Systems({s,up,P}){
         <${Field} label="Contact email" type="email" value=${t.contactEmail} on=${set('contactEmail')} dis=${!P.edit}/>
         <${Field} label="Company (if an outside vendor)" value=${t.contactCompany} on=${set('contactCompany')} dis=${!P.edit}/></div>`}/>
     ${html`<div class="pref-note span">${Icon('key',15)}<span><b>Administrator access is preferred.</b> Regular access works if admin isn’t available — at least one is required.</span></div>`}
-    ${[['adminUser','phone:admin','Administrator Access','Can manage users, routing and settings','Admin'],['regUser','phone:regular','Regular Access','Standard user / extension','Regular']].map(([k,sk,title,hint,lbl])=>html`<${Tile} key=${k} id=${'ph-'+k} P=${P} icon="key" title=${title} lines=${t[k]?[t[k]]:[]} empty="Add username and password" done=${!blank(t[k])?true:!blank(t[k==='adminUser'?'regUser':'adminUser'])?null:false}
+    ${[['adminUser','phone:admin','Administrator Access','Can manage users, routing and settings','Admin'],['regUser','phone:regular','Regular Access','Standard user / extension','Regular']].map(([k,sk,title,hint,lbl])=>html`<${Tile} key=${k} id=${'ph-'+k} P=${P} icon="key" title=${title} cls=${k==='adminUser'?'acc-admin':'acc-regular'} lines=${t[k]?[t[k]]:[]} empty="Add username and password" done=${!blank(t[k])?true:!blank(t[k==='adminUser'?'regUser':'adminUser'])?null:false}
       editor=${()=>html`<div class="grid"><${Field} label=${lbl+' username'} value=${t[k]} on=${set(k)} dis=${!P.edit}/><${Password} k=${sk} label=${lbl+' password'} dis=${!P.edit}/></div><span class="small muted">${Icon('lock',12)} Passwords aren’t saved in this preview. In the live portal they go to the secure credential vault.</span>`}/>`)}
   </${Group}>`;
 }
