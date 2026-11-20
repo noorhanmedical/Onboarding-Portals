@@ -365,6 +365,8 @@ function checks(s,k){
   if(k==='facility'){const g=s.org;if(blank(g.legalName))c('Enter the legal business name.');if(blank(g.phone))c('Enter the main clinic telephone.');if(blank(g.status))c('Confirm the clinic status.');
     if(!s.locations.length)c('Add at least one clinic location.');for(const l of s.locations){const n=l.name||'a location';if([l.name,l.street,l.city,l.state,l.zip,l.tz].some(blank))c(`Complete the name, address and timezone for ${n}.`);if(!l.days.length||!l.open||!l.close)c(`Add operating days and hours for ${n}.`);}
     if(!s.contacts.primaryId)c('Choose the primary office contact.');if(!s.contacts.omId)c('Choose the office manager.');}
+  if(k==='bfacility'){const g=s.org;if(blank(g.legalName))c('Enter the legal business name.');if(blank(g.status))c('Confirm the clinic status.');
+    if(!s.locations.length)c('Add at least one clinic location.');for(const l of s.locations){if([l.name,l.street,l.city,l.state,l.zip].some(blank))c(`Complete the name and address for ${l.name||'a location'}.`);}}
   if(k==='rosters'){if(!act.length)c('Add at least one clinician.');for(const x of act){const n=x.name||'a clinician';if(blank(x.name))c('Enter the provider’s full name on each card.');if(!x.creds.length)c(`Select credentials for ${n}.`);if(!npiOk(x.npi||''))c(`Enter a valid NPI for ${n}.`);if(!x.locs.length)c(`Select clinic locations for ${n}.`);}}
   if(k==='payers'){if(!s.payers.length)c('Select at least one insurance or portal.');for(const p of s.payers){const m=portalMissing(p);if(m.length)c(`${portalTitle(p)}: ${m.join(', ')}, or check “Invitation sent”.`);}}
   if(k==='flows'){const f=s.flows;const a=(g,q)=>q.filter(([key])=>!blank(f[g][key]?.choice)).length;const la=a('lab',LAB_Q),ia=a('imaging',IMG_Q);
@@ -384,7 +386,7 @@ function checks(s,k){
   return o;
 }
 function status(s){
-  const secs=SECTIONS.map(([k,label])=>{const t=s.tasks[k]||{state:'not_started',reason:''};const bt=s.tasks[base(k)];const items=checks(s,base(k));return {k,label,state:t.state==='not_started'&&ALIAS[k]&&bt.state!=='not_started'?(bt.state==='submitted'?'saved':bt.state):t.state,reason:t.reason,items,clinic:items.filter(i=>i[0]==='clinic')};});
+  const secs=SECTIONS.map(([k,label])=>{const t=s.tasks[k]||{state:'not_started',reason:''};const bt=s.tasks[base(k)];const items=checks(s,k==='brosters'?'rosters':k);return {k,label,state:t.state==='not_started'&&ALIAS[k]&&bt.state!=='not_started'?(bt.state==='submitted'?'saved':bt.state):t.state,reason:t.reason,items,clinic:items.filter(i=>i[0]==='clinic')};});
   secs.forEach(x=>{x.complete=x.state==='na'||['verified','waived'].includes(x.state)||!x.clinic.length;});
   const done=secs.filter(x=>x.complete).length,submitted=secs.every(x=>['submitted','na','verified','waived'].includes(x.state));
   const stage=secs.every(x=>['verified','waived'].includes(x.state))?2:submitted?1:0;
@@ -484,10 +486,12 @@ function Facility({s,up,P}){
   const loc=(id,k)=>v=>up(d=>{const l=d.locations.find(x=>x.id===id);l[k]=v;if(k==='primary'&&v)d.locations.forEach(x=>{if(x.id!==id)x.primary=false;});},'facility');
   const addLoc=()=>{const id=uid();up(d=>{d.locations.push({id,name:'',street:'',suite:'',city:'',state:'',zip:'',tz:'',phone:'',fax:'',days:[],open:'',close:'',primary:!d.locations.length,isNew:true});});P.setEk('loc-'+id);};
   const doneLoc=id=>up(d=>{const l=d.locations.find(x=>x.id===id);if(!l)return;if(l.isNew&&!l.name&&!l.street)d.locations=d.locations.filter(x=>x!==l);else delete l.isNew;});
-  const orgNeed=need(['legalName','phone','status'].filter(k=>blank(o[k])).length);
+  const bill=P.pre==='bfacility:';
+  const orgReq=bill?[['legalName','Legal business name'],['status','Clinic status']]:[['legalName','Legal business name'],['phone','Main clinic telephone'],['status','Clinic status']];
+  const orgNeed=need(orgReq.filter(([k])=>blank(o[k])).length);
   return html`
   <${Group} icon="building" title="Organization" cols="1">
-    <${Tile} id="org" P=${P} icon="building" span title="Your Practice" lines=${[o.dba||o.legalName]} empty="Add practice details" ...${orgNeed} missing=${[['legalName','Legal business name'],['phone','Main clinic telephone'],['status','Clinic status']].filter(([k])=>blank(o[k])).map(x=>x[1])}
+    <${Tile} id="org" P=${P} icon="building" span title="Your Practice" lines=${[o.dba||o.legalName]} empty="Add practice details" ...${orgNeed} missing=${orgReq.filter(([k])=>blank(o[k])).map(x=>x[1])}
       editor=${()=>html`
         <${EGroup} title="Practice">
           <${Field} label="Legal business name" req value=${o.legalName} on=${setO('legalName')} dis=${!P.edit}/>
@@ -497,17 +501,17 @@ function Facility({s,up,P}){
           <${Sel} label="Practice type" value=${o.type} on=${setO('type')} opts=${['Primary care','Internal medicine','Family medicine','Cardiology','Neurology','Multispecialty','Skilled nursing','Other']} dis=${!P.edit}/>
           <${Chips} label="Clinic status" multi=${false} opts=${['Running','Preparing to Open','Temporarily Closed']} value=${o.status} on=${setO('status')} dis=${!P.edit}/>
         </${EGroup}>
-        <${EGroup} title="Contact">
+        ${!bill&&html`<${EGroup} title="Contact">
           <${Field} label="Main clinic telephone" req type="tel" value=${o.phone} on=${setO('phone')} dis=${!P.edit}/>
           <${Field} label="Main fax" type="tel" value=${o.fax} on=${setO('fax')} dis=${!P.edit}/>
           <${Field} label="Main email" type="email" value=${o.email} on=${setO('email')} dis=${!P.edit}/>
           <${Field} label="Website" type="url" ph="https://" value=${o.website} on=${setO('website')} dis=${!P.edit}/>
-        </${EGroup}>`}/>
+        </${EGroup}>`}`}/>
   </${Group}>
   <${Group} icon="pin" title="Locations">
-    ${s.locations.map(l=>{const miss=[l.name,l.street,l.city,l.state,l.zip,l.tz].filter(blank).length+(!l.days.length||!l.open||!l.close?1:0);
+    ${s.locations.map(l=>{const miss=bill?[l.name,l.street,l.city,l.state,l.zip].filter(blank).length:[l.name,l.street,l.city,l.state,l.zip,l.tz].filter(blank).length+(!l.days.length||!l.open||!l.close?1:0);
       return html`<${Tile} key=${l.id} id=${'loc-'+l.id} P=${P} icon="pin" title=${l.name||'New location'} badge=${l.primary?'Primary':''}
-        lines=${l.street||l.city?[[[l.street,l.suite].filter(Boolean).join(' '),[l.city,[l.state,l.zip].filter(Boolean).join(' ')].filter(Boolean).join(', ')].filter(Boolean).join(', '),hoursLine(l.days,l.open,l.close)]:[]} empty="Add address" ...${need(miss)} missing=${[['name','Location name'],['street','Street address'],['city','City'],['state','State'],['zip','ZIP'],['tz','Timezone']].filter(([k])=>blank(l[k])).map(x=>x[1]).concat(!l.days.length||!l.open||!l.close?['Operating hours']:[])} onDone=${()=>doneLoc(l.id)}
+        lines=${l.street||l.city?[[[l.street,l.suite].filter(Boolean).join(' '),[l.city,[l.state,l.zip].filter(Boolean).join(' ')].filter(Boolean).join(', ')].filter(Boolean).join(', '),hoursLine(l.days,l.open,l.close)]:[]} empty="Add address" ...${need(miss)} missing=${[['name','Location name'],['street','Street address'],['city','City'],['state','State'],['zip','ZIP'],['tz','Timezone']].filter(([k])=>blank(l[k])&&!(bill&&k==='tz')).map(x=>x[1]).concat(!bill&&(!l.days.length||!l.open||!l.close)?['Operating hours']:[])} onDone=${()=>doneLoc(l.id)}
         foot=${html`<${Remove} label=${l.name||'this location'} dis=${!P.edit} onRemove=${()=>{P.setEk(null);up(d=>{d.locations=d.locations.filter(x=>x.id!==l.id);d.clinicians.forEach(c=>c.locs=c.locs.filter(x=>x!==l.id));d.team.forEach(c=>c.locs=c.locs.filter(x=>x!==l.id));if(d.room.loc===l.id)d.room.loc='';if(l.primary&&d.locations[0])d.locations[0].primary=true;},'facility');}}/>`}
         editor=${()=>html`
           <${EGroup} title="Address">
@@ -518,7 +522,7 @@ function Facility({s,up,P}){
             <${Field} label="State" req ph="AZ" value=${l.state} on=${v=>loc(l.id,'state')(v.toUpperCase().slice(0,2))} dis=${!P.edit}/>
             <${Field} label="ZIP" req num value=${l.zip} on=${loc(l.id,'zip')} err=${l.zip&&!/^\d{5}(-\d{4})?$/.test(l.zip)?'Use a 5-digit ZIP':''} dis=${!P.edit}/>
           </${EGroup}>
-          <${EGroup} title="Contact" open=${!!(l.phone||l.fax)}>
+          ${!bill&&html`<${EGroup} title="Contact" open=${!!(l.phone||l.fax)}>
             <${Field} label="Main phone" type="tel" value=${l.phone} on=${loc(l.id,'phone')} dis=${!P.edit}/>
             <${Field} label="Fax" type="tel" value=${l.fax} on=${loc(l.id,'fax')} dis=${!P.edit}/>
           </${EGroup}>
@@ -527,15 +531,15 @@ function Facility({s,up,P}){
             <${Chips} label="Operating days" opts=${DAYS} value=${l.days} on=${loc(l.id,'days')} dis=${!P.edit}/>
             <${Field} label="Opens" type="time" value=${l.open} on=${loc(l.id,'open')} dis=${!P.edit}/>
             <${Field} label="Closes" type="time" value=${l.close} on=${loc(l.id,'close')} err=${l.open&&l.close&&l.open>=l.close?'Closing must be after opening':''} dis=${!P.edit}/>
-          </${EGroup}>
+          </${EGroup}>`}
           ${!l.primary&&P.edit&&html`<button class="link" onClick=${()=>loc(l.id,'primary')(true)}>Make this the primary location</button>`}`}/>`;})}
     <${AddTile} label=${s.locations.length?'Add another location':'Add a location'} dis=${!P.edit} onClick=${addLoc}/>
   </${Group}>
-  <${Group} icon="users" title="Key Contacts">
+  ${!bill&&html`<${Group} icon="users" title="Key Contacts">
     ${[['omId','Office Manager','Office Manager'],['primaryId','Primary Office Contact','Other']].map(([k,label,role])=>{const m=s.team.find(x=>x.id===s.contacts[k]);
       return html`<${Tile} key=${k} id=${'contact-'+k} P=${P} icon="user" title=${label} lines=${m?[m.name]:[]} empty="Add contact" done=${m?true:false}
         editor=${()=>html`<${ContactPicker} s=${s} up=${up} P=${P} k=${k} label=${label} role=${role}/>`}/>`;})}
-  </${Group}>`;
+  </${Group}>`}`;
 }
 function ContactPicker({s,up,P,k,label,role}){
   const [adding,setAdding]=useState(false),[nm,setNm]=useState({name:'',email:'',phone:''});const m=s.team.find(x=>x.id===s.contacts[k]);
