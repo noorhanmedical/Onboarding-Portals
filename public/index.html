@@ -86,11 +86,19 @@ main{position:relative;z-index:1}
 @media(prefers-reduced-motion:reduce){.tile,.addtile,.chev-r{transition:none}.tile:hover,.addtile:hover{transform:none}}
 
 /* ---- typography & density refinement ---- */
+.rdash .hero-top{align-items:flex-start}.rcards{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}@media(max-width:760px){.rcards{grid-template-columns:1fr}}
+.rcard{all:unset;box-sizing:border-box;cursor:pointer;display:flex;flex-direction:column;gap:9px;padding:16px 18px;border-radius:18px;border:1.5px solid var(--line);background:#fff;transition:box-shadow .15s,border-color .15s}
+.rcard:hover{box-shadow:0 6px 20px hsla(215,50%,30%,.1)}.rcard:focus-visible{outline:3px solid hsl(210 90% 60%);outline-offset:2px}
+.rcard.clinic.on{border-color:hsl(214 64% 45%);box-shadow:0 0 0 3px hsla(214,64%,50%,.15)}.rcard.billing.on{border-color:hsl(270 52% 50%);box-shadow:0 0 0 3px hsla(270,52%,50%,.15)}
+.rc-h{display:flex;justify-content:space-between;align-items:baseline}.rc-h b{font-size:18px;font-weight:600}.rc-pct{font-size:26px;font-weight:600;color:var(--navy)}
+.rcard.billing .rc-h b,.rcard.billing .rc-pct{color:hsl(268 50% 34%)}.rcard.billing .track span{background:linear-gradient(90deg,hsl(270 52% 50%),hsl(285 60% 60%))}
+.rc-m{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:14.5px;color:var(--bluegray)}.rc-m b{color:var(--navy);font-weight:600}.warn-t,.warn-t b{color:var(--amber)!important}
+.rc-f{font-size:14px;color:var(--bluegray);line-height:1.4}
 .acts{display:flex;flex-direction:column;gap:6px;align-items:stretch;min-width:118px}.acts .btn{justify-content:center;white-space:nowrap}.invpanel{margin-top:16px;padding:16px 18px;display:flex;flex-direction:column;gap:12px}.invpanel h3{margin:0;font-size:18px}.invgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px}@media(max-width:860px){.invgrid{grid-template-columns:1fr}}
 .invbox{background:#fff;border:1px solid var(--line);border-left:4px solid hsl(214 64% 45%);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:10px}.invbox.billing{border-left-color:hsl(270 52% 50%)}
 .invbox-h{display:flex;justify-content:space-between;align-items:baseline}.invbox-h b{font-size:16px}.invbox-h span{font-size:13.5px;color:var(--bluegray)}
 .inv-add{flex-wrap:nowrap;gap:8px}.inv-add input{flex:1;min-width:0}.invbox.billing .btn.pri{background:hsl(270 52% 44%);border-color:hsl(270 52% 44%)}
-.invlist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}.invlist li{display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid hsl(210 30% 93%);flex-wrap:wrap}.inv-e{flex:1;font-size:15px;min-width:160px}
+.invlist .danger-link{align-self:center}.inv-rows{display:flex;flex-direction:column;gap:8px}.inv-row{display:grid;grid-template-columns:1fr 1.3fr 24px;gap:8px;align-items:center}.inv-row input{min-width:0}.invlist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}.invlist li{display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid hsl(210 30% 93%);flex-wrap:wrap}.inv-e{flex:1;font-size:15px;min-width:160px}
 .phase.bill.first{margin-top:0;border-top:0;padding-top:14px}.link.back{display:inline-block;margin-bottom:6px;color:var(--blue);font-weight:600;font-size:14.5px;padding:0}.final.bill .btn.pri{background:hsl(270 52% 44%);border-color:hsl(270 52% 44%)}
 .flat{display:flex;flex-direction:column;gap:10px}.flat+.flat{border-top:1px solid hsl(210 30% 92%);padding-top:14px}.flat-h{font-size:13px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--bluegray)}
 .ptiles{align-content:start}.ptiles .tile.editing{grid-column:1/-1;box-shadow:0 8px 26px hsla(215,50%,30%,.12)}.ptiles .addtile{min-height:96px}@media(max-width:1100px){.tile.editing .ptiles{grid-template-columns:1fr}}
@@ -911,7 +919,11 @@ function App(){
     if(state){n.audit.unshift({t:new Date().toLocaleString(),who,ev:`${LABEL[k]}: ${STATE_LABEL[t.state]} → ${STATE_LABEL[state]}`,d:reason});t.state=state;t.reason=['changes','na'].includes(state)?reason:'';}
     else n.audit.unshift({t:new Date().toLocaleString(),who,ev:`${LABEL[k]}: reminder`,d:reason});return n;});
   const st=useMemo(()=>status(s),[s]);
-  const VIS=view==='clinic'?SECTIONS.filter(([k])=>!BILLING_KEYS.includes(k)):view==='billing'?SECTIONS.filter(([k])=>BILLING_KEYS.includes(k)):SECTIONS;
+  const [rtab,setRtab]=useState('clinic');
+  const CLIN=SECTIONS.filter(([k])=>!BILLING_KEYS.includes(k)),BILL=SECTIONS.filter(([k])=>BILLING_KEYS.includes(k));
+  const VIS=view==='clinic'||(view==='review'&&rtab==='clinic')?CLIN:BILL;
+  const teamStat=G=>{const xs=st.secs.filter(x=>G.some(([k])=>k===x.k)),d=xs.filter(x=>x.complete).length;
+    return {xs,d,n:G.length,pct:Math.round(d/G.length*100),sub:xs.filter(x=>['submitted','na','verified','waived'].includes(x.state)).length,ver:xs.filter(x=>['verified','waived'].includes(x.state)).length,chg:xs.filter(x=>x.state==='changes').length};};
   const vis=st.secs.filter(x=>VIS.some(([k])=>k===x.k)),vdone=vis.filter(x=>x.complete).length,vpct=Math.round(vdone/VIS.length*100);
   const vsub=vis.every(x=>['submitted','na','verified','waived'].includes(x.state)),vstage=vis.every(x=>['verified','waived'].includes(x.state))?2:vsub?1:0;
   const gi=k=>SECTIONS.findIndex(x=>x[0]===k);
@@ -937,8 +949,20 @@ function App(){
 
   if(view==='console')return html`${bar}<main><${Console} s=${s} st=${st} setS=${setS} openReview=${()=>{setView('review');scrollTo(0,0);}}/></main>`;
   return html`${bar}<main>
+    ${view==='review'?html`<section class="hero rdash">
+      <div class="hero-top"><div><button type="button" class="link back" onClick=${()=>{setView('console');scrollTo(0,0);}}>← Back to console</button><p class="eyebrow">${s.clinic} · Plexus review</p><h1>${s.site}</h1></div>
+        <div class=${'save'+(!saving&&saved?' ok':'')} aria-live="polite">${saving?'Saving…':saved?'✓ Saved':''}</div></div>
+      <div class="rcards" role="tablist" aria-label="Onboarding teams">${[['clinic','Clinic onboarding',CLIN,'clinic'],['billing','Billing onboarding',BILL,'billing']].map(([t,l,G,team])=>{const x=teamStat(G),inv=((s.invites||{})[s.site]||{})[team]||[];
+        return html`<button type="button" role="tab" aria-selected=${rtab===t} class=${'rcard '+t+(rtab===t?' on':'')} onClick=${()=>{setRtab(t);setOpen({});}}>
+          <span class="rc-h"><b>${l}</b><span class="rc-pct">${x.pct}%</span></span>
+          <span class="track"><span style=${`width:${x.pct}%`}/></span>
+          <span class="rc-m"><span><b>${x.d}</b>/${x.n} complete</span><span><b>${x.sub}</b> submitted</span><span><b>${x.ver}</b> verified</span>${x.chg?html`<span class="warn-t"><b>${x.chg}</b> changes requested</span>`:''}</span>
+          <span class="rc-f">${x.xs.filter(y=>!y.complete).length?`Still open: ${x.xs.filter(y=>!y.complete).map(y=>y.label).join(', ')}`:'All sections complete'}</span>
+          <span class="rc-f">${inv.length?`Team: ${inv.map(i=>i.name||i.email).join(', ')}`:'No one invited yet'}</span>
+        </button>`;})}</div>
+    </section>`:html`
     <section class="hero">
-      <div class="hero-top"><div>${view==='review'&&html`<button type="button" class="link back" onClick=${()=>{setView('console');scrollTo(0,0);}}>← Back to console</button>`}<p class="eyebrow">${s.clinic}${view==='review'?' · Plexus review':''}</p><h1>${view==='review'?'Plexus Review':view==='billing'?'Billing Onboarding':'Clinic Onboarding'}</h1></div>
+      <div class="hero-top"><div><p class="eyebrow">${s.clinic}${view==='review'?' · Plexus review':''}</p><h1>${view==='review'?'Plexus Review':view==='billing'?'Billing Onboarding':'Clinic Onboarding'}</h1></div>
         <label class="field" style="min-width:210px"><span class="lbl">Facility</span><select><option>${s.site}</option></select></label></div>
       <div class="stats">
         <div class="pct"><strong>${vpct}%</strong><span>complete</span></div>
@@ -948,7 +972,7 @@ function App(){
         <div class=${'save'+(!saving&&saved?' ok':'')} aria-live="polite">${saving?'Saving…':saved==='mem'?'Saved for this session (browser storage unavailable)':saved?`✓ All changes saved · ${saved.toLocaleTimeString([],{hour:'numeric',minute:'2-digit'})} · this browser only`:'Changes save automatically'}</div>
       </div>
       ${vstage===2&&html`<div class="note ok" style="margin-top:10px">Every section is verified. Launch approval still requires startup, training and the Plexus launch dry run.</div>`}
-    </section>
+    </section>`}
     <nav class="tabs" ref=${tabsRef} aria-label="My Progress sections"><div>${VIS.map(([k,l],i)=>{const x=st.secs[gi(k)];return html`${k===BILLING_KEYS[0]&&i>0&&html`<span class="tab-sep" aria-hidden="true"/>`}<button data-k=${k} class=${(active===k?'on':'')+(BILLING_KEYS.includes(k)?' bill':'')} aria-current=${active===k?'true':undefined} onKeyDown=${e=>tk(e,i)} onClick=${()=>goTo(k)}><i class=${'dot '+(x.complete?'verified':x.state==='not_started'?'not_started':'saved')}/>${l}<span class="sr">, ${secLabel(x)}</span></button>`;})}</div></nav>
     <div class="secs">${VIS.map(([k,l],i)=>{const g=gi(k),x=st.secs[g],isOpen=!!open[k],B=BODIES[k],done=x.complete;
       const bill=BILLING_KEYS.includes(k),num=bill?BILLING_KEYS.indexOf(k)+1:i+1;
@@ -977,20 +1001,28 @@ function App(){
 
 const emailOk=e=>/^[^\s@,;]+@[^\s@,;]+\.[^\s@,;]+$/.test(e);
 function InviteBox({fac,team,list,setS}){
-  const [txt,setTxt]=useState(''),[err,setErr]=useState(''),[copied,setCopied]=useState(false);
+  const blankRow=()=>({id:uid(),name:'',email:''});
+  const [rows,setRows]=useState(()=>[blankRow()]),[err,setErr]=useState(''),[copied,setCopied]=useState(false);
   const label=team==='clinic'?'Clinic onboarding':'Billing onboarding';
   const now=()=>new Date().toLocaleString([], {month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});
   const mut=f=>setS(p=>{const n=structuredClone(p);n.invites=n.invites||{};n.invites[fac]=n.invites[fac]||{clinic:[],billing:[]};f(n.invites[fac][team],n);return n;});
-  const send=()=>{const emails=[...new Set(txt.split(/[\s,;]+/).map(x=>x.trim().toLowerCase()).filter(Boolean))];
-    const bad=emails.filter(e=>!emailOk(e));if(!emails.length){setErr('Enter at least one email.');return;}if(bad.length){setErr('Check: '+bad.join(', '));return;}
-    mut((l,n)=>{for(const e of emails){const ex=l.find(x=>x.email===e);if(ex)ex.sent=now();else l.push({id:uid(),email:e,sent:now()});}n.audit.unshift({t:new Date().toLocaleString(),who:'Morgan Lee (Plexus coordinator)',ev:`${label} invitation sent — ${fac}`,d:emails.join(', ')});});
-    setTxt('');setErr('');};
+  const setRow=(id,k,v)=>{setRows(r=>r.map(x=>x.id===id?{...x,[k]:v}:x));setErr('');};
+  const send=()=>{const filled=rows.filter(r=>r.email.trim()||r.name.trim());
+    if(!filled.length){setErr('Add at least one person.');return;}
+    const bad=filled.filter(r=>!emailOk(r.email.trim()));if(bad.length){setErr('Check the email for: '+bad.map(r=>r.name||r.email||'a blank row').join(', '));return;}
+    mut((l,n)=>{for(const r of filled){const e=r.email.trim().toLowerCase(),ex=l.find(x=>x.email===e);if(ex){ex.sent=now();if(r.name.trim())ex.name=r.name.trim();}else l.push({id:uid(),name:r.name.trim(),email:e,sent:now()});}
+      n.audit.unshift({t:new Date().toLocaleString(),who:'Morgan Lee (Plexus coordinator)',ev:`${label} invitation sent — ${fac}`,d:filled.map(r=>r.email.trim()).join(', ')});});
+    setRows([blankRow()]);setErr('');};
   const link=(()=>{try{return location.origin+location.pathname+'?view='+team;}catch(e){return '?view='+team;}})();
   return html`<div class=${'invbox '+team}><div class="invbox-h"><b>${label}</b><span>${list.length} invited</span></div>
-    <div class="row inv-add"><input aria-label=${label+' emails'} placeholder="name@clinic.com, another@clinic.com" value=${txt} onInput=${e=>{setTxt(e.target.value);setErr('');}} onKeyDown=${e=>{if(e.key==='Enter'){e.preventDefault();send();}}}/><button class="btn pri sm" onClick=${send}>Send invitations</button></div>
-    ${err&&html`<span class="small" style="color:var(--red)">${err}</span>`}
-    ${list.length?html`<ul class="invlist">${list.map(x=>html`<li key=${x.id}><span class="inv-e">${x.email}</span><span class="small muted">Sent ${x.sent}</span>
+    ${list.length?html`<ul class="invlist">${list.map(x=>html`<li key=${x.id}><span class="inv-e">${x.name?html`<b>${x.name}</b><br/>`:''}<span>${x.email}</span></span><span class="small muted">Sent ${x.sent}</span>
       <button class="link" onClick=${()=>mut(l=>{const y=l.find(z=>z.id===x.id);if(y)y.sent=now();})}>Resend</button><button class="link danger-link" onClick=${()=>mut(l=>{l.splice(l.findIndex(z=>z.id===x.id),1);})}>Remove</button></li>`)}</ul>`:html`<span class="small muted">No one invited yet.</span>`}
+    <div class="inv-rows">${rows.map((r,i)=>html`<div class="inv-row" key=${r.id}>
+      <input aria-label=${'Name '+(i+1)} placeholder="Full name" value=${r.name} onInput=${e=>setRow(r.id,'name',e.target.value)}/>
+      <input aria-label=${'Email '+(i+1)} type="email" placeholder="email@clinic.com" value=${r.email} onInput=${e=>setRow(r.id,'email',e.target.value)} onKeyDown=${e=>{if(e.key==='Enter'){e.preventDefault();send();}}}/>
+      ${rows.length>1?html`<button type="button" class="link" aria-label="Remove row" onClick=${()=>setRows(rs=>rs.filter(x=>x.id!==r.id))}>✕</button>`:html`<span/>`}</div>`)}</div>
+    <div class="row between"><button type="button" class="btn ghost sm" onClick=${()=>setRows(r=>[...r,blankRow()])}>${Icon('plus',14)} Add another person</button><button class="btn pri sm" onClick=${send}>Send ${rows.filter(r=>r.email.trim()).length>1?rows.filter(r=>r.email.trim()).length+' invitations':'invitation'}</button></div>
+    ${err&&html`<span class="small" style="color:var(--red)">${err}</span>`}
     <div class="row small"><span class="muted">Invite link opens ${team==='clinic'?'Clinic':'Billing'} view</span><button class="link" onClick=${()=>{try{navigator.clipboard.writeText(link);setCopied(true);setTimeout(()=>setCopied(false),1500);}catch(e){}}}>${copied?'Copied':'Copy link'}</button></div>
   </div>`;
 }
