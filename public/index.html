@@ -86,6 +86,7 @@ main{position:relative;z-index:1}
 @media(prefers-reduced-motion:reduce){.tile,.addtile,.chev-r{transition:none}.tile:hover,.addtile:hover{transform:none}}
 
 /* ---- typography & density refinement ---- */
+.iosrow.other{font-style:italic}
 .acc-check{display:flex;align-items:center;gap:8px;cursor:pointer}.acc-check input{width:20px;height:20px;min-height:0;accent-color:hsl(224 72% 40%);margin:0}.access.regular .acc-check input,.acc-check.regular input{accent-color:hsl(168 58% 34%)}
 .access.off{border:1.5px solid hsl(214 20% 85%)!important;background:hsl(210 20% 97%)!important}.access.off .acc-tag{background:hsl(214 14% 62%)!important}.access.off .access-h b{color:hsl(214 15% 45%)!important}
 .tile.acc-off{border:1.5px solid hsl(214 20% 85%);background:hsl(210 20% 97%)}.tile.acc-off .ico{background:hsl(214 20% 90%);color:hsl(214 15% 45%)}
@@ -816,7 +817,7 @@ function LoginCards({s,up,P}){
     const sel=s.logins.filter(l=>l.type===type),inc=sel.filter(l=>loginMissing(l).length);
     const has=n=>sel.filter(l=>l.name===n);
     const pick=n=>up(d=>{d.logins.push(newLogin(type,n));},'emr',`Added ${n}`);
-    const unpick=n=>{up(d=>{d.logins=d.logins.filter(l=>!(l.type===type&&l.name===n));},'emr',`Removed ${n}`);setAsk(null);};
+    const unpick=n=>{const ids=new Set((n==='Other'?sel.filter(custom):has(n)).map(l=>l.id));up(d=>{d.logins=d.logins.filter(l=>!ids.has(l.id));},'emr',`Removed ${n}`);setAsk(null);};
     const addCustom=()=>{const l=newLogin(type,'');l.custom=true;up(d=>{d.logins.push(l);},'emr');setOpenId(l.id);};
     const removeOne=id=>{setOpenId(null);up(d=>{d.logins=d.logins.filter(x=>x.id!==id);},'emr');};
     const custom=l=>l.custom||!names.includes(l.name);
@@ -827,8 +828,8 @@ function LoginCards({s,up,P}){
         <div class=${names.length?'payers':'payers solo'}>
           ${names.length>0&&html`<aside class="plist" aria-label=${title+' checklist'}>
             <div class="search">${Icon('scan',15)}<input aria-label=${'Search '+title} placeholder="Search" value=${q} onInput=${e=>setQ(e.target.value)}/></div>
-            <ul class="ioslist">${names.filter(n=>n.toLowerCase().includes(q.toLowerCase())).map(n=>{const on=has(n).length>0,id=type+':'+n;return html`<li key=${n}>${ask===id?html`<div class="confirm">Remove ${n}?<button class="btn danger sm" onClick=${()=>unpick(n)}>Remove</button><button class="btn ghost sm" onClick=${()=>setAsk(null)}>Cancel</button></div>`:
-              html`<label class=${'iosrow'+(on?' on':'')}><input type="checkbox" checked=${on} disabled=${!P.edit} onChange=${ev=>{if(ev.target.checked)pick(n);else if(has(n).some(l=>[l.access.admin,l.access.regular,...(l.extra||[])].some(a=>a.username||a.pathway||a.url)))setAsk(id);else unpick(n);}}/><span>${n}</span><i class="tick">${on?Icon('check',15):''}</i></label>`}</li>`;})}</ul>
+            <ul class="ioslist">${[...names,'Other'].filter(n=>n.toLowerCase().includes(q.toLowerCase())||n==='Other').map(n=>{const oth=n==='Other',ents=oth?sel.filter(custom):has(n),on=ents.length>0,id=type+':'+n;return html`<li key=${n}>${ask===id?html`<div class="confirm">Remove ${n}?<button class="btn danger sm" onClick=${()=>unpick(n)}>Remove</button><button class="btn ghost sm" onClick=${()=>setAsk(null)}>Cancel</button></div>`:
+              html`<label class=${'iosrow'+(on?' on':'')+(oth?' other':'')}><input type="checkbox" checked=${on} disabled=${!P.edit} onChange=${ev=>{if(ev.target.checked){oth?addCustom():pick(n);}else if(ents.some(l=>l.name||[l.access.admin,l.access.regular,...(l.extra||[])].some(a=>a.username||a.pathway||a.url)))setAsk(id);else unpick(n);}}/><span>${n}${oth&&ents.length>0?html` <small class="muted">(${ents.length})</small>`:''}</span><i class="tick">${on?Icon('check',15):''}</i></label>`}</li>`;})}</ul>
           </aside>`}
           <div class="bento c2 ptiles">
             ${sel.map(l=>html`<${LoginTile} key=${l.id} e=${l} L=${L(l.id)} P=${P} s=${s} up=${up} icon=${icon} open=${openId===l.id} setOpen=${setOpenId} nameLabel=${nameLabel} custom=${custom(l)} onRemove=${()=>removeOne(l.id)}/>`)}
