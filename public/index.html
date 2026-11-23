@@ -86,6 +86,14 @@ main{position:relative;z-index:1}
 @media(prefers-reduced-motion:reduce){.tile,.addtile,.chev-r{transition:none}.tile:hover,.addtile:hover{transform:none}}
 
 /* ---- typography & density refinement ---- */
+.signin-wrap{min-height:100vh;display:grid;place-items:center;padding:24px;background:linear-gradient(160deg,hsl(214 70% 96%),hsl(260 60% 97%))}
+.signin{width:min(440px,100%);background:#fff;border:1px solid var(--line);border-radius:24px;padding:28px;box-shadow:0 20px 50px hsla(215,50%,30%,.12);display:flex;flex-direction:column;gap:14px}
+.signin h1{margin:6px 0 0;font-size:26px}.signin p{margin:0;font-size:15.5px;line-height:1.5}.si-brand{display:flex;gap:12px;align-items:center}.si-brand b{display:block;font-size:16px}.si-brand span{font-size:13.5px;color:var(--bluegray)}
+.si-logo{width:40px;height:40px;border-radius:12px;background:linear-gradient(145deg,hsl(214 70% 40%),hsl(265 55% 50%));color:#fff!important;display:grid;place-items:center;font-weight:700;font-size:18px}
+.si-err{color:var(--red);font-size:14.5px}.si-demo{border-top:1px dashed var(--line);padding-top:12px;display:flex;flex-direction:column;gap:8px}.si-demo .chip{font-size:13.5px}
+.signin .btn.billing{background:hsl(270 52% 44%);border-color:hsl(270 52% 44%)}
+.who{display:flex;align-items:center;gap:10px;margin-left:auto}.who-n{display:flex;flex-direction:column;align-items:flex-end;font-size:13.5px;color:#fff;line-height:1.2}.who-n small{font-size:11.5px;color:hsl(198 85% 85%)}.signout{color:hsl(198 85% 88%)!important;font-size:13.5px}
+@media(max-width:640px){.who-n{display:none}}
 .reqpanel{margin:0 0 16px;padding:16px 18px;display:flex;flex-direction:column;gap:12px;text-align:left}.reqpanel h3{margin:0;font-size:18px}
 .req-tabs{display:flex;gap:8px}.req-tab{all:unset;cursor:pointer;padding:8px 14px;border-radius:999px;border:1.5px solid var(--line);font-size:15px;font-weight:500}.req-tab.clinic.on{background:hsl(214 64% 45%);border-color:hsl(214 64% 45%);color:#fff}.req-tab.billing.on{background:hsl(270 52% 46%);border-color:hsl(270 52% 46%);color:#fff}
 .req-actions{gap:8px}.req-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
@@ -1026,10 +1034,41 @@ function Footer({k,sec,P,act,flag}){
 
 const secLabel=x=>x.state==='submitted'?'Submitted':x.state==='na'?'Not applicable':['verified','waived'].includes(x.state)?'Verified':x.complete?'Complete':x.state==='not_started'?'Not started':'In progress';
 /* ---------------- app ---------------- */
+const AUTH_KEY='plexus-onboarding-session';
+const loadAuth=()=>{try{return JSON.parse(localStorage.getItem(AUTH_KEY))||null;}catch(e){return null;}};
+const saveAuth=a=>{try{a?localStorage.setItem(AUTH_KEY,JSON.stringify(a)):localStorage.removeItem(AUTH_KEY);}catch(e){}};
+const PLEXUS_DOMAIN='@plexusclinical.com';
+function SignIn({s,onIn}){
+  const [email,setEmail]=useState(''),[err,setErr]=useState(''),[step,setStep]=useState('email'),[match,setMatch]=useState(null);
+  const inv=(s.invites||{})[s.site]||{clinic:[],billing:[]};
+  const find=e=>{const em=e.trim().toLowerCase();if(!emailOk(em))return {err:'Enter a valid email address.'};
+    if(em.endsWith(PLEXUS_DOMAIN))return {user:{email:em,name:em.split('@')[0],role:'plexus'}};
+    const teams=['clinic','billing'].filter(t=>inv[t].some(x=>x.email===em));const rec=[...inv.clinic,...inv.billing].find(x=>x.email===em);
+    if(!teams.length)return {err:'This email hasn’t been invited yet. Ask your Plexus coordinator for an invitation.'};
+    return {user:{email:em,name:(rec&&rec.name)||em,role:'member',teams}};};
+  const go=()=>{const r=find(email);if(r.err){setErr(r.err);return;}setErr('');setMatch(r.user);setStep('sent');};
+  const finish=team=>{const u={...match};if(u.role==='member')u.team=team||u.teams[0];onIn(u);};
+  const demo=[['Plexus team','morgan'+PLEXUS_DOMAIN],...inv.clinic.slice(0,2).map(x=>['Clinic team',x.email]),...inv.billing.slice(0,2).map(x=>['Billing team',x.email])];
+  return html`<div class="signin-wrap"><div class="signin">
+    <div class="si-brand"><span class="si-logo">P</span><div><b>Plexus Onboarding</b><span>${s.site}</span></div></div>
+    ${step==='email'?html`<h1>Sign in</h1><p class="muted">Enter the email your invitation was sent to. We’ll email you a secure sign-in link.</p>
+      <label class="field"><span class="lbl">Email</span><input type="email" autocomplete="email" value=${email} placeholder="you@clinic.com" onInput=${e=>{setEmail(e.target.value);setErr('');}} onKeyDown=${e=>{if(e.key==='Enter')go();}}/></label>
+      ${err&&html`<span class="si-err" role="alert">${err}</span>`}
+      <button class="btn pri big" onClick=${go}>Email me a sign-in link</button>
+      <div class="si-demo"><span class="small muted">Preview accounts (no email is sent in this preview):</span><div class="chips">${demo.map(([l,e])=>html`<button class="chip" onClick=${()=>{setEmail(e);setErr('');}}><b>${l}</b> · ${e}</button>`)}</div>
+        ${!inv.clinic.length&&!inv.billing.length&&html`<span class="small muted">Invite clinic or billing team members from the Plexus console to sign in as them.</span>`}</div>`
+    :html`<h1>Check your email</h1><p class="muted">We sent a sign-in link to <b>${match.email}</b>. The link expires in 15 minutes.</p>
+      ${match.role==='member'&&match.teams.length>1?html`<p>You’re on both teams. Open:</p><div class="row">${match.teams.map(t=>html`<button class=${'btn pri '+t} onClick=${()=>finish(t)}>${t==='clinic'?'Clinic onboarding':'Billing onboarding'}</button>`)}</div>`
+        :html`<button class="btn pri big" onClick=${()=>finish()}>Open sign-in link (preview)</button>`}
+      <button class="link" onClick=${()=>setStep('email')}>Use a different email</button>`}
+  </div></div>`;
+}
 function App(){
+  const [auth,setAuth]=useState(loadAuth);
   const [s,setS]=useState(load),[view,setView]=useState(()=>{try{const v=new URLSearchParams(location.search).get('view');return ['clinic','billing'].includes(v)?v:'clinic';}catch(e){return 'clinic';}}),[saved,setSaved]=useState(null),[saving,setSaving]=useState(false);
   const [open,setOpen]=useState({}),[active,setActive]=useState(location.hash.slice(1)||'facility');
   const prog=useRef(0),tabsRef=useRef(null),heads=useRef({});
+  useEffect(()=>{if(auth&&auth.role==='member'&&view!==auth.team)setView(auth.team);if(auth&&auth.role==='plexus'&&view==='clinic'&&!new URLSearchParams(location.search).get('view'))setView('console');},[auth]);
   const plexus=view==='review'||view==='console';
   const [ek,setEk]=useState(null),[flags,setFlags]=useState({}),[tried,setTried]=useState(false);
   const P={edit:true,plexus,settlement:true,ek,setEk};
@@ -1067,9 +1106,12 @@ function App(){
   const [confirmReset,setConfirmReset]=useState(false);
 
   const bar=html`<header class="bar"><div class="ctx"><small>Plexus Onboarding / ${plexus?'Plexus':view==='billing'?'Billing team':'Clinic team'}</small><strong>${view==='console'?'Console':view==='review'?'Plexus review':view==='billing'?'Billing Onboarding':'Clinic Onboarding'}</strong></div>
-    <div class="views" role="tablist" aria-label="View as">${[['clinic','Clinic view'],['billing','Billing view'],['console','Plexus console']].map(([v,l])=>{const on=view===v||(v==='console'&&view==='review');return html`<button role="tab" aria-selected=${on} class=${on?'on':''} onClick=${()=>{setView(v);setOpen({});scrollTo(0,0);}}>${l}</button>`;})}</div>
-    <button class="reset" onClick=${reset} onBlur=${()=>setConfirmReset(false)}>${confirmReset?'Click again to erase':'Reset demo'}</button></header>`;
+    ${auth&&auth.role==='plexus'&&html`<div class="views" role="tablist" aria-label="View as">${[['clinic','Clinic view'],['billing','Billing view'],['console','Plexus console']].map(([v,l])=>{const on=view===v||(v==='console'&&view==='review');return html`<button role="tab" aria-selected=${on} class=${on?'on':''} onClick=${()=>{setView(v);setOpen({});scrollTo(0,0);}}>${l}</button>`;})}</div>`}
+    <div class="who">${auth&&html`<span class="who-n">${auth.name}<small>${auth.role==='plexus'?'Plexus':auth.team==='billing'?'Billing team':'Clinic team'}</small></span><button class="link signout" onClick=${()=>{saveAuth(null);setAuth(null);setView('clinic');}}>Sign out</button>`}</div>
+    ${auth&&auth.role==='plexus'&&html`<button class="reset" onClick=${reset} onBlur=${()=>setConfirmReset(false)}>${confirmReset?'Click again to erase':'Reset demo'}</button>`}</header>`;
 
+  if(!auth)return html`<${SignIn} s=${s} onIn=${u=>{saveAuth(u);setAuth(u);setView(u.role==='plexus'?'console':u.team);scrollTo(0,0);}}/>`;
+  if(auth.role!=='plexus'&&(view==='console'||view==='review'))return null;
   if(view==='console')return html`${bar}<main><${Console} s=${s} st=${st} setS=${setS} openReview=${()=>{setView('review');scrollTo(0,0);}}/></main>`;
   return html`${bar}<main>
     ${view==='review'?html`<section class="hero rdash">

@@ -11,6 +11,13 @@ Three views:
 - **Billing Onboarding:** Facility Details, Add Clinician, Billing, Logins (insurance, multi-payer and prior authorization portals)
 - Shared sections (facility, clinicians, portal logins) stay in sync between both teams.
 
+## Sign-in (preview)
+
+- Plexus staff sign in with an `@plexusclinical.com` email and land on the Plexus console.
+- Clinic and billing team members sign in with the email they were invited with and only see their team's onboarding.
+- In this preview no email is sent; the "Open sign-in link" button stands in for the emailed magic link.
+  Production sign-in (magic links via SES, server-enforced roles) is part of the AWS backend.
+
 ## Run
 
 ```bash
