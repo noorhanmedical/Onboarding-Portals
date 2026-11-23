@@ -86,6 +86,15 @@ main{position:relative;z-index:1}
 @media(prefers-reduced-motion:reduce){.tile,.addtile,.chev-r{transition:none}.tile:hover,.addtile:hover{transform:none}}
 
 /* ---- typography & density refinement ---- */
+.reqpanel{margin:0 0 16px;padding:16px 18px;display:flex;flex-direction:column;gap:12px;text-align:left}.reqpanel h3{margin:0;font-size:18px}
+.req-tabs{display:flex;gap:8px}.req-tab{all:unset;cursor:pointer;padding:8px 14px;border-radius:999px;border:1.5px solid var(--line);font-size:15px;font-weight:500}.req-tab.clinic.on{background:hsl(214 64% 45%);border-color:hsl(214 64% 45%);color:#fff}.req-tab.billing.on{background:hsl(270 52% 46%);border-color:hsl(270 52% 46%);color:#fff}
+.req-actions{gap:8px}.req-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+.req-sec{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:14px;padding:10px 12px;background:#fff}.req-sec>b{font-size:15px;padding:2px 4px 6px}
+.req-row{all:unset;box-sizing:border-box;cursor:pointer;display:grid;grid-template-columns:1fr auto 40px;align-items:center;gap:10px;padding:8px 4px;border-top:1px solid hsl(210 30% 94%);font-size:14.5px}.req-row:focus-visible{outline:2px solid hsl(210 90% 60%);border-radius:8px}
+.req-v{font-size:12.5px;color:var(--bluegray);min-width:58px;text-align:right}.req-row.on .req-v{color:var(--navy);font-weight:600}
+.req-c{font-style:normal;font-size:11px;font-weight:600;color:hsl(32 80% 38%);background:hsl(40 100% 93%);border-radius:6px;padding:1px 6px;margin-left:6px}
+.sw{width:38px;height:22px;border-radius:999px;background:hsl(214 20% 82%);position:relative;transition:background .15s}.sw i{position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 3px hsla(0,0%,0%,.25);transition:left .15s}
+.sw.on i{left:18px}.sw.clinic.on{background:hsl(214 64% 45%)}.sw.billing.on{background:hsl(270 52% 46%)}
 .iosrow.other{font-style:italic}
 .acc-check{display:flex;align-items:center;gap:8px;cursor:pointer}.acc-check input{width:20px;height:20px;min-height:0;accent-color:hsl(224 72% 40%);margin:0}.access.regular .acc-check input,.acc-check.regular input{accent-color:hsl(168 58% 34%)}
 .access.off{border:1.5px solid hsl(214 20% 85%)!important;background:hsl(210 20% 97%)!important}.access.off .acc-tag{background:hsl(214 14% 62%)!important}.access.off .access-h b{color:hsl(214 15% 45%)!important}
@@ -396,33 +405,78 @@ function compat(s){
   const f=s.testing.firstDate;if(f&&s.rooms.length){const d=DAYS[(new Date(f+'T12:00:00Z').getUTCDay()+6)%7];if(!s.rooms.some(r=>r.days.includes(d)))o.push(['clinic',`The first proposed testing date is a ${d}, but no room is available that day.`]);}
   return o;
 }
+/* Requirement rules. Plexus sets defaults per team and can override per facility. key, label, {team: section} */
+const REQ_RULES=[
+  ['legalName','Legal business name',{clinic:'facility',billing:'bfacility'}],
+  ['orgPhone','Main clinic telephone',{clinic:'facility'}],
+  ['orgStatus','Clinic status',{clinic:'facility',billing:'bfacility'}],
+  ['location','At least one location',{clinic:'facility',billing:'bfacility'}],
+  ['locAddress','Location name and address',{clinic:'facility',billing:'bfacility'}],
+  ['locTz','Location timezone',{clinic:'facility'}],
+  ['locHours','Location operating days and hours',{clinic:'facility'}],
+  ['primaryContact','Primary office contact',{clinic:'facility'}],
+  ['omContact','Office manager (key contact)',{clinic:'facility'}],
+  ['clinician','At least one clinician',{clinic:'rosters',billing:'brosters'}],
+  ['clinName','Clinician full name',{clinic:'rosters',billing:'brosters'}],
+  ['clinCreds','Clinician credentials',{clinic:'rosters',billing:'brosters'}],
+  ['clinNpi','Clinician NPI',{clinic:'rosters',billing:'brosters'}],
+  ['clinLocs','Clinician locations',{clinic:'rosters',billing:'brosters'}],
+  ['labQs','Laboratory questions',{clinic:'flows'}],
+  ['imgQs','Imaging questions',{clinic:'flows'}],
+  ['delivery','Result delivery details',{clinic:'flows'}],
+  ['flowPortals','Lab result portal logins',{clinic:'flows'}],
+  ['emr','At least one EMR',{clinic:'emr'}],
+  ['loginName','Name on each login',{clinic:'emr'}],
+  ['loginAccess','Admin or regular access on each login',{clinic:'emr'}],
+  ['inviteDetails','Invitation date and recipient',{clinic:'emr'}],
+  ['portalsClinic','Insurance / payer / prior auth portal logins',{clinic:'emr'}],
+  ['phoneSystem','Phone system name',{clinic:'systems'}],
+  ['phoneAccess','Phone admin or regular access',{clinic:'systems'}],
+  ['phoneContact','Phone system contact',{clinic:'systems'}],
+  ['teamOm','Office manager on the team',{clinic:'team'}],
+  ['teamMore','At least one more team member',{clinic:'team'}],
+  ['teamName','Name on each team member',{clinic:'team'}],
+  ['teamReach','Email or phone for each team member',{clinic:'team'}],
+  ['vendorName','Name on each vendor',{clinic:'vendors'}],
+  ['visits','How regular visits are scheduled',{clinic:'scheduling'}],
+  ['clinHours','Provider availability',{clinic:'scheduling'}],
+  ['roomName','Testing room name',{clinic:'testing'}],
+  ['roomLoc','Testing room location',{clinic:'testing'}],
+  ['billContact','Billing contact name',{billing:'billing'}],
+  ['billReach','Billing contact email or phone',{billing:'billing'}],
+  ['payerAny','At least one insurance or portal',{billing:'payers'}],
+  ['portalsBilling','Portal logins complete',{billing:'payers'}],
+];
+const reqDefault=(s,team,key)=>{const d=(s.reqDefaults||{})[team]||{};return d[key]!==undefined?d[key]:true;};
+const isReq=(s,team,key)=>{const o=((s.reqOverride||{})[team])||{};return o[key]!==undefined?o[key]:reqDefault(s,team,key);};
 function checks(s,k){
-  const o=[];const c=m=>o.push(['clinic',m]);const act=s.clinicians.filter(x=>x.active);
-  if(k==='facility'){const g=s.org;if(blank(g.legalName))c('Enter the legal business name.');if(blank(g.phone))c('Enter the main clinic telephone.');if(blank(g.status))c('Confirm the clinic status.');
-    if(!s.locations.length)c('Add at least one clinic location.');for(const l of s.locations){const n=l.name||'a location';if([l.name,l.street,l.city,l.state,l.zip,l.tz].some(blank))c(`Complete the name, address and timezone for ${n}.`);if(!l.days.length||!l.open||!l.close)c(`Add operating days and hours for ${n}.`);}
-    if(!s.contacts.primaryId)c('Choose the primary office contact.');if(!s.contacts.omId)c('Choose the office manager.');}
-  if(k==='bfacility'){const g=s.org;if(blank(g.legalName))c('Enter the legal business name.');if(blank(g.status))c('Confirm the clinic status.');
-    if(!s.locations.length)c('Add at least one clinic location.');for(const l of s.locations){if([l.name,l.street,l.city,l.state,l.zip].some(blank))c(`Complete the name and address for ${l.name||'a location'}.`);}}
-  if(k==='rosters'){if(!act.length)c('Add at least one clinician.');for(const x of act){const n=x.name||'a clinician';if(blank(x.name))c('Enter the provider’s full name on each card.');if(!x.creds.length)c(`Select credentials for ${n}.`);if(!npiOk(x.npi||''))c(`Enter a valid NPI for ${n}.`);if(!x.locs.length)c(`Select clinic locations for ${n}.`);}}
-  if(k==='payers'){if(!s.payers.length)c('Select at least one insurance or portal.');for(const p of s.payers){const m=portalMissing(p);if(m.length)c(`${portalTitle(p)}: ${m.join(', ')}, or check “Invitation sent”.`);}}
+  const team=BILLING_KEYS.includes(k)?'billing':'clinic';const o=[];const c=(m,key)=>{if(!key||isReq(s,team,key))o.push(['clinic',m]);};const act=s.clinicians.filter(x=>x.active);
+  if(k==='brosters')k='rosters';
+  if(k==='facility'){const g=s.org;if(blank(g.legalName))c('Enter the legal business name.','legalName');if(blank(g.phone))c('Enter the main clinic telephone.','orgPhone');if(blank(g.status))c('Confirm the clinic status.','orgStatus');
+    if(!s.locations.length)c('Add at least one clinic location.','location');for(const l of s.locations){const n=l.name||'a location';if([l.name,l.street,l.city,l.state,l.zip].some(blank))c(`Complete the name and address for ${n}.`,'locAddress');if(blank(l.tz))c(`Choose the timezone for ${n}.`,'locTz');if(!l.days.length||!l.open||!l.close)c(`Add operating days and hours for ${n}.`,'locHours');}
+    if(!s.contacts.primaryId)c('Choose the primary office contact.','primaryContact');if(!s.contacts.omId)c('Choose the office manager.','omContact');}
+  if(k==='bfacility'){const g=s.org;if(blank(g.legalName))c('Enter the legal business name.','legalName');if(blank(g.status))c('Confirm the clinic status.','orgStatus');
+    if(!s.locations.length)c('Add at least one clinic location.','location');for(const l of s.locations){if([l.name,l.street,l.city,l.state,l.zip].some(blank))c(`Complete the name and address for ${l.name||'a location'}.`,'locAddress');}}
+  if(k==='rosters'){if(!act.length)c('Add at least one clinician.','clinician');for(const x of act){const n=x.name||'a clinician';if(blank(x.name))c('Enter the provider’s full name on each card.','clinName');if(!x.creds.length)c(`Select credentials for ${n}.`,'clinCreds');if(!npiOk(x.npi||''))c(`Enter a valid NPI for ${n}.`,'clinNpi');if(!x.locs.length)c(`Select clinic locations for ${n}.`,'clinLocs');}}
+  if(k==='payers'){if(!s.payers.length)c('Select at least one insurance or portal.','payerAny');for(const p of s.payers){const m=portalMissing(p);if(m.length)c(`${portalTitle(p)}: ${m.join(', ')}, or check “Invitation sent”.`,'portalsBilling');}}
   if(k==='flows'){const f=s.flows;const a=(g,q)=>q.filter(([key])=>!blank(f[g][key]?.choice)).length;const la=a('lab',LAB_Q),ia=a('imaging',IMG_Q);
-    if(la<8)c(`Answer the laboratory questions (${la} of 8 answered).`);if(ia<6)c(`Answer the imaging questions (${ia} of 6 answered).`);
+    if(la<8)c(`Answer the laboratory questions (${la} of 8 answered).`,'labQs');if(ia<6)c(`Answer the imaging questions (${ia} of 6 answered).`,'imgQs');
     const d=f.delivery;const miss=[['destination','preferred result destination'],['notification','provider notification method'],['critical','critical result workflow'],['responsibleId','responsible contact'],['escalation','escalation procedure']].filter(([x])=>blank(d[x])).map(x=>x[1]);
-    if(miss.length)c(`Complete result delivery: ${miss.join(', ')}.`);for(const l of f.labs)if(blank(l.website)||blank(l.username))c(`Add the portal website and username for ${l.key}.`);}
-  if(k==='emr'){for(const p of s.payers){const m=portalMissing(p);if(m.length)c(`${portalTitle(p)}: ${m.join(', ')}, or check “Invitation sent”.`);}if(!s.logins.some(l=>l.type==='EMR'))c('Add at least one EMR.');for(const e of s.logins){const n=e.name||e.type||'a login';if(blank(e.name))c(`Enter the name for each ${LOGIN_GROUP_LABEL[e.type]||'login'}.`);
-    {for(const x of loginMissing(e).filter(x=>x!=='Name'))c(`${n}: ${x}.`);}
-    for(const a of [e.access.admin,e.access.regular,...(e.extra||[])].filter(a=>a.on!==false))if(a.pathway==='sent'&&(blank(a.sentDate)||blank(a.sentTo)))c(`Enter the date and recipient of each invitation for ${n}.`);}}
-  if(k==='team'){const om=s.team.find(m=>m.role==='Office Manager');if(!om)c('Add the office manager.');if(s.team.filter(m=>m!==om).length<1)c('Add at least one more team member.');for(const m of s.team){if(blank(m.name))c('Enter a name on each team card.');else if(blank(m.email)&&blank(m.phone))c(`Add an email or phone for ${m.name}.`);}}
-  if(k==='scheduling'){if(!s.visits.ways.length&&blank(s.visits.text))c('Tell us how you schedule patients for regular visits.');
-    for(const x of act){const h=s.hours[x.id]||{};if(blank(h.text)&&!(h.days&&h.days.length&&h.start&&h.end))c(`Add general hours for ${x.name||'each clinician'}.`);}}
-  if(k==='vendors'){for(const v of s.vendors)if(blank(v.name)&&(v.contact||v.email||v.phone||v.user))c('Enter the name on each vendor card.');}
-  if(k==='testing'){if(blank(s.room.name))c('Enter the dedicated room name.');if(blank(s.room.loc))c('Choose the room’s clinic location.');}
-  if(k==='billing'){const b=s.billing;if(blank(b.contact))c('Enter the billing contact.');if(blank(b.email)&&blank(b.phone))c('Add the billing contact’s email or phone.');}
-  if(k==='systems'){const t=s.phone;if(blank(t.system))c('Enter your phone system.');if(!t.adminOn&&!t.regOn)c('Check administrator or regular access for the phone system.');if(t.adminOn&&blank(t.adminUser))c('Enter the phone system admin username.');if(t.regOn&&blank(t.regUser))c('Enter the phone system regular username.');if(blank(t.contactName))c('Tell us who the contact for your phone system is.');}
+    if(miss.length)c(`Complete result delivery: ${miss.join(', ')}.`,'delivery');for(const l of f.labs)if(blank(l.website)||blank(l.username))c(`Add the portal website and username for ${l.key}.`,'flowPortals');}
+  if(k==='emr'){for(const p of s.payers){const m=portalMissing(p);if(m.length)c(`${portalTitle(p)}: ${m.join(', ')}, or check “Invitation sent”.`,'portalsClinic');}if(!s.logins.some(l=>l.type==='EMR'))c('Add at least one EMR.','emr');for(const e of s.logins){const n=e.name||e.type||'a login';if(blank(e.name))c(`Enter the name for each ${LOGIN_GROUP_LABEL[e.type]||'login'}.`,'loginName');
+    {for(const x of loginMissing(e).filter(x=>x!=='Name'))c(`${n}: ${x}.`,'loginAccess');}
+    for(const a of [e.access.admin,e.access.regular,...(e.extra||[])].filter(a=>a.on!==false))if(a.pathway==='sent'&&(blank(a.sentDate)||blank(a.sentTo)))c(`Enter the date and recipient of each invitation for ${n}.`,'inviteDetails');}}
+  if(k==='team'){const om=s.team.find(m=>m.role==='Office Manager');if(!om)c('Add the office manager.','teamOm');if(s.team.filter(m=>m!==om).length<1)c('Add at least one more team member.','teamMore');for(const m of s.team){if(blank(m.name))c('Enter a name on each team card.','teamName');else if(blank(m.email)&&blank(m.phone))c(`Add an email or phone for ${m.name}.`,'teamReach');}}
+  if(k==='scheduling'){if(!s.visits.ways.length&&blank(s.visits.text))c('Tell us how you schedule patients for regular visits.','visits');
+    for(const x of act){const h=s.hours[x.id]||{};if(blank(h.text)&&!(h.days&&h.days.length&&h.start&&h.end))c(`Add general hours for ${x.name||'each clinician'}.`,'clinHours');}}
+  if(k==='vendors'){for(const v of s.vendors)if(blank(v.name)&&(v.contact||v.email||v.phone||v.user))c('Enter the name on each vendor card.','vendorName');}
+  if(k==='testing'){if(blank(s.room.name))c('Enter the dedicated room name.','roomName');if(blank(s.room.loc))c('Choose the room’s clinic location.','roomLoc');}
+  if(k==='billing'){const b=s.billing;if(blank(b.contact))c('Enter the billing contact.','billContact');if(blank(b.email)&&blank(b.phone))c('Add the billing contact’s email or phone.','billReach');}
+  if(k==='systems'){const t=s.phone;if(blank(t.system))c('Enter your phone system.','phoneSystem');if(!t.adminOn&&!t.regOn)c('Check administrator or regular access for the phone system.','phoneAccess');if(t.adminOn&&blank(t.adminUser))c('Enter the phone system admin username.','phoneAccess');if(t.regOn&&blank(t.regUser))c('Enter the phone system regular username.','phoneAccess');if(blank(t.contactName))c('Tell us who the contact for your phone system is.','phoneContact');}
   return o;
 }
 function status(s){
-  const secs=SECTIONS.map(([k,label])=>{const t=s.tasks[k]||{state:'not_started',reason:''};const bt=s.tasks[base(k)];const items=checks(s,k==='brosters'?'rosters':k);return {k,label,state:t.state==='not_started'&&ALIAS[k]&&bt.state!=='not_started'?(bt.state==='submitted'?'saved':bt.state):t.state,reason:t.reason,items,clinic:items.filter(i=>i[0]==='clinic')};});
+  const secs=SECTIONS.map(([k,label])=>{const t=s.tasks[k]||{state:'not_started',reason:''};const bt=s.tasks[base(k)];const items=checks(s,k);return {k,label,state:t.state==='not_started'&&ALIAS[k]&&bt.state!=='not_started'?(bt.state==='submitted'?'saved':bt.state):t.state,reason:t.reason,items,clinic:items.filter(i=>i[0]==='clinic')};});
   secs.forEach(x=>{x.complete=x.state==='na'||['verified','waived'].includes(x.state)||!x.clinic.length;});
   const done=secs.filter(x=>x.complete).length,submitted=secs.every(x=>['submitted','na','verified','waived'].includes(x.state));
   const stage=secs.every(x=>['verified','waived'].includes(x.state))?2:submitted?1:0;
@@ -988,7 +1042,7 @@ function App(){
     if(state){n.audit.unshift({t:new Date().toLocaleString(),who,ev:`${LABEL[k]}: ${STATE_LABEL[t.state]} → ${STATE_LABEL[state]}`,d:reason});t.state=state;t.reason=['changes','na'].includes(state)?reason:'';}
     else n.audit.unshift({t:new Date().toLocaleString(),who,ev:`${LABEL[k]}: reminder`,d:reason});return n;});
   const st=useMemo(()=>status(s),[s]);
-  const [rtab,setRtab]=useState('clinic');
+  const [rtab,setRtab]=useState('clinic'),[reqFac,setReqFac]=useState(false);
   const CLIN=SECTIONS.filter(([k])=>!BILLING_KEYS.includes(k)),BILL=SECTIONS.filter(([k])=>BILLING_KEYS.includes(k));
   const VIS=view==='clinic'||(view==='review'&&rtab==='clinic')?CLIN:BILL;
   const teamStat=G=>{const xs=st.secs.filter(x=>G.some(([k])=>k===x.k)),d=xs.filter(x=>x.complete).length;
@@ -1019,8 +1073,9 @@ function App(){
   if(view==='console')return html`${bar}<main><${Console} s=${s} st=${st} setS=${setS} openReview=${()=>{setView('review');scrollTo(0,0);}}/></main>`;
   return html`${bar}<main>
     ${view==='review'?html`<section class="hero rdash">
-      <div class="hero-top"><div><button type="button" class="link back" onClick=${()=>{setView('console');scrollTo(0,0);}}>← Back to console</button><p class="eyebrow">${s.clinic} · Plexus review</p><h1>${s.site}</h1></div>
+      <div class="hero-top"><div><button type="button" class="link back" onClick=${()=>{setView('console');scrollTo(0,0);}}>← Back to console</button><p class="eyebrow">${s.clinic} · Plexus review</p><h1>${s.site}</h1><button class=${'btn sm'+(reqFac?' pri':'')} style="margin-top:8px" onClick=${()=>setReqFac(!reqFac)}>${Icon('check',14)} Requirements for this facility${Object.values(s.reqOverride||{}).reduce((a,o)=>a+Object.keys(o).length,0)?' · customized':''}</button></div>
         <div class=${'save'+(!saving&&saved?' ok':'')} aria-live="polite">${saving?'Saving…':saved?'✓ Saved':''}</div></div>
+      ${reqFac&&html`<${ReqEditor} s=${s} setS=${setS} mode="facility" onClose=${()=>setReqFac(false)}/>`}
       <div class="rcards" role="tablist" aria-label="Onboarding teams">${[['clinic','Clinic onboarding',CLIN,'clinic'],['billing','Billing onboarding',BILL,'billing']].map(([t,l,G,team])=>{const x=teamStat(G),inv=((s.invites||{})[s.site]||{})[team]||[];
         return html`<button type="button" role="tab" aria-selected=${rtab===t} class=${'rcard '+t+(rtab===t?' on':'')} onClick=${()=>{setRtab(t);setOpen({});}}>
           <span class="rc-h"><b>${l}</b><span class="rc-pct">${x.pct}%</span></span>
@@ -1095,17 +1150,41 @@ function InviteBox({fac,team,list,setS}){
     <div class="row small"><span class="muted">Invite link opens ${team==='clinic'?'Clinic':'Billing'} view</span><button class="link" onClick=${()=>{try{navigator.clipboard.writeText(link);setCopied(true);setTimeout(()=>setCopied(false),1500);}catch(e){}}}>${copied?'Copied':'Copy link'}</button></div>
   </div>`;
 }
+function ReqEditor({s,setS,mode,onClose}){
+  // mode: 'defaults' edits s.reqDefaults; 'facility' edits s.reqOverride for this facility
+  const [team,setTeam]=useState('clinic');
+  const secs=SECTIONS.filter(([k])=>REQ_RULES.some(r=>r[2][team]===k));
+  const val=key=>mode==='defaults'?reqDefault(s,team,key):isReq(s,team,key);
+  const custom=key=>mode==='facility'&&(((s.reqOverride||{})[team])||{})[key]!==undefined;
+  const flip=key=>setS(p=>{const n=structuredClone(p);const tgt=mode==='defaults'?(n.reqDefaults=n.reqDefaults||{}):(n.reqOverride=n.reqOverride||{});tgt[team]=tgt[team]||{};
+    const next=!val(key);if(mode==='facility'&&next===reqDefault(n,team,key))delete tgt[team][key];else tgt[team][key]=next;
+    n.audit.unshift({t:new Date().toLocaleString(),who:'Morgan Lee (Plexus coordinator)',ev:`${mode==='defaults'?'Default':n.site} requirement changed`,d:`${REQ_RULES.find(r=>r[0]===key)[1]} (${team}) → ${next?'Required':'Optional'}`});return n;});
+  const setAll=v=>setS(p=>{const n=structuredClone(p);const tgt=mode==='defaults'?(n.reqDefaults=n.reqDefaults||{}):(n.reqOverride=n.reqOverride||{});tgt[team]={};
+    if(mode==='defaults'||v!==undefined)for(const r of REQ_RULES)if(r[2][team]){if(v===undefined)continue;if(mode==='defaults'?v!==true:v!==reqDefault(n,team,r[0]))tgt[team][r[0]]=v;}return n;});
+  const nCustom=Object.keys(((s.reqOverride||{})[team])||{}).length;
+  return html`<div class="panel reqpanel" id="reqpanel">
+    <div class="row between"><div><h3>${mode==='defaults'?'Requirement defaults':'Requirements · '+s.site}</h3>
+      <span class="small muted">${mode==='defaults'?'Applies to every facility unless a facility is customized.':nCustom?`${nCustom} customized for this facility · others follow the defaults`:'Following the defaults'}</span></div>
+      <button class="link" onClick=${onClose}>Close</button></div>
+    <div class="req-tabs" role="tablist">${[['clinic','Clinic onboarding'],['billing','Billing onboarding']].map(([t,l])=>html`<button role="tab" aria-selected=${team===t} class=${'req-tab '+t+(team===t?' on':'')} onClick=${()=>setTeam(t)}>${l}</button>`)}</div>
+    <div class="row req-actions"><button class="btn ghost sm" onClick=${()=>setAll(true)}>All required</button><button class="btn ghost sm" onClick=${()=>setAll(false)}>All optional</button>${mode==='facility'&&html`<button class="btn ghost sm" onClick=${()=>setAll(undefined)}>Reset to defaults</button>`}</div>
+    <div class="req-grid">${secs.map(([k,label])=>html`<div class="req-sec" key=${k}><b>${label}</b>
+      ${REQ_RULES.filter(r=>r[2][team]===k).map(([key,l])=>{const on=val(key);return html`<button type="button" role="switch" aria-checked=${on} class=${'req-row'+(on?' on':'')} onClick=${()=>flip(key)}>
+        <span class="req-l">${l}${custom(key)&&html`<i class="req-c">custom</i>`}</span><span class="req-v">${on?'Required':'Optional'}</span><span class=${'sw '+team+(on?' on':'')}><i/></span></button>`;})}</div>`)}</div>
+  </div>`;
+}
 function Console({s,st,setS,openReview}){
   const access=[...s.payers,...s.logins,...s.flows.labs,...s.clinicians.flatMap(c=>c.portals)].filter(a=>a.status!=='verified'&&(a.invite==='sent'||a.invite==='pending'||a.website||a.username||a.login)).length;
   const others=[['Mesa Clinic','Sonoran Family Health',30,'Clinic Completing',7,1,'Jordan Ellis','Dec 8, 2026'],['Lakeside Clinic','Lakeside Medical',80,'Plexus Reviewing',2,3,'Jordan Ellis','Nov 30, 2026']];
   const set=k=>e=>setS(p=>{const n=structuredClone(p);n.settings[k]=e.target.value.trim();return n;});
-  const [open,setOpen]=useState(null);
+  const [open,setOpen]=useState(null),[reqOpen,setReqOpen]=useState(false);
   const invs=f=>(s.invites||{})[f]||{clinic:[],billing:[]};
   const invBtn=f=>{const v=invs(f);return html`<button class=${'btn sm'+(open===f?' pri':'')} aria-expanded=${open===f} onClick=${()=>setOpen(open===f?null:f)}>${Icon('user',14)} Invite${v.clinic.length+v.billing.length?` · ${v.clinic.length} / ${v.billing.length}`:''}</button>`;};
   const invPanel=f=>html`<div class="panel invpanel" id="invpanel"><div class="row between"><h3>Invitations · ${f}</h3><button class="link" onClick=${()=>setOpen(null)}>Close</button></div><div class="invgrid">${['clinic','billing'].map(t=>html`<${InviteBox} key=${f+t} fac=${f} team=${t} list=${invs(f)[t]} setS=${setS}/>`)}</div></div>`;
   useEffect(()=>{if(open)document.getElementById('invpanel')?.scrollIntoView({block:'nearest',behavior:'smooth'});},[open]);
   return html`
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><h1>Clinic onboarding</h1></div>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><h1>Clinic onboarding</h1><button class=${'btn'+(reqOpen?' pri':'')} onClick=${()=>setReqOpen(!reqOpen)}>${Icon('check',15)} Requirement defaults</button></div>
+  ${reqOpen&&html`<${ReqEditor} s=${s} setS=${setS} mode="defaults" onClose=${()=>setReqOpen(false)}/>`}
   <div class="kpis"><div class="kpi"><b>3</b><span>Assigned clinics</span></div><div class="kpi"><b>${st.review+5}</b><span>Sections awaiting review</span></div><div class="kpi"><b>${access+4}</b><span>Access requests to verify</span></div><div class="kpi"><b>${st.stage===2?1:0}</b><span>Ready to launch</span></div></div>
   <div class="panel"><div class="tw"><table><thead><tr><th>Facility / organization</th><th>Stage</th><th>Clinic team</th><th>Billing team</th><th>Outstanding</th><th>Access to verify</th><th>Coordinator</th><th>Target date</th><th>Launch readiness</th><th></th></tr></thead><tbody>
     <tr><td><b style="font-weight:500">${s.site}</b><div class="small muted">${s.clinic} · ${s.locations.length} location${s.locations.length===1?'':'s'}</div></td><td><${Pill}>${['Clinic Completing','Plexus Reviewing','Ready to Launch'][st.stage]}</${Pill}></td>
