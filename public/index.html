@@ -90,7 +90,7 @@ main{position:relative;z-index:1}
 .signin{width:min(440px,100%);background:#fff;border:1px solid var(--line);border-radius:24px;padding:28px;box-shadow:0 20px 50px hsla(215,50%,30%,.12);display:flex;flex-direction:column;gap:14px}
 .signin h1{margin:6px 0 0;font-size:26px}.signin p{margin:0;font-size:15.5px;line-height:1.5}.si-brand{display:flex;gap:12px;align-items:center}.si-brand b{display:block;font-size:16px}.si-brand span{font-size:13.5px;color:var(--bluegray)}
 .si-logo{width:40px;height:40px;border-radius:12px;background:linear-gradient(145deg,hsl(214 70% 40%),hsl(265 55% 50%));color:#fff!important;display:grid;place-items:center;font-weight:700;font-size:18px}
-.si-err{color:var(--red);font-size:14.5px}.si-demo{border-top:1px dashed var(--line);padding-top:12px;display:flex;flex-direction:column;gap:8px}.si-demo .chip{font-size:13.5px}
+.si-ws{justify-content:center;border:1.5px solid hsl(214 64% 45%);color:hsl(214 64% 35%);background:hsl(214 90% 97%)}.si-err{color:var(--red);font-size:14.5px}.si-demo{border-top:1px dashed var(--line);padding-top:12px;display:flex;flex-direction:column;gap:8px}.si-demo .chip{font-size:13.5px}
 .signin .btn.billing{background:hsl(270 52% 44%);border-color:hsl(270 52% 44%)}
 .who{display:flex;align-items:center;gap:10px;margin-left:auto}.who-n{display:flex;flex-direction:column;align-items:flex-end;font-size:13.5px;color:#fff;line-height:1.2}.who-n small{font-size:11.5px;color:hsl(198 85% 85%)}.signout{color:hsl(198 85% 88%)!important;font-size:13.5px}
 @media(max-width:640px){.who-n{display:none}}
@@ -1055,7 +1055,8 @@ function SignIn({s,onIn}){
       <label class="field"><span class="lbl">Email</span><input type="email" autocomplete="email" value=${email} placeholder="you@clinic.com" onInput=${e=>{setEmail(e.target.value);setErr('');}} onKeyDown=${e=>{if(e.key==='Enter')go();}}/></label>
       ${err&&html`<span class="si-err" role="alert">${err}</span>`}
       <button class="btn pri big" onClick=${go}>Email me a sign-in link</button>
-      <div class="si-demo"><span class="small muted">Preview accounts (no email is sent in this preview):</span><div class="chips">${demo.map(([l,e])=>html`<button class="chip" onClick=${()=>{setEmail(e);setErr('');}}><b>${l}</b> · ${e}</button>`)}</div>
+      <div class="si-demo"><button class="btn big si-ws" onClick=${()=>onIn({email:'drimran'+PLEXUS_DOMAIN,name:'Dr. Imran',role:'plexus'})}>${Icon('building',16)} Open Plexus workspace (preview)</button>
+        <span class="small muted">Preview accounts (no email is sent in this preview):</span><div class="chips">${demo.map(([l,e])=>html`<button class="chip" onClick=${()=>{setEmail(e);setErr('');}}><b>${l}</b> · ${e}</button>`)}</div>
         ${!inv.clinic.length&&!inv.billing.length&&html`<span class="small muted">Invite clinic or billing team members from the Plexus console to sign in as them.</span>`}</div>`
     :html`<h1>Check your email</h1><p class="muted">We sent a sign-in link to <b>${match.email}</b>. The link expires in 15 minutes.</p>
       ${match.role==='member'&&match.teams.length>1?html`<p>You’re on both teams. Open:</p><div class="row">${match.teams.map(t=>html`<button class=${'btn pri '+t} onClick=${()=>finish(t)}>${t==='clinic'?'Clinic onboarding':'Billing onboarding'}</button>`)}</div>`
