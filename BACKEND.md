@@ -12,6 +12,7 @@ preview behaviors real without changing the UI. Everything below is already work
 | Clinic team / billing team | **Invitation link → create account**: full name + password (12+ chars) + required two-step verification (6-digit email code or authenticator app). They may instead link a Google account with the same email. |
 
 - Invitation links: one per person, single-use, expire after 7 days, tied to facility + team (`clinic` or `billing`). Resend issues a new token and invalidates the old one. Removing an invitee revokes access.
+- The preview's password sign-in for drimran@ and dralhadheri@ (`PREVIEW_ADMIN_PW`, password "admin") is **preview only** — remove it; Plexus staff use Google sign-in in production.
 - Passwords: argon2id (or bcrypt cost ≥ 12). Never logged or returned. Lockout/rate limit after repeated failures. Password reset by email.
 - Sessions: httpOnly, Secure, SameSite=Lax cookies. Server enforces role:
   - Plexus roles (Admin, Coordinator, Reviewer, Billing) per the permission matrix in *Users & roles*.

@@ -86,6 +86,11 @@ main{position:relative;z-index:1}
 @media(prefers-reduced-motion:reduce){.tile,.addtile,.chev-r{transition:none}.tile:hover,.addtile:hover{transform:none}}
 
 /* ---- typography & density refinement ---- */
+.set-body .setpanel>.row.between>.link,.set-body .reqpanel>.row.between>.link{display:none}.set-layout{display:grid;grid-template-columns:220px 1fr;gap:16px;align-items:start}.set-body{min-width:0}
+.set-nav{position:sticky;top:76px;display:flex;flex-direction:column;gap:4px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:8px}
+.set-nav-i{all:unset;box-sizing:border-box;cursor:pointer;display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;font-size:15px;font-weight:500;color:hsl(218 30% 26%)}
+.set-nav-i:hover{background:hsl(214 60% 96%)}.set-nav-i.on{background:hsl(222 60% 18%);color:#fff}.set-nav-i:focus-visible{outline:2px solid hsl(210 90% 60%)}
+@media(max-width:760px){.set-layout{grid-template-columns:1fr}.set-nav{position:static;flex-direction:row;overflow-x:auto}.set-nav-i{white-space:nowrap}}
 .set-btn{display:inline-flex;align-items:center;gap:6px;height:36px!important;padding:0 12px!important;border-radius:999px!important}.set-btn.on{border-color:#c4dbff!important;color:#c4dbff!important}
 .settings{scroll-margin-top:130px;margin:0 0 18px;display:flex;flex-direction:column;gap:12px}.set-head{display:flex;justify-content:space-between;align-items:center}.set-head h2{margin:0;font-size:22px;display:flex;align-items:center;gap:8px}
 .set-tabs{display:flex;gap:6px;flex-wrap:wrap}.set-tab{all:unset;cursor:pointer;padding:8px 16px;border-radius:999px;border:1.5px solid var(--line);background:#fff;font-size:15px;font-weight:500}.set-tab.on{background:var(--navy,hsl(222 60% 18%));border-color:transparent;color:#fff}.set-tab:focus-visible{outline:2px solid hsl(210 90% 60%)}
@@ -1119,8 +1124,11 @@ const jget=(k,d)=>{try{const v=JSON.parse(lsGet(k));return v==null?d:v;}catch(e)
 const PROLES={Admin:'Full access, including users and roles',Coordinator:'Add clinics, invite teams, reminders',Reviewer:'Review and approve sections',Billing:'Billing onboarding review'};
 const PERMS=[['users','Manage users and roles',['Admin']],['clinics','Add clinics',['Admin','Coordinator']],['invite','Invite clinic and billing teams',['Admin','Coordinator']],['review','Review and approve sections',['Admin','Coordinator','Reviewer','Billing']],['requirements','Edit requirement defaults',['Admin']],['reminders','Edit reminder settings',['Admin','Coordinator']],['credentials','Reveal stored credentials',['Admin']]];
 const can=(auth,perm)=>!!auth&&auth.role==='plexus'&&(PERMS.find(x=>x[0]===perm)||[,,[]])[2].includes(auth.prole||'Admin');
-const defaultUsers=()=>[{email:'onboarding'+PLEXUS_DOMAIN,name:'Plexus Onboarding',role:'Admin',owner:true,added:new Date().toISOString()},{email:'billing'+PLEXUS_DOMAIN,name:'Plexus Billing',role:'Billing',added:new Date().toISOString()},{email:'drimran'+PLEXUS_DOMAIN,name:'Dr. Imran',role:'Admin',added:new Date().toISOString()}];
-const loadUsers=()=>{const u=jget(USERS_KEY,null);if(Array.isArray(u)&&u.length)return u;const d=defaultUsers();jset(USERS_KEY,d);return d;};
+const defaultUsers=()=>[{email:'onboarding'+PLEXUS_DOMAIN,name:'Plexus Onboarding',role:'Admin',owner:true,added:new Date().toISOString()},{email:'billing'+PLEXUS_DOMAIN,name:'Plexus Billing',role:'Billing',added:new Date().toISOString()},{email:'drimran'+PLEXUS_DOMAIN,name:'Dr. Imran',role:'Admin',added:new Date().toISOString()},{email:'dralhadheri'+PLEXUS_DOMAIN,name:'Dr. Alhadheri',role:'Admin',added:new Date().toISOString()}];
+/* Preview-only password sign-in for these Plexus admins (password: admin). Production uses Google sign-in only. */
+const PREVIEW_ADMIN_PW={['drimran'+PLEXUS_DOMAIN]:'29b6a9afe870f858480ba9f66586a746da727afa8ab4e181af2e46fcc6d314e6',['dralhadheri'+PLEXUS_DOMAIN]:'2553a71c40eb33c5d9e19e09656fbc8e15bdf46ee4c8d9c707c474afbdebee28'};
+const loadUsers=()=>{let u=jget(USERS_KEY,null);if(!Array.isArray(u)||!u.length)u=defaultUsers();
+  for(const d of defaultUsers().filter(x=>PREVIEW_ADMIN_PW[x.email])){const x=u.find(y=>y.email===d.email);if(!x)u.push(d);else{x.role='Admin';x.disabled=false;}}jset(USERS_KEY,u);return u;};
 const REM_DEFAULT={enabled:true,every:3,business:true,teams:'both',stopOnSubmit:true,max:6,noWeekends:true,from:'onboarding'+PLEXUS_DOMAIN};
 const loadRem=()=>({...REM_DEFAULT,...jget(REM_KEY,{})});
 async function pwHash(email,pw){try{const d=await crypto.subtle.digest('SHA-256',new TextEncoder().encode('plexus-onboarding:'+email+':'+pw));return Array.from(new Uint8Array(d)).map(b=>b.toString(16).padStart(2,'0')).join('');}catch(e){let h=0;for(const ch of email+pw)h=(h*31+ch.charCodeAt(0))|0;return 'x'+h;}}
@@ -1176,7 +1184,7 @@ function SignIn({facs,onIn,inviteToken,clearInvite}){
   const startCode=u=>{const c=String(Math.floor(100000+Math.random()*900000));setSent(c);setCode('');setPending(u);setMode('code');};
   const finish=(u,team)=>{const acc=jget(ACC_KEY,{});if(acc[u.email]){acc[u.email].lastSignIn=new Date().toISOString();jset(ACC_KEY,acc);}const v={...u};if(v.role==='member')v.team=team||v.teams[0];onIn(v);};
   const signIn=async()=>{const em=email.trim().toLowerCase();if(!emailOk(em)){setErr('Enter a valid email address.');return;}
-    if(em.endsWith(PLEXUS_DOMAIN)){setErr('Plexus staff sign in with Google.');return;}
+    if(em.endsWith(PLEXUS_DOMAIN)){const u=users.find(x=>x.email===em&&!x.disabled);if(u&&PREVIEW_ADMIN_PW[em]){if(await pwHash(em,pw)===PREVIEW_ADMIN_PW[em]){onIn({email:em,name:u.name,role:'plexus',prole:u.role,via:'password'});return;}setErr('That email and password don’t match.');return;}setErr('Plexus staff sign in with Google.');return;}
     const a=accts[em];const m=memberFor(em);if(!m){setErr('This email hasn’t been invited. Ask your Plexus coordinator for an invitation.');return;}
     if(!a||!a.hash){setErr('You haven’t created your account yet. Open the invitation link in your email to create it.');return;}
     if(await pwHash(em,pw)!==a.hash){setErr('That email and password don’t match.');return;}setErr('');startCode(m);};
@@ -1451,7 +1459,7 @@ function UsersRoles({auth,who,onClose}){
       ${PERMS.map(([k,l,rs])=>html`<tr key=${k}><td>${l}</td>${Object.keys(PROLES).map(r=>html`<td>${rs.includes(r)?'✓':''}</td>`)}</tr>`)}</tbody></table></div>
     <span class="small muted">Clinic and billing team members are invited per clinic and create their own accounts (email + password with two-step verification, or Google). ${Object.keys(accts).length} team account${Object.keys(accts).length===1?'':'s'} created so far.</span></div>`;
 }
-const SET_TABS=[['clinics','Clinics','clinics'],['req','Requirements','requirements'],['rem','Reminders','reminders'],['users','Users & roles','users']];
+const SET_TABS=[['clinics','Clinics','clinics','building'],['req','Requirements','requirements','check'],['rem','Reminders','reminders','bell'],['users','Users & roles','users','users']];
 function Console({s,st,setS,facs,fid,setFid,addFacility,openReview,auth,openInvite,who,settings,setSettings}){
   const access=[...s.payers,...s.logins,...s.flows.labs,...s.clinicians.flatMap(c=>c.portals)].filter(a=>a.status!=='verified'&&(a.invite==='sent'||a.invite==='pending'||a.website||a.username||a.login)).length;
   const rows=facs.map(f=>{const fs=f.id===fid?s:loadFac(f.id);const fst=f.id===fid?st:status(fs);return {f,fs,fst};});
@@ -1473,7 +1481,7 @@ function Console({s,st,setS,facs,fid,setFid,addFacility,openReview,auth,openInvi
   return html`
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><h1>Clinic onboarding</h1></div>
   ${settings&&html`<div class="settings" id="settings"><div class="set-head"><h2>${Icon('gear',18)} Settings</h2><button class="link" onClick=${()=>setSettings(null)}>Close</button></div>
-    <div class="set-tabs" role="tablist">${SET_TABS.filter(([k,,perm])=>can(auth,perm)).map(([k,l])=>html`<button role="tab" aria-selected=${settings===k} class=${'set-tab'+(settings===k?' on':'')} onClick=${()=>setSettings(k)}>${l}</button>`)}</div>
+    <div class="set-layout"><nav class="set-nav" aria-label="Settings">${SET_TABS.filter(([k,,perm])=>can(auth,perm)).map(([k,l,,ic])=>html`<button aria-current=${settings===k?'page':undefined} class=${'set-nav-i'+(settings===k?' on':'')} onClick=${()=>setSettings(k)}>${Icon(ic,16)}<span>${l}</span></button>`)}</nav><div class="set-body">
     ${settings==='rem'&&html`<${ReminderSettings} rem=${rem} setRem=${setRem} onClose=${()=>setSettings(null)}/>`}
     ${settings==='users'&&html`<${UsersRoles} auth=${auth} who=${who} onClose=${()=>setSettings(null)}/>`}
     ${settings==='req'&&html`<${ReqEditor} s=${s} setS=${setS} mode="defaults" onClose=${()=>setSettings(null)}/>`}
@@ -1485,7 +1493,7 @@ function Console({s,st,setS,facs,fid,setFid,addFacility,openReview,auth,openInvi
     ${nfErr&&html`<span class="small" style="color:var(--red)">${nfErr}</span>`}
     <div class="row" style="justify-content:flex-end;gap:8px"><button class="btn pri" onClick=${saveNew}>Add clinic and invite teams</button></div>
       <h4 style="margin:6px 0 0">Clinics (${facs.length})</h4><ul class="faclist">${facs.map(f=>html`<li key=${f.id}><b>${f.site}</b><span class="muted">${f.clinic}${f.coordinator?' · '+f.coordinator:''}${f.target?' · launch '+fmtD(f.target+'T12:00'):''}</span></li>`)}</ul></div>`}
-  </div>`}
+  </div></div></div>`}
   <div class="kpis"><div class="kpi"><b>${rows.length}</b><span>Clinics</span></div><div class="kpi"><b>${rows.reduce((a,r)=>a+r.fst.secs.filter(x=>['submitted','na'].includes(x.state)).length,0)}</b><span>Sections awaiting review</span></div><div class="kpi"><b>${rows.filter(r=>r.fst.secs.every(x=>x.complete)).length}</b><span>Fully complete</span></div><div class="kpi"><b>${rows.filter(r=>r.fst.stage===2).length}</b><span>Ready to launch</span></div></div>
   <div class="panel"><div class="tw"><table><thead><tr><th>Facility / organization</th><th>Stage</th><th>Clinic team</th><th>Billing team</th><th>Outstanding</th><th>Access</th><th>Reminders</th><th>Coordinator</th><th></th></tr></thead><tbody>
     ${rows.map(({f,fs,fst})=>{const acc=[...fs.payers,...fs.logins].filter(a=>a.status!=='verified'&&(a.website||a.username||a.invited)).length;
