@@ -420,6 +420,62 @@ td{padding:13px 14px;border-bottom:1px solid var(--line);vertical-align:top}tr:l
  .tabs{margin:0 -14px 12px;padding:6px 14px}.sec>h2 button{padding:13px 12px}.body{padding:2px 12px 14px}.todo{display:none}.card>header{flex-direction:column}.meta{justify-content:flex-start}
  .bar{padding:0 10px;gap:8px}.bar .ctx small{display:none}.bar .reset{display:none}.svc{grid-template-columns:1fr auto}}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}.snow{display:none}html{scroll-behavior:auto}}
+
+/* Plexus dock */
+.dk-root{position:fixed;right:20px;bottom:20px;z-index:70;display:flex;flex-direction:column;align-items:flex-end;gap:12px;pointer-events:none}
+.dk-root>*{pointer-events:auto}
+.dk{display:flex;align-items:center;padding:5px;border-radius:999px;opacity:.5;border:1px solid transparent;transition:opacity .25s,background-color .25s,box-shadow .25s,border-color .25s}
+.dk.open,.dk:has(:focus-visible){opacity:1;background:rgba(255,255,255,.74);border-color:rgba(255,255,255,.9);box-shadow:0 10px 30px -8px rgba(15,30,60,.3);backdrop-filter:blur(22px) saturate(1.6);-webkit-backdrop-filter:blur(22px) saturate(1.6)}
+.dk-p{position:relative;display:grid;place-items:center;width:48px;height:48px;border-radius:50%;flex-shrink:0;cursor:pointer;background:#fff;border:1px solid hsl(214 30% 86%);box-shadow:0 6px 18px -6px rgba(15,30,60,.5);transition:transform .2s}
+.dk-p:hover{transform:scale(1.05)}
+.dk-p:focus-visible,.dk-app:focus-visible,.dk-x:focus-visible{outline:2px solid hsl(214 70% 55%);outline-offset:2px}
+.dk-dot{position:absolute;top:2px;right:2px;width:11px;height:11px;border-radius:50%;background:hsl(4 80% 55%);border:2px solid #fff}
+.dk-bar{display:flex;align-items:center;gap:8px;max-width:0;overflow:hidden;opacity:0;transition:max-width .3s cubic-bezier(.2,.8,.2,1),opacity .2s,padding .3s}
+.dk.open .dk-bar,.dk:has(:focus-visible) .dk-bar{max-width:420px;opacity:1;padding:0 10px 0 4px;overflow:visible}
+.dk-app{position:relative;display:grid;place-items:center;width:44px;height:44px;border-radius:13px;flex-shrink:0;color:#fff;cursor:pointer;border:0;background:linear-gradient(160deg,hsl(214 70% 62%),hsl(222 60% 42%));box-shadow:0 4px 10px -4px rgba(30,60,110,.6);transition:transform .18s cubic-bezier(.2,.8,.2,1)}
+.dk-app:not(.dk-empty):hover{transform:translateY(-4px) scale(1.08)}
+.dk-app.on::after{content:"";position:absolute;bottom:-7px;left:50%;width:4px;height:4px;margin-left:-2px;border-radius:50%;background:hsl(222 60% 25%)}
+.dk-app.dk-empty{box-sizing:border-box;padding:0;margin:0;height:44px;cursor:default;color:hsl(214 30% 70%);background:hsl(214 40% 97%);border:1.5px dashed hsl(214 30% 80%);box-shadow:none;font-size:15px}
+.dk-badge{position:absolute;top:-5px;right:-5px;min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:hsl(4 80% 55%);color:#fff;font-size:11px;font-style:normal;font-weight:700;display:grid;place-items:center;border:2px solid #fff}
+.dk-tip{position:absolute;bottom:calc(100% + 10px);left:50%;transform:translate(-50%,4px);white-space:nowrap;pointer-events:none;font-size:11.5px;font-weight:600;color:#fff;background:rgba(30,41,59,.92);padding:4px 9px;border-radius:7px;opacity:0;transition:opacity .15s,transform .15s}
+.dk-app:hover .dk-tip{opacity:1;transform:translate(-50%,0)}
+.dk-panel{width:min(370px,calc(100vw - 24px));height:min(540px,calc(100dvh - 130px));display:flex;flex-direction:column;overflow:hidden;border-radius:20px;background:rgba(255,255,255,.96);border:1px solid hsl(214 30% 88%);box-shadow:0 24px 60px -18px rgba(15,30,60,.42);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);animation:dk-in .22s cubic-bezier(.2,.8,.2,1)}
+.dk-panel[hidden]{display:none}
+@keyframes dk-in{from{opacity:0;transform:translateY(8px) scale(.98)}to{opacity:1;transform:none}}
+.dk-ph{display:flex;align-items:center;gap:10px;padding:12px 12px 10px 14px;border-bottom:1px solid hsl(214 30% 92%);font-size:15px}
+.dk-pi{display:grid;place-items:center;width:28px;height:28px;border-radius:9px;color:#fff;background:linear-gradient(160deg,hsl(214 70% 62%),hsl(222 60% 42%))}
+.dk-x{all:unset;margin-left:auto;display:grid;place-items:center;width:30px;height:30px;border-radius:50%;color:hsl(214 15% 45%);cursor:pointer;font-size:13px}
+.dk-x:hover{background:hsl(214 40% 95%)}
+.dk-pb{flex:1;min-height:0;display:flex;flex-direction:column}
+.msg{flex:1;min-height:0;display:flex;flex-direction:column}
+.msg-fac{box-sizing:border-box;width:calc(100% - 24px);margin:10px 12px 4px;font:inherit;font-size:14px;padding:8px 10px;border-radius:10px;border:1px solid hsl(214 30% 86%);background:#fff}
+.msg-site{padding:10px 16px 2px;font-size:12.5px;font-weight:600;color:var(--bluegray)}
+.msg-ch{list-style:none;margin:0;padding:6px;overflow-y:auto}
+.msg-row{all:unset;box-sizing:border-box;width:100%;display:flex;align-items:center;gap:11px;padding:10px;border-radius:12px;cursor:pointer}
+.msg-row:hover{background:hsl(214 40% 96%)}.msg-row:focus-visible{outline:2px solid hsl(214 70% 55%)}
+.msg-av{display:grid;place-items:center;width:40px;height:40px;border-radius:50%;flex-shrink:0;color:#fff;font-weight:700;font-size:15px}
+.msg-av.sm{width:30px;height:30px;font-size:12.5px}
+.msg-av.teal{background:hsl(180 55% 38%)}.msg-av.purple{background:hsl(268 45% 52%)}.msg-av.navy{background:hsl(222 55% 30%)}
+.msg-rt{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}.msg-rt b{font-size:15px}
+.msg-rt small{font-size:13px;color:var(--bluegray);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.msg-meta{display:flex;flex-direction:column;align-items:flex-end;gap:4px;font-size:12px;color:var(--bluegray)}
+.msg-un{font-style:normal;min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:hsl(214 75% 50%);color:#fff;font-size:11.5px;font-weight:700;display:grid;place-items:center}
+.msg-th{display:flex;align-items:center;gap:9px;padding:8px 12px;border-bottom:1px solid hsl(214 30% 93%)}
+.msg-back{all:unset;cursor:pointer;font-size:26px;line-height:1;color:hsl(214 75% 45%);padding:0 6px 3px 0}
+.msg-list{flex:1;min-height:0;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:2px}
+.msg-b{display:flex;flex-direction:column;align-items:flex-start;max-width:82%}
+.msg-b.me{align-self:flex-end;align-items:flex-end}
+.msg-bb{padding:8px 12px;border-radius:18px;background:hsl(214 30% 93%);font-size:14.5px;line-height:1.4;white-space:pre-wrap;word-break:break-word}
+.msg-b.me .msg-bb{background:hsl(214 80% 50%);color:#fff}
+.msg-n{font-size:11.5px;color:var(--bluegray);margin:8px 0 3px 10px}.msg-n .tg{font-size:10.5px;font-weight:600;padding:1px 7px;border-radius:999px;margin-left:3px}.tg.plexus{background:hsl(222 50% 93%);color:hsl(222 55% 30%)}.tg.clinic{background:hsl(180 45% 92%);color:hsl(180 60% 25%)}.tg.billing{background:hsl(268 45% 94%);color:hsl(268 45% 40%)}
+.msg-t{font-size:11px;color:hsl(214 15% 60%);margin:3px 10px 6px}
+.msg-empty{margin:auto;color:var(--bluegray);font-size:14px;text-align:center}
+.msg-comp{display:flex;align-items:flex-end;gap:8px;padding:10px 12px 12px;border-top:1px solid hsl(214 30% 93%)}
+.msg-comp textarea{flex:1;min-width:0;box-sizing:border-box;min-height:38px;height:38px;resize:none;font:inherit;font-size:15px;line-height:1.4;border:1px solid hsl(214 30% 84%);border-radius:20px;padding:8px 14px;max-height:110px}
+.msg-send{all:unset;display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:hsl(214 80% 50%);color:#fff;font-weight:700;font-size:17px;cursor:pointer;flex-shrink:0}
+.msg-send:disabled{background:hsl(214 20% 82%);cursor:default}
+@media(max-width:640px){.dk-root{right:12px;bottom:12px}}
+@media(prefers-reduced-motion:reduce){.dk,.dk-bar,.dk-app,.dk-p,.dk-panel{transition:none;animation:none}}
 </style>
 </head>
 <body>
@@ -1291,6 +1347,59 @@ function SignIn({facs,onIn,inviteToken,clearInvite}){
         ${demo.length>0&&html`<div class="lx-demo"><span>Preview: open an invitation</span>${demo.map(([l,x,site])=>html`<button class="lx-chip" onClick=${()=>{if(jget(ACC_KEY,{})[x.email]&&jget(ACC_KEY,{})[x.email].hash){setEmail(x.email);setErr('Account already created — enter the password.');}else{location.hash='';onIn({inviteToken:x.token});}}}><b>${l}</b> ${x.name||x.email} · ${site}</button>`)}</div>`}`}
     </div></main>`;
 }
+
+/* ---------- Plexus dock + Messaging ---------- */
+const MSG_KEY='plexus-onboarding-messages',MREAD_KEY='plexus-onboarding-msg-read';
+const CHANNELS=[['clinic','Clinic team','teal'],['billing','Billing team','purple'],['all','Everyone','navy']];
+const chVisible=(auth,ch)=>auth.role==='plexus'||ch==='all'||(auth.teams||[auth.team]).includes(ch);
+const loadMsgs=()=>jget(MSG_KEY,{});
+const fmtMsgT=iso=>{const d=new Date(iso),n=new Date();return d.toDateString()===n.toDateString()?d.toLocaleTimeString([],{hour:'numeric',minute:'2-digit'}):d.toLocaleDateString([],{month:'short',day:'numeric'});};
+function unreadFor(auth,facs){if(!auth)return 0;const m=loadMsgs(),r=jget(MREAD_KEY,{})[auth.email]||{};let n=0;
+  (auth.role==='plexus'?facs:facs.filter(f=>f.id===auth.fid)).forEach(f=>CHANNELS.forEach(([ch])=>{if(!chVisible(auth,ch))return;const k=f.id+':'+ch;(m[k]||[]).forEach(x=>{if(x.email!==auth.email&&(!r[k]||x.at>r[k]))n++;});}));return n;}
+function Messaging({auth,actor,facs,fid,tick}){
+  const myFacs=auth.role==='plexus'?facs:facs.filter(f=>f.id===auth.fid);
+  const [fac,setFac]=useState(auth.role==='plexus'?fid:auth.fid),[ch,setCh]=useState(null),[txt,setTxt]=useState(''),[,force]=useState(0);
+  const list=useRef(null);const f=myFacs.find(x=>x.id===fac)||myFacs[0]||{};const all=loadMsgs(),reads=jget(MREAD_KEY,{}),mine=reads[auth.email]||{};
+  const k=ch&&f.id+':'+ch,thread=k?(all[k]||[]):[];
+  const markRead=key=>{const r=jget(MREAD_KEY,{});r[auth.email]={...(r[auth.email]||{}),[key]:new Date().toISOString()};jset(MREAD_KEY,r);};
+  useEffect(()=>{if(k){markRead(k);if(list.current)list.current.scrollTop=list.current.scrollHeight;}},[k,thread.length,tick]);
+  const send=()=>{const v=txt.trim();if(!v||!k)return;const m=loadMsgs();m[k]=[...(m[k]||[]),{id:uid(),at:new Date().toISOString(),name:actor.name,tk:actor.tk,team:actor.team,email:auth.email,text:v}];jset(MSG_KEY,m);markRead(k);setTxt('');force(x=>x+1);try{window.dispatchEvent(new Event('plexus-msg'));}catch(e){}};
+  if(!f.id)return html`<p class="msg-empty">No clinics yet.</p>`;
+  if(!ch)return html`<div class="msg">
+    ${auth.role==='plexus'&&html`<select class="msg-fac" aria-label="Clinic" value=${f.id} onChange=${e=>setFac(e.target.value)}>${myFacs.map(x=>html`<option value=${x.id}>${x.site||x.clinic||'Clinic'}</option>`)}</select>`}
+    ${auth.role!=='plexus'&&html`<div class="msg-site">${f.site}</div>`}
+    <ul class="msg-ch">${CHANNELS.filter(([c])=>chVisible(auth,c)).map(([c,l,col])=>{const ms=all[f.id+':'+c]||[],last=ms[ms.length-1],un=ms.filter(x=>x.email!==auth.email&&(!mine[f.id+':'+c]||x.at>mine[f.id+':'+c])).length;
+      return html`<li><button class="msg-row" onClick=${()=>setCh(c)} data-ch=${c}><span class=${'msg-av '+col}>${c==='all'?Icon('users',16):c==='billing'?'B':'C'}</span>
+        <span class="msg-rt"><b>${l}</b><small>${last?`${last.email===auth.email?'You':last.name.split(' ')[0]}: ${last.text}`:c==='all'?'Plexus, clinic and billing teams':c==='billing'?'Plexus and the billing team':'Plexus and the clinic team'}</small></span>
+        <span class="msg-meta">${last&&html`<small>${fmtMsgT(last.at)}</small>`}${un>0&&html`<i class="msg-un">${un}</i>`}</span></button></li>`;})}</ul></div>`;
+  const [,l,col]=CHANNELS.find(x=>x[0]===ch);
+  return html`<div class="msg">
+    <div class="msg-th"><button class="msg-back" aria-label="Back to conversations" onClick=${()=>setCh(null)}>‹</button><span class=${'msg-av sm '+col}>${ch==='all'?Icon('users',13):ch==='billing'?'B':'C'}</span><span class="msg-rt"><b>${l}</b><small>${f.site}</small></span></div>
+    <div class="msg-list" ref=${list}>${thread.length?thread.map((m,i)=>{const me=m.email===auth.email,first=i===0||thread[i-1].email!==m.email;
+      return html`<div class=${'msg-b'+(me?' me':'')}>${first&&!me&&html`<small class="msg-n">${m.name} <span class=${'tg '+m.tk}>${m.team}</span></small>`}<div class="msg-bb">${m.text}</div>${(i===thread.length-1||thread[i+1].email!==m.email)&&html`<small class="msg-t">${fmtMsgT(m.at)}</small>`}</div>`;})
+      :html`<p class="msg-empty">No messages yet.</p>`}</div>
+    <div class="msg-comp"><textarea rows="1" aria-label="Message" placeholder="Message" value=${txt} onInput=${e=>{setTxt(e.target.value);e.target.style.height='auto';e.target.style.height=Math.min(e.target.scrollHeight,110)+'px';}} onKeyDown=${e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send();}}}></textarea><button class="msg-send" aria-label="Send" disabled=${!txt.trim()} onClick=${send}>↑</button></div></div>`;
+}
+const DOCK_APPS=[{id:'messaging',label:'Messaging',icon:'msg'}],DOCK_SLOTS=4;
+function Dock({auth,actor,facs,fid}){
+  const [exp,setExp]=useState(false),[open,setOpen]=useState(null),[tick,setTick]=useState(0);const root=useRef(null);
+  useEffect(()=>{const on=()=>setTick(x=>x+1),key=e=>{if(e.key==='Escape'){setOpen(null);setExp(false);}},down=e=>{if(e.pointerType!=='mouse'&&root.current&&!root.current.contains(e.target))setExp(false);};
+    addEventListener('storage',on);addEventListener('plexus-msg',on);addEventListener('keydown',key);addEventListener('pointerdown',down);const iv=setInterval(on,4000);
+    return ()=>{removeEventListener('storage',on);removeEventListener('plexus-msg',on);removeEventListener('keydown',key);removeEventListener('pointerdown',down);clearInterval(iv);};},[]);
+  const un=unreadFor(auth,facs);
+  return html`<div class="dk-root" ref=${root} data-tick=${tick}>
+    <section class="dk-panel" role="dialog" aria-label="Messaging" hidden=${open!=='messaging'}>
+      <header class="dk-ph"><span class="dk-pi">${Icon('msg',15)}</span><b>Messaging</b><button class="dk-x" aria-label="Close Messaging" onClick=${()=>setOpen(null)}>✕</button></header>
+      <div class="dk-pb">${open==='messaging'&&html`<${Messaging} auth=${auth} actor=${actor} facs=${facs} fid=${fid} tick=${tick}/>`}</div></section>
+    <div class=${'dk'+(exp?' open':'')} onMouseEnter=${()=>setExp(true)} onMouseLeave=${()=>setExp(false)}>
+      <div class="dk-bar" role="toolbar" aria-label="Plexus dock">
+        ${DOCK_APPS.map(a=>html`<button class=${'dk-app'+(open===a.id?' on':'')} aria-label=${a.label} aria-pressed=${open===a.id} onClick=${()=>setOpen(o=>o===a.id?null:a.id)}>${Icon(a.icon,19)}<span class="dk-tip">${a.label}</span>${a.id==='messaging'&&un>0&&html`<i class="dk-badge">${un}</i>`}</button>`)}
+        ${Array.from({length:Math.max(0,DOCK_SLOTS-DOCK_APPS.length)},(_,i)=>html`<span class="dk-app dk-empty" role="img" aria-label="Empty slot">+</span>`)}
+      </div>
+      <button class="dk-p" aria-label="Plexus dock" aria-expanded=${exp} onClick=${()=>setExp(v=>!v)}><img src=${PLEXUS_MARK} alt="" width="17" height="26"/>${un>0&&!exp&&html`<i class="dk-dot"></i>`}</button>
+    </div></div>`;
+}
+
 function App(){
   const [settings,setSettings]=useState('clinics'),[invOpen,setInvOpen]=useState(null);
   const [auth,setAuth]=useState(loadAuth),[invTok,setInvTok]=useState(()=>{try{return new URLSearchParams(location.search).get('invite');}catch(e){return null;}});
@@ -1364,10 +1473,10 @@ function App(){
 
   if(!auth||invTok)return html`<${SignIn} facs=${facs} inviteToken=${invTok} clearInvite=${()=>{setInvTok(null);try{history.replaceState(null,'',location.pathname);}catch(e){}}} onIn=${u=>{if(u.inviteToken){saveAuth(null);setAuth(null);setInvTok(u.inviteToken);return;}if(u.role==='plexus'&&!u.prole){const x=loadUsers().find(y=>y.email===u.email);u.prole=x?x.role:'Admin';}saveAuth(u);setAuth(u);setInvTok(null);if(u.fid)setFid(u.fid);setView(u.role==='plexus'?'console':u.team);scrollTo(0,0);}}/>`;
   if(auth.role!=='plexus'&&(view==='console'||view==='review'))return null;
-  if(view==='settings'&&auth&&auth.role==='plexus')return html`${bar}<main class="sp-wrap"><${SettingsPage} auth=${auth} who=${who} s=${s} setS=${setS} facs=${facs} addFacility=${addFacility} tab=${settings} setTab=${setSettings}
+  if(view==='settings'&&auth&&auth.role==='plexus')return html`${bar}${auth&&html`<${Dock} auth=${auth} actor=${actor} facs=${facs} fid=${fid}/>`}<main class="sp-wrap"><${SettingsPage} auth=${auth} who=${who} s=${s} setS=${setS} facs=${facs} addFacility=${addFacility} tab=${settings} setTab=${setSettings}
     openClinic=${id=>{setFid(id);setInvOpen(id);setView('console');scrollTo(0,0);}} onBack=${()=>{setView('console');scrollTo(0,0);}}/></main>`;
-  if(view==='console')return html`${bar}<main><${Console} key=${'c'+(invOpen||'')} initOpen=${invOpen} s=${s} st=${st} setS=${setS} facs=${facs} fid=${fid} setFid=${setFid} addFacility=${addFacility} openReview=${id=>{setFid(id);setView('review');scrollTo(0,0);}} auth=${auth} who=${who} openInvite=${tok=>{saveAuth(null);setAuth(null);setInvTok(tok);}}/></main>`;
-  return html`${bar}<main>
+  if(view==='console')return html`${bar}${auth&&html`<${Dock} auth=${auth} actor=${actor} facs=${facs} fid=${fid}/>`}<main><${Console} key=${'c'+(invOpen||'')} initOpen=${invOpen} s=${s} st=${st} setS=${setS} facs=${facs} fid=${fid} setFid=${setFid} addFacility=${addFacility} openReview=${id=>{setFid(id);setView('review');scrollTo(0,0);}} auth=${auth} who=${who} openInvite=${tok=>{saveAuth(null);setAuth(null);setInvTok(tok);}}/></main>`;
+  return html`${bar}${auth&&html`<${Dock} auth=${auth} actor=${actor} facs=${facs} fid=${fid}/>`}<main>
     ${view==='review'?html`<section class="hero rdash">
       <div class="hero-top"><div><button type="button" class="link back" onClick=${()=>{setView('console');scrollTo(0,0);}}>← Back to console</button><p class="eyebrow">${s.clinic} · Plexus review</p><h1>${s.site}</h1><button class=${'btn sm'+(reqFac?' pri':'')} style="margin-top:8px" onClick=${()=>setReqFac(!reqFac)}>${Icon('check',14)} Requirements for this facility${Object.values(s.reqOverride||{}).reduce((a,o)=>a+Object.keys(o).length,0)?' · customized':''}</button></div>
         <div class=${'save'+(!saving&&saved?' ok':'')} aria-live="polite">${saving?'Saving…':saved?'✓ Saved':''}</div></div>
