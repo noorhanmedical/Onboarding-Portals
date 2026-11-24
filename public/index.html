@@ -86,6 +86,27 @@ main{position:relative;z-index:1}
 @media(prefers-reduced-motion:reduce){.tile,.addtile,.chev-r{transition:none}.tile:hover,.addtile:hover{transform:none}}
 
 /* ---- typography & density refinement ---- */
+.by-tag{display:inline-flex;align-items:center;gap:4px;margin-top:6px;font-size:12px;font-weight:500;color:hsl(214 40% 40%);background:hsl(214 60% 96%);border:1px solid hsl(214 50% 88%);border-radius:999px;padding:2px 8px;align-self:flex-start;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tile-top+.tile-lines+.by-tag,.tile-top+.by-tag{margin-left:42px}.ed-t .by-tag{margin-top:4px}
+@media(max-width:640px){.tile-top+.tile-lines+.by-tag{margin-left:0}}
+.modal-bg{position:fixed;inset:0;z-index:200;background:hsla(220,40%,10%,.45);display:grid;place-items:center;padding:16px}
+.modal{width:min(640px,100%);max-height:86vh;overflow:auto;background:#fff;border-radius:20px;padding:20px 22px;display:flex;flex-direction:column;gap:12px;box-shadow:0 30px 70px -20px rgba(0,0,0,.4)}.modal h3{margin:0;font-size:19px}
+.peer-list{display:flex;flex-direction:column;gap:10px}.peer{border:1px solid var(--line);border-radius:14px;padding:12px 14px;display:flex;flex-direction:column;gap:8px}
+.peer-h{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}.peer-h .by-tag{margin:0}.peer-v{display:flex;flex-direction:column;gap:2px;font-size:14.5px}.peer-v .lbl{font-size:12px;color:var(--bluegray)}.peer-v.ours{color:hsl(32 60% 30%)}
+.disputes{margin:0 0 16px;padding:16px 18px;display:flex;flex-direction:column;gap:10px;border-color:hsl(36 80% 70%)}.disputes h3{margin:0;font-size:17px;display:flex;gap:8px;align-items:center;color:hsl(32 70% 32%)}
+.note.resume{display:flex;align-items:center;gap:8px;background:hsl(150 50% 95%);color:hsl(155 55% 25%);border-radius:12px;padding:8px 12px;font-size:14px}.note.resume .link{margin-left:auto}
+.setpanel{margin:0 0 16px;padding:16px 18px;display:flex;flex-direction:column;gap:12px}.setpanel h3{margin:0;font-size:18px}
+.set-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(400px,1fr));gap:8px 18px}.set-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid hsl(210 30% 94%);font-size:15px}.set-row select,.set-row input{min-height:38px;font-size:14.5px;width:auto}.set-row>span:last-child{display:flex;align-items:center;gap:6px;white-space:nowrap}.set-row>span:first-child{flex:1}
+.nu-row{display:grid;grid-template-columns:1.4fr 1fr auto auto;gap:8px}@media(max-width:760px){.nu-row{grid-template-columns:1fr}}
+table.perm td{text-align:center}table.perm td:first-child{text-align:left}
+.remcell div{display:flex;align-items:center;gap:6px;font-size:13.5px;white-space:nowrap}.rt{display:inline-grid;place-items:center;width:18px;height:18px;border-radius:5px;font-size:11px;font-weight:700;color:#fff}.rt.clinic{background:hsl(214 64% 45%)}.rt.billing{background:hsl(270 52% 46%)}
+.remlog{margin:0 0 16px;padding:12px 16px}.remlog summary{cursor:pointer;font-weight:600}.remlog ul{list-style:none;margin:8px 0 0;padding:0;display:flex;flex-direction:column;gap:6px;font-size:14px}.remlog li{display:flex;gap:8px;align-items:center}
+.acct{font-size:12px;color:hsl(32 70% 35%);background:hsl(40 100% 94%);border-radius:999px;padding:2px 8px}.acct.ok{color:hsl(155 55% 28%);background:hsl(150 50% 93%)}
+.lx-google{all:unset;box-sizing:border-box;cursor:pointer;margin-top:22px;width:100%;height:46px;display:inline-flex;align-items:center;justify-content:center;gap:10px;border-radius:10px;background:#fff;color:#1f1f1f;font-size:15px;font-weight:600}.lx-google:hover{background:#f1f3f4}
+.lx-or{display:flex;align-items:center;gap:10px;margin-top:18px;color:#8592a8;font-size:12.5px}.lx-or::before,.lx-or::after{content:"";flex:1;height:1px;background:rgba(160,180,215,.2)}.lx-or+.lx-form{margin-top:14px}
+.lx-gpick{margin-top:10px;display:flex;flex-direction:column;gap:6px}.lx-field{position:relative}.lx-inp.has-btn{padding-right:58px}.lx-eye{all:unset;cursor:pointer;position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:12.5px;color:#a8b4c8}.lx-hint{margin:6px 0 0;font-size:12px;color:#8592a8}.lx-hint b{color:#e6ecf5;letter-spacing:.1em}
+.lx-inp.code{letter-spacing:.4em;font-size:20px;text-align:center}.lx-link{all:unset;cursor:pointer;margin-top:14px;font-size:13.5px;color:#9cc4f2;display:block;text-align:center}
+.lx-inp:disabled{opacity:.7}
 /* Plexus OS banner: black with dim stars and an occasional shooting star */
 .bar{background:#050505!important;border-bottom:1px solid #252525!important;color:#f5f5f5;isolation:isolate;overflow:hidden;height:60px}
 .bar .brand{display:flex;align-items:center;gap:10px;flex:1;min-width:0}.bar .brand img{width:22px;height:auto;flex-shrink:0}
@@ -601,19 +622,20 @@ function AddTile({label,onClick,dis,needed}){return html`<button type="button" c
 function Flat({title,children}){return html`<div class="flat"><span class="flat-h">${title}</span><div class="grid">${children}</div></div>`;}
 function EGroup({title,open=true,children}){return html`<details class="eg" open=${open}><summary>${title}</summary><div class="grid">${children}</div></details>`;}
 /** Summary-first card. Tap to edit inline; Done returns to the updated summary. */
-function Tile({id,P,icon,title,req,badge,lines=[],empty,done,tone,missing=[],editor,onDone,span,foot,cls=''}){
+function Tile({id,P,icon,title,req,badge,lines=[],empty,done,tone,missing=[],editor,onDone,span,foot,cls='',by}){
   const tid=(P.pre||'')+id,open=P.ek===tid,ref=useRef(null);
   if(done===undefined)done=tone==='ok'?true:tone==='warn'?false:null;
   const shown=lines.filter(Boolean).slice(0,2);
   useEffect(()=>{if(!open||!ref.current)return;ref.current.scrollIntoView({block:'nearest',behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});const f=ref.current.querySelector('.ed-b input,.ed-b select,.ed-b textarea,.ed-b button');f&&f.focus({preventScroll:true});},[open]);
   const close=()=>{onDone&&onDone();P.setEk(null);requestAnimationFrame(()=>document.getElementById('tile-'+tid)?.focus());};
   if(open)return html`<div ref=${ref} class=${'tile editing'+(cls?' '+cls:'')} role="group" aria-label=${'Editing '+title} onKeyDown=${e=>{if(e.key==='Escape'){e.stopPropagation();close();}}}>
-    <div class="ed-h">${icon&&html`<span class="ico">${Icon(icon)}</span>`}<div class="ed-t"><b>${title}</b>${missing.length>0&&html`<span class="ed-miss">Still needed: ${missing.join(', ')}</span>`}</div>${foot}<button type="button" class="btn pri" onClick=${close}>${Icon('check',16)} Done</button></div>
+    <div class="ed-h">${icon&&html`<span class="ico">${Icon(icon)}</span>`}<div class="ed-t"><b>${title}</b>${missing.length>0&&html`<span class="ed-miss">Still needed: ${missing.join(', ')}</span>`}${by&&html`<${ByTag} by=${by}/>`}</div>${foot}<button type="button" class="btn pri" onClick=${close}>${Icon('check',16)} Done</button></div>
     <div class="ed-b">${editor()}</div></div>`;
   return html`<button type="button" id=${'tile-'+tid} class=${'tile'+(span?' span':'')+(done===false?' incomplete':'')+(cls?' '+cls:'')} onClick=${()=>P.setEk(id)}>
     <span class="tile-top">${icon&&html`<span class="ico sm">${Icon(icon,17)}</span>`}<span class="tile-title"><b>${title}${req&&html`<span class="req" aria-label="required"> *</span>`}</b>${badge&&html`<span class="badge">${badge}</span>`}</span>
       ${done===true?html`<span class="ind ok" title="Complete" aria-label="Complete">${Icon('check',14)}</span>`:done===false?html`<span class="ind dot" title="Incomplete" aria-label="Incomplete"/>`:null}<span class="chev-r">${Icon('chev',18)}</span></span>
     ${shown.length?html`<span class="tile-lines">${shown.map(l=>html`<span>${l}</span>`)}</span>`:empty&&html`<span class="tile-lines"><span class="ph">${empty}</span></span>`}
+    ${by&&html`<${ByTag} by=${by}/>`}
   </button>`;}
 const need=(n)=>({done:!n});
 
@@ -628,7 +650,7 @@ function Facility({s,up,P}){
   const orgNeed=need(orgReq.filter(([k])=>blank(o[k])).length);
   return html`
   <${Group} icon="building" title="Organization" cols="1">
-    <${Tile} id="org" P=${P} icon="building" span title="Your Practice" lines=${[o.dba||o.legalName]} empty="Add practice details" ...${orgNeed} missing=${orgReq.filter(([k])=>blank(o[k])).map(x=>x[1])}
+    <${Tile} id="org" P=${P} icon="building" span by=${o._by} title="Your Practice" lines=${[o.dba||o.legalName]} empty="Add practice details" ...${orgNeed} missing=${orgReq.filter(([k])=>blank(o[k])).map(x=>x[1])}
       editor=${()=>html`
         <${EGroup} title="Practice">
           <${Field} label="Legal business name" req value=${o.legalName} on=${setO('legalName')} dis=${!P.edit}/>
@@ -647,7 +669,7 @@ function Facility({s,up,P}){
   </${Group}>
   <${Group} icon="pin" title="Locations">
     ${s.locations.map(l=>{const miss=bill?[l.name,l.street,l.city,l.state,l.zip].filter(blank).length:[l.name,l.street,l.city,l.state,l.zip,l.tz].filter(blank).length+(!l.days.length||!l.open||!l.close?1:0);
-      return html`<${Tile} key=${l.id} id=${'loc-'+l.id} P=${P} icon="pin" title=${l.name||'New location'} badge=${l.primary?'Primary':''}
+      return html`<${Tile} key=${l.id} id=${'loc-'+l.id} P=${P} by=${l._by} icon="pin" title=${l.name||'New location'} badge=${l.primary?'Primary':''}
         lines=${l.street||l.city?[[[l.street,l.suite].filter(Boolean).join(' '),[l.city,[l.state,l.zip].filter(Boolean).join(' ')].filter(Boolean).join(', ')].filter(Boolean).join(', '),hoursLine(l.days,l.open,l.close)]:[]} empty="Add address" ...${need(miss)} missing=${[['name','Location name'],['street','Street address'],['city','City'],['state','State'],['zip','ZIP'],['tz','Timezone']].filter(([k])=>blank(l[k])&&!(bill&&k==='tz')).map(x=>x[1]).concat(!bill&&(!l.days.length||!l.open||!l.close)?['Operating hours']:[])} onDone=${()=>doneLoc(l.id)}
         foot=${html`<${Remove} label=${l.name||'this location'} dis=${!P.edit} onRemove=${()=>{P.setEk(null);up(d=>{d.locations=d.locations.filter(x=>x.id!==l.id);d.clinicians.forEach(c=>c.locs=c.locs.filter(x=>x!==l.id));d.team.forEach(c=>c.locs=c.locs.filter(x=>x!==l.id));if(d.room.loc===l.id)d.room.loc='';if(l.primary&&d.locations[0])d.locations[0].primary=true;},'facility');}}/>`}
         editor=${()=>html`
@@ -699,7 +721,7 @@ function Rosters({s,up,P}){
     ${act.map(c=>{const dupNpi=c.npi&&act.some(x=>x!==c&&x.npi===c.npi),dupName=c.name&&act.some(x=>x!==c&&x.name.trim().toLowerCase()===c.name.trim().toLowerCase());
       const reg={not_checked:['Registry not checked','gray'],match:['NPPES name match','green'],unavailable:['Registry not reachable from this preview','amber']}[c.reg];
       const miss=(blank(c.name)?1:0)+(!c.creds.length?1:0)+(!npiOk(c.npi||'')?1:0)+(!c.locs.length?1:0);
-      return html`<${Tile} key=${c.id} id=${'clin-'+c.id} P=${P} icon="user" title=${c.name||'New clinician'}
+      return html`<${Tile} key=${c.id} id=${'clin-'+c.id} P=${P} by=${c._by} icon="user" title=${c.name||'New clinician'}
         lines=${[[[...c.creds.filter(x=>x!=='Other'),c.credOther].filter(Boolean).join(', '),c.npi&&`NPI ${c.npi}`,c.taxonomy].filter(Boolean).join(' · '),s.locations.filter(l=>c.locs.includes(l.id)).map(l=>l.name).join(' · ')]} empty="Add credentials and NPI" ...${need(miss)}
         missing=${[blank(c.name)&&'Full name',!c.creds.length&&'Credentials',!npiOk(c.npi||'')&&'Valid NPI',!c.locs.length&&'Locations'].filter(Boolean)} onDone=${()=>done(c.id)}
         foot=${html`<${Remove} label=${c.name||'this clinician'} dis=${!P.edit} onRemove=${()=>{P.setEk(null);C(c.id,x=>{x.active=false;});}}/>`}
@@ -769,12 +791,12 @@ function PortalTile({p,Pa,P,icon,open,setOpen,onRemove}){
   useEffect(()=>{if(open&&ref.current){ref.current.scrollIntoView({block:'nearest',behavior:'smooth'});const f=ref.current.querySelector('input:not([type=checkbox])');f&&f.focus({preventScroll:true});}},[open]);
   const sub=p.key==='State Medicaid'&&p.state?p.state:p.key==='Blue Cross Blue Shield'&&p.localPlan?p.localPlan:MULTI_ROWS[p.key]&&p.key!=='Other Portal'?(p.key==='Medicaid Managed Care'?'Managed care':'Commercial'):'';
   if(open)return html`<div ref=${ref} class="tile editing ptile" role="group" aria-label=${'Editing '+portalTitle(p)} onKeyDown=${e=>{if(e.key==='Escape'){e.stopPropagation();setOpen(null);}}}>
-    <div class="ed-h"><span class="ico">${Icon(icon)}</span><div class="ed-t"><b>${portalTitle(p)}</b>${m.length>0&&html`<span class="ed-miss">Still needed: ${m.join(', ')}</span>`}</div><button type="button" class="btn pri sm" onClick=${()=>setOpen(null)}>${Icon('check',15)} Done</button></div>
+    <div class="ed-h"><span class="ico">${Icon(icon)}</span><div class="ed-t"><b>${portalTitle(p)}</b>${m.length>0&&html`<span class="ed-miss">Still needed: ${m.join(', ')}</span>`}${p._by&&html`<${ByTag} by=${p._by}/>`}</div><button type="button" class="btn pri sm" onClick=${()=>setOpen(null)}>${Icon('check',15)} Done</button></div>
     <div class="ed-b"><${PortalAccess} p=${p} Pa=${Pa} P=${P}/></div></div>`;
   return html`<div class="tile-wrap"><button type="button" class=${'tile ptile'+(m.length?' incomplete':'')} onClick=${()=>setOpen(p.id)}>
     <span class="tile-top"><span class="ico sm">${Icon(icon,17)}</span><span class="tile-title"><b>${portalTitle(p)}</b>${sub&&html`<span class="badge">${sub}</span>`}</span>
       ${m.length?html`<span class="ind dot" aria-label="Incomplete"/>`:html`<span class="ind ok" aria-label="Complete">${Icon('check',14)}</span>`}<span class="chev-r">${Icon('chev',18)}</span></span>
-    <span class="tile-lines">${p.invited?html`<span>Invite sent</span>`:p.username?html`<span>${host(p.website)}</span><span>${p.username}</span>`:html`<span class="ph">Add portal login</span>`}</span></button>
+    <span class="tile-lines">${p.invited?html`<span>Invite sent</span>`:p.username?html`<span>${host(p.website)}</span><span>${p.username}</span>`:html`<span class="ph">Add portal login</span>`}</span>${p._by&&html`<${ByTag} by=${p._by}/>`}</button>
     ${onRemove&&P.edit&&html`<${Trash} label=${portalTitle(p)} confirm=${!!(p.username||p.invited||p.name||(p.website&&p.website!==SIGNIN[p.key]))} onClick=${onRemove}/>`}</div>`;
 }
 function PortalEntry({p,Pa,P,open,onRemove}){
@@ -792,7 +814,7 @@ function PortalCards({s,up,P,sec,required}){
   const remove=(g,k)=>{up(d=>{d.payers=d.payers.filter(p=>!(p.group===g&&p.key===k));},sec,`Deselected ${k}`);setAsk(null);};
   return PORTAL_GROUPS.map(([g,title,icon,rows])=>{const sel=s.payers.filter(p=>p.group===g);const inc=sel.filter(p=>portalMissing(p).length);
     const inv=sel.filter(p=>p.invited).length;
-    return html`<${Tile} key=${g} id=${'pg-'+sec+'-'+g} P=${P} icon=${icon} title=${title}
+    return html`<${Tile} key=${g} id=${'pg-'+sec+'-'+g} P=${P} icon=${icon} title=${title} by=${latestBy(sel)}
       lines=${sel.length?[sel.map(portalTitle).join(', '),[sel.length-inc.length+' of '+sel.length+' ready',inv?inv+' invite'+(inv>1?'s':'')+' sent':''].filter(Boolean).join(' · ')]:[]}
       empty="Choose portals" done=${sel.length?!inc.length:null} missing=${inc.map(p=>`${portalTitle(p)} (${portalMissing(p).join(', ')})`)}
       editor=${()=>html`
@@ -809,6 +831,16 @@ function PortalCards({s,up,P,sec,required}){
               ${P.edit&&html`<${AddTile} label=${g==='ins'?'Add insurer':'Add portal'} onClick=${()=>add(g,g==='ins'?'Other Commercial Insurance':'Other Portal',true)}/>`}</div>
           </div>
         </div>`}/>`;});
+}
+function Disputes({s,setS,who}){
+  const items=[...SHARED.flatMap(([c,l])=>(s[c]||[]).filter(x=>x._dispute).map(x=>({c,l,x,name:itemSummary(c,x)}))),...(s.org._dispute?[{c:'org',l:'Practice details',x:s.org,name:itemSummary('org',s.org)}]:[])];
+  if(!items.length)return null;
+  const resolve=it=>setS(p=>{const n=structuredClone(p);const x=it.c==='org'?n.org:n[it.c].find(y=>y.id===it.x.id);if(x)delete x._dispute;n.audit.unshift({t:new Date().toLocaleString(),who,ev:'Dispute resolved',d:it.name});return n;});
+  return html`<div class="panel disputes"><h3>${Icon('alert',16)} Disputed between teams (${items.length})</h3>${items.map(it=>html`<div class="peer" key=${it.c+(it.x.id||'')}>
+    <div class="peer-h"><b>${it.l}</b><span class="small">Disputed by ${byText(it.x._dispute.by)} · ${fmtDT(it.x._dispute.by.at)}</span></div>
+    <div class="peer-v"><span class="lbl">Current entry${it.x._by?' — '+byText(it.x._by):''}</span><span>${it.name}</span></div>
+    ${it.x._dispute.ours&&html`<div class="peer-v ours"><span class="lbl">${it.x._dispute.by.team}’s earlier entry</span><span>${it.x._dispute.ours}</span></div>`}
+    <div class="row" style="justify-content:flex-end"><button class="btn pri sm" onClick=${()=>resolve(it)}>Mark resolved</button></div></div>`)}</div>`;
 }
 function PortalReview({s,P}){
   return P.plexus&&s.payers.length>0&&html`<div class="review"><h5>🛡 Portal access summary</h5><div class="tw"><table><thead><tr><th>Portal</th><th>Type</th><th>Status</th></tr></thead><tbody>
@@ -893,7 +925,7 @@ function LoginTile({e,L,P,s,up,icon,open,setOpen,onRemove,nameLabel,custom}){
   useEffect(()=>{if(open&&ref.current){ref.current.scrollIntoView({block:'nearest',behavior:'smooth'});const f=ref.current.querySelector('input:not([type=checkbox])');f&&f.focus({preventScroll:true});}},[open]);
   const title=e.name||('New '+(LOGIN_GROUP_LABEL[e.type]||'system'));
   if(open)return html`<div ref=${ref} class="tile editing ptile" role="group" aria-label=${'Editing '+title} onKeyDown=${ev=>{if(ev.key==='Escape'){ev.stopPropagation();setOpen(null);}}}>
-    <div class="ed-h"><span class="ico">${Icon(icon)}</span><div class="ed-t"><b>${title}</b>${m.length>0&&html`<span class="ed-miss">Still needed: ${m.join(', ')}</span>`}</div><button type="button" class="btn pri sm" onClick=${()=>setOpen(null)}>${Icon('check',15)} Done</button></div>
+    <div class="ed-h"><span class="ico">${Icon(icon)}</span><div class="ed-t"><b>${title}</b>${m.length>0&&html`<span class="ed-miss">Still needed: ${m.join(', ')}</span>`}${e._by&&html`<${ByTag} by=${e._by}/>`}</div><button type="button" class="btn pri sm" onClick=${()=>setOpen(null)}>${Icon('check',15)} Done</button></div>
     <div class="ed-b">
       ${custom&&html`<div class="grid"><${Field} full label=${nameLabel} req value=${e.name} on=${v=>L(x=>{x.name=v;})} dis=${!P.edit}/></div>`}
       <div class="pref-note">${Icon('key',15)}<span><b>Administrator access is preferred.</b> Regular access works if admin isn’t available — at least one is required.</span></div>
@@ -908,7 +940,7 @@ function LoginTile({e,L,P,s,up,icon,open,setOpen,onRemove,nameLabel,custom}){
   return html`<div class="tile-wrap"><button type="button" class=${'tile ptile'+(m.length?' incomplete':'')} onClick=${()=>setOpen(e.id)}>
     <span class="tile-top"><span class="ico sm">${Icon(icon,17)}</span><span class="tile-title"><b>${title}</b></span>
       ${m.length?html`<span class="ind dot" aria-label="Incomplete"/>`:html`<span class="ind ok" aria-label="Complete">${Icon('check',14)}</span>`}<span class="chev-r">${Icon('chev',18)}</span></span>
-    <span class="tile-lines">${m.length&&!adminOk&&!regs?html`<span class="ph">Add administrator or regular access</span>`:html`<span>${[adminOk?'Admin '+accState(ad):'',regs?`${regs} regular`:''].filter(Boolean).join(' · ')}</span>`}</span></button>
+    <span class="tile-lines">${m.length&&!adminOk&&!regs?html`<span class="ph">Add administrator or regular access</span>`:html`<span>${[adminOk?'Admin '+accState(ad):'',regs?`${regs} regular`:''].filter(Boolean).join(' · ')}</span>`}</span>${e._by&&html`<${ByTag} by=${e._by}/>`}</button>
     ${onRemove&&P.edit&&html`<${Trash} label=${title} confirm=${hasData} onClick=${onRemove}/>`}</div>`;
 }
 function LoginCards({s,up,P}){
@@ -922,7 +954,7 @@ function LoginCards({s,up,P}){
     const addCustom=()=>{const l=newLogin(type,'');l.custom=true;up(d=>{d.logins.push(l);},'emr');setOpenId(l.id);};
     const removeOne=id=>{setOpenId(null);up(d=>{d.logins=d.logins.filter(x=>x.id!==id);},'emr');};
     const custom=l=>l.custom||!names.includes(l.name);
-    return html`<${Tile} key=${type} id=${'lg-'+type} P=${P} icon=${icon} title=${title}
+    return html`<${Tile} key=${type} id=${'lg-'+type} P=${P} icon=${icon} title=${title} by=${latestBy(sel)}
       lines=${sel.length?[sel.map(l=>l.name||'Unnamed').join(', '),`${sel.length-inc.length} of ${sel.length} ready`]:[]}
       empty=${type==='EMR'?'Add your EMR':'Optional'} done=${sel.length?!inc.length:(type==='EMR'?false:null)} missing=${type==='EMR'&&!sel.length?['At least one EMR']:inc.map(l=>`${l.name||'Unnamed'} (${loginMissing(l).join(', ')})`)}
       editor=${()=>html`
@@ -1077,6 +1109,48 @@ const AUTH_KEY='plexus-onboarding-session';
 const loadAuth=()=>{try{return JSON.parse(localStorage.getItem(AUTH_KEY))||null;}catch(e){return null;}};
 const saveAuth=a=>{try{a?localStorage.setItem(AUTH_KEY,JSON.stringify(a)):localStorage.removeItem(AUTH_KEY);}catch(e){}};
 const PLEXUS_DOMAIN='@plexusclinical.com';
+const ACC_KEY='plexus-onboarding-accounts',USERS_KEY='plexus-onboarding-users',REM_KEY='plexus-onboarding-reminders';
+const jget=(k,d)=>{try{const v=JSON.parse(lsGet(k));return v==null?d:v;}catch(e){return d;}};const jset=(k,v)=>lsSet(k,JSON.stringify(v));
+const PROLES={Admin:'Full access, including users and roles',Coordinator:'Add clinics, invite teams, reminders',Reviewer:'Review and approve sections',Billing:'Billing onboarding review'};
+const PERMS=[['users','Manage users and roles',['Admin']],['clinics','Add clinics',['Admin','Coordinator']],['invite','Invite clinic and billing teams',['Admin','Coordinator']],['review','Review and approve sections',['Admin','Coordinator','Reviewer','Billing']],['requirements','Edit requirement defaults',['Admin']],['reminders','Edit reminder settings',['Admin','Coordinator']],['credentials','Reveal stored credentials',['Admin']]];
+const can=(auth,perm)=>!!auth&&auth.role==='plexus'&&(PERMS.find(x=>x[0]===perm)||[,,[]])[2].includes(auth.prole||'Admin');
+const defaultUsers=()=>[{email:'onboarding'+PLEXUS_DOMAIN,name:'Plexus Onboarding',role:'Admin',owner:true,added:new Date().toISOString()},{email:'billing'+PLEXUS_DOMAIN,name:'Plexus Billing',role:'Billing',added:new Date().toISOString()},{email:'drimran'+PLEXUS_DOMAIN,name:'Dr. Imran',role:'Admin',added:new Date().toISOString()}];
+const loadUsers=()=>{const u=jget(USERS_KEY,null);if(Array.isArray(u)&&u.length)return u;const d=defaultUsers();jset(USERS_KEY,d);return d;};
+const REM_DEFAULT={enabled:true,every:3,business:true,teams:'both',stopOnSubmit:true,max:6,noWeekends:true,from:'onboarding'+PLEXUS_DOMAIN};
+const loadRem=()=>({...REM_DEFAULT,...jget(REM_KEY,{})});
+async function pwHash(email,pw){try{const d=await crypto.subtle.digest('SHA-256',new TextEncoder().encode('plexus-onboarding:'+email+':'+pw));return Array.from(new Uint8Array(d)).map(b=>b.toString(16).padStart(2,'0')).join('');}catch(e){let h=0;for(const ch of email+pw)h=(h*31+ch.charCodeAt(0))|0;return 'x'+h;}}
+const addBusinessDays=(d,n,biz)=>{const r=new Date(d);let k=0;while(k<n){r.setDate(r.getDate()+1);if(!biz||(r.getDay()!==0&&r.getDay()!==6))k++;}return r;};
+const fmtDT=iso=>{try{return new Date(iso).toLocaleString([], {month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});}catch(e){return '';}};
+const fmtD=iso=>{try{return new Date(iso).toLocaleDateString([], {month:'short',day:'numeric'});}catch(e){return '';}};
+/* Team reminders: when the next one is due for a facility team (null = none due) */
+function reminderPlan(fs,team,rem){const ov=(fs.remOverride||{});const on=ov.enabled!==undefined?ov.enabled:rem.enabled;const every=ov.every||rem.every;
+  const inv=((fs.invites||{})[fs.site]||{})[team]||[];if(!on)return {state:'off'};if(!inv.length)return {state:'none',label:'No one invited'};
+  if(rem.teams!=='both'&&rem.teams!==team)return {state:'off'};
+  const keys=SECTIONS.map(x=>x[0]).filter(k=>team==='billing'?BILLING_KEYS.includes(k):!BILLING_KEYS.includes(k));const st=status(fs);const xs=st.secs.filter(x=>keys.includes(x.k));
+  if(rem.stopOnSubmit&&xs.every(x=>['submitted','na','verified','waived'].includes(x.state)))return {state:'done',label:'Submitted'};
+  if(xs.every(x=>x.complete))return {state:'done',label:'Complete'};
+  const log=(fs.reminders||[]).filter(r=>r.team===team);if(log.length>=rem.max)return {state:'max',label:`Max ${rem.max} sent`};
+  const last=log.length?log[0].at:(inv.map(x=>x.sentAt).filter(Boolean).sort()[0]||new Date().toISOString());
+  const next=addBusinessDays(new Date(last),every,rem.business);return {state:'due',next,overdue:next<=new Date(),count:log.length,to:inv.map(x=>x.email)};}
+
+/* ---------- attribution: who changed each shared item ---------- */
+const SHARED=[['logins','Login'],['payers','Portal'],['clinicians','Clinician'],['locations','Location']];
+const strip=o=>{if(!o||typeof o!=='object')return o;const r={};for(const k of Object.keys(o))if(k[0]!=='_')r[k]=o[k];return r;};
+function itemSummary(coll,x){if(!x)return '';
+  if(coll==='logins'){const a=[['Admin',x.access.admin],['Regular',x.access.regular]].filter(([,v])=>v.on!==false).map(([l,v])=>`${l}: ${v.pathway==='fill'?(v.username||'—')+(v.url?' @ '+v.url.replace(/^https?:\/\//,''):''):v.pathway==='will_send'?'invite pending':v.pathway==='sent'?'invite sent':'not chosen'}`);return `${x.name||x.type} — ${a.join(' · ')||'no access'}`;}
+  if(coll==='payers')return `${portalTitle(x)} — ${x.invited?'Invite sent':x.username?`${x.username}${x.website?' @ '+x.website.replace(/^https?:\/\//,''):''}`:'no login yet'}`;
+  if(coll==='clinicians')return [x.name||'Unnamed',[...(x.creds||[])].join(', '),x.npi&&'NPI '+x.npi].filter(Boolean).join(' · ');
+  if(coll==='locations')return [x.name,[x.street,x.city,x.state].filter(Boolean).join(', ')].filter(Boolean).join(' · ');
+  if(coll==='org')return [x.legalName||x.dba||'Practice',x.status].filter(Boolean).join(' · ');return '';}
+function stampChanges(prev,n,by){
+  for(const [coll] of SHARED){const before=new Map((prev[coll]||[]).map(x=>[x.id,x]));
+    for(const x of n[coll]||[]){const b=before.get(x.id);if(b&&JSON.stringify(strip(b))===JSON.stringify(strip(x)))continue;
+      if(x._by&&x._by.tk!==by.tk&&b)x._prev={by:x._by,sum:itemSummary(coll,b)};else if(x._by&&x._by.tk===by.tk&&x._prev&&x._prev.by.tk===by.tk)delete x._prev;x._by=by;}}
+  if(JSON.stringify(strip(prev.org))!==JSON.stringify(strip(n.org))){if(n.org._by&&n.org._by.tk!==by.tk)n.org._prev={by:n.org._by,sum:itemSummary('org',prev.org)};n.org._by=by;}}
+const latestBy=xs=>xs.map(x=>x._by).filter(Boolean).sort((a,b)=>a.at<b.at?1:-1)[0];
+const byText=b=>b?`${b.name} – ${b.team}`:'';
+function ByTag({by}){return by?html`<span class="by-tag" title=${'Last updated '+fmtDT(by.at)}>${Icon('user',11)} ${byText(by)} · ${fmtDT(by.at)}</span>`:null;}
+
 const PLEXUS_MARK='data:image/png;base64,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',PLEXUS_WHITE='data:image/png;base64,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';
 const STARS=Array.from({length:48},(_,i)=>({left:`${((i*37.31+7)%100).toFixed(2)}%`,top:`${((i*61.73+13)%90+5).toFixed(2)}%`,opacity:.2+(i%5)*.08,width:i%7===0?1.5:1,height:i%7===0?1.5:1}));
 function BannerStars({intervalMs=30000,fixed}){
@@ -1086,35 +1160,69 @@ function BannerStars({intervalMs=30000,fixed}){
   return html`<div class=${'ws-stars'+(fixed?' fixed':'')} aria-hidden="true">${STARS.map((st,i)=>html`<span key=${i} class="ws-star" style=${{left:st.left,top:st.top,opacity:st.opacity,width:st.width+'px',height:st.height+'px'}}/>`)}
     ${m&&html`<span key=${'m'+m.id} class="ws-meteor" style=${{left:m.left,top:m.top}} onAnimationEnd=${()=>setM(null)}/>`}</div>`;
 }
-function SignIn({s,facs,onIn}){
-  const [email,setEmail]=useState(''),[err,setErr]=useState(''),[step,setStep]=useState('email'),[match,setMatch]=useState(null);
-  const all=facs.map(f=>{const st0=loadFac(f.id);return {f,inv:(st0.invites||{})[st0.site]||{clinic:[],billing:[]}};});const inv={clinic:all.flatMap(a=>a.inv.clinic),billing:all.flatMap(a=>a.inv.billing)};
-  const find=e=>{const em=e.trim().toLowerCase();if(!emailOk(em))return {err:'Enter a valid email address.'};
-    if(em.endsWith(PLEXUS_DOMAIN))return {user:{email:em,name:em.split('@')[0],role:'plexus'}};
-    const hit=all.find(a=>['clinic','billing'].some(t=>a.inv[t].some(x=>x.email===em)));const teams=hit?['clinic','billing'].filter(t=>hit.inv[t].some(x=>x.email===em)):[];const rec=hit&&[...hit.inv.clinic,...hit.inv.billing].find(x=>x.email===em);
-    if(!teams.length)return {err:'This email hasn’t been invited yet. Ask your Plexus coordinator for an invitation.'};
-    return {user:{email:em,name:(rec&&rec.name)||em,role:'member',teams,fid:hit.f.id,site:hit.f.site}};};
-  const go=()=>{const r=find(email);if(r.err){setErr(r.err);return;}setErr('');setMatch(r.user);setStep('sent');};
-  const finish=team=>{const u={...match};if(u.role==='member')u.team=team||u.teams[0];onIn(u);};
-  const demo=[['Plexus team','morgan'+PLEXUS_DOMAIN],...inv.clinic.slice(0,2).map(x=>['Clinic team',x.email]),...inv.billing.slice(0,2).map(x=>['Billing team',x.email])];
+function SignIn({facs,onIn,inviteToken,clearInvite}){
+  const [mode,setMode]=useState(inviteToken?'invite':'signin'),[email,setEmail]=useState(''),[pw,setPw]=useState(''),[pw2,setPw2]=useState(''),[name,setName]=useState(''),[show,setShow]=useState(false);
+  const [err,setErr]=useState(''),[pending,setPending]=useState(null),[code,setCode]=useState(''),[sent,setSent]=useState(''),[gpick,setGpick]=useState(false),[gmail,setGmail]=useState('');
+  const all=facs.map(f=>{const st0=loadFac(f.id);return {f,inv:(st0.invites||{})[st0.site]||{clinic:[],billing:[]}};});
+  const users=loadUsers(),accts=jget(ACC_KEY,{});
+  const memberFor=em=>{const hit=all.find(a=>['clinic','billing'].some(t=>a.inv[t].some(x=>x.email===em)));if(!hit)return null;const teams=['clinic','billing'].filter(t=>hit.inv[t].some(x=>x.email===em));const rec=[...hit.inv.clinic,...hit.inv.billing].find(x=>x.email===em);return {email:em,name:(rec&&rec.name)||em,role:'member',teams,fid:hit.f.id,site:hit.f.site};};
+  const inviteRec=(()=>{if(!inviteToken)return null;for(const a of all)for(const t of ['clinic','billing']){const r=a.inv[t].find(x=>x.token===inviteToken);if(r)return {...r,team:t,f:a.f};}return null;})();
+  useEffect(()=>{if(inviteToken){setMode('invite');setErr('');setPw('');setPw2('');}if(inviteRec){setEmail(inviteRec.email);setName(inviteRec.name||'');}},[inviteToken]);
+  const startCode=u=>{const c=String(Math.floor(100000+Math.random()*900000));setSent(c);setCode('');setPending(u);setMode('code');};
+  const finish=(u,team)=>{const acc=jget(ACC_KEY,{});if(acc[u.email]){acc[u.email].lastSignIn=new Date().toISOString();jset(ACC_KEY,acc);}const v={...u};if(v.role==='member')v.team=team||v.teams[0];onIn(v);};
+  const signIn=async()=>{const em=email.trim().toLowerCase();if(!emailOk(em)){setErr('Enter a valid email address.');return;}
+    if(em.endsWith(PLEXUS_DOMAIN)){setErr('Plexus staff sign in with Google.');return;}
+    const a=accts[em];const m=memberFor(em);if(!m){setErr('This email hasn’t been invited. Ask your Plexus coordinator for an invitation.');return;}
+    if(!a||!a.hash){setErr('You haven’t created your account yet. Open the invitation link in your email to create it.');return;}
+    if(await pwHash(em,pw)!==a.hash){setErr('That email and password don’t match.');return;}setErr('');startCode(m);};
+  const accept=async()=>{if(!inviteRec){setErr('This invitation link is invalid or was removed. Ask your Plexus coordinator to resend it.');return;}
+    if(!name.trim()){setErr('Enter your full name.');return;}if(pw.length<12){setErr('Use at least 12 characters for your password.');return;}if(pw!==pw2){setErr('The passwords don’t match.');return;}
+    const acc=jget(ACC_KEY,{});acc[inviteRec.email]={name:name.trim(),hash:await pwHash(inviteRec.email,pw),created:new Date().toISOString(),method:'password',mfa:true};jset(ACC_KEY,acc);
+    setErr('');startCode({...memberFor(inviteRec.email),name:name.trim()});};
+  const google=em=>{em=em.trim().toLowerCase();if(!emailOk(em)){setErr('Enter a valid Google account.');return;}
+    const u=users.find(x=>x.email===em&&!x.disabled);if(u){onIn({email:em,name:u.name,role:'plexus',prole:u.role,via:'google'});return;}
+    if(em.endsWith(PLEXUS_DOMAIN)){setErr('This Google account hasn’t been added in Users & roles. Ask onboarding@plexusclinical.com for access.');setGpick(false);return;}
+    const m=memberFor(em);if(!m){setErr('This Google account hasn’t been invited.');setGpick(false);return;}
+    const acc=jget(ACC_KEY,{});if(!acc[em])acc[em]={name:m.name,created:new Date().toISOString(),method:'google'};else acc[em].google=true;jset(ACC_KEY,acc);finish(m);};
+  const demo=[...all.flatMap(a=>a.inv.clinic.slice(0,2).map(x=>['Clinic team',x,a.f.site])),...all.flatMap(a=>a.inv.billing.slice(0,2).map(x=>['Billing team',x,a.f.site]))].slice(0,6);
+  const G=html`<svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>`;
   return html`<main class="lx"><${BannerStars} intervalMs=${10000} fixed/>
     <div class="lx-card">
       <img src=${PLEXUS_WHITE} alt="Plexus Ancillary Services" class="lx-logo"/>
       <div class="lx-app">Onboarding</div>
-      ${step==='email'?html`<h1 class="lx-h">Sign in</h1><p class="lx-sub">Enter the email your invitation was sent to. We’ll email you a secure sign-in link.</p>
-        <div class="lx-form"><div><label class="lx-lbl" for="si-email">Email</label><input id="si-email" class="lx-inp" type="email" autocomplete="email" value=${email} onInput=${e=>{setEmail(e.target.value);setErr('');}} onKeyDown=${e=>{if(e.key==='Enter')go();}}/></div>
-        ${err&&html`<div class="lx-err" role="alert">${err}</div>`}
-        <button class="lx-btn" onClick=${go}>Email me a sign-in link <span aria-hidden="true">→</span></button></div>
-        <button class="lx-alt" onClick=${()=>onIn({email:'drimran'+PLEXUS_DOMAIN,name:'Dr. Imran',role:'plexus'})}>Explore Plexus workspace (preview)</button>
-        ${demo.length>1&&html`<div class="lx-demo"><span>Preview team accounts</span>${demo.slice(1).map(([l,e])=>html`<button class="lx-chip" onClick=${()=>{setEmail(e);setErr('');}}><b>${l}</b> ${e}</button>`)}</div>`}`
-      :html`<h1 class="lx-h">Check your email</h1><p class="lx-sub">We sent a sign-in link to <b>${match.email}</b>. It expires in 15 minutes.</p>
-        <div class="lx-form">${match.role==='member'&&match.teams.length>1?html`<p class="lx-sub">You’re on both teams. Open:</p>${match.teams.map(t=>html`<button class="lx-btn" onClick=${()=>finish(t)}>${t==='clinic'?'Clinic onboarding':'Billing onboarding'}</button>`)}`
-          :html`<button class="lx-btn" onClick=${()=>finish()}>Open sign-in link (preview) <span aria-hidden="true">→</span></button>`}</div>
-        <button class="lx-alt" onClick=${()=>setStep('email')}>Use a different email</button>`}
+      ${mode==='invite'?html`<h1 class="lx-h">Accept your invitation</h1>
+        ${inviteRec?html`<p class="lx-sub">${inviteRec.f.site} · ${inviteRec.team==='billing'?'Billing team':'Clinic team'}. Create your account to start onboarding.</p>`:html`<p class="lx-sub">This invitation link is invalid or was removed.</p>`}
+        <div class="lx-form"><div><label class="lx-lbl" for="ia-name">Full name</label><input id="ia-name" class="lx-inp" autocomplete="name" value=${name} onInput=${e=>{setName(e.target.value);setErr('');}}/></div>
+          <div><label class="lx-lbl" for="ia-email">Email</label><input id="ia-email" class="lx-inp" value=${email} disabled/></div>
+          <div><label class="lx-lbl" for="ia-pw">Create password</label><div class="lx-field"><input id="ia-pw" class="lx-inp has-btn" type=${show?'text':'password'} autocomplete="new-password" value=${pw} onInput=${e=>{setPw(e.target.value);setErr('');}}/><button type="button" class="lx-eye" onClick=${()=>setShow(!show)} aria-label=${show?'Hide password':'Show password'}>${show?'Hide':'Show'}</button></div><p class="lx-hint">12 characters minimum</p></div>
+          <div><label class="lx-lbl" for="ia-pw2">Confirm password</label><input id="ia-pw2" class="lx-inp" type=${show?'text':'password'} autocomplete="new-password" value=${pw2} onInput=${e=>{setPw2(e.target.value);setErr('');}} onKeyDown=${e=>{if(e.key==='Enter')accept();}}/></div>
+          ${err&&html`<div class="lx-err" role="alert">${err}</div>`}
+          <button class="lx-btn" onClick=${accept}>Create account <span aria-hidden="true">→</span></button></div>
+        <button class="lx-alt" onClick=${()=>{setGmail(email);google(email);}}>${G} Use my Google account instead</button>
+        <button class="lx-link" onClick=${()=>{clearInvite&&clearInvite();setMode('signin');setErr('');}}>I already have an account</button>`
+      :mode==='code'?html`<h1 class="lx-h">Two-step verification</h1><p class="lx-sub">Enter the 6-digit code we sent to <b>${pending.email}</b>.</p>
+        <div class="lx-form"><div><label class="lx-lbl" for="si-code">Verification code</label><input id="si-code" class="lx-inp code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" value=${code} onInput=${e=>{setCode(e.target.value.replace(/\D/g,''));setErr('');}} onKeyDown=${e=>{if(e.key==='Enter')document.getElementById('si-verify')?.click();}}/></div>
+          <p class="lx-hint">Preview only: your code is <b>${sent}</b></p>
+          ${err&&html`<div class="lx-err" role="alert">${err}</div>`}
+          ${pending.role==='member'&&pending.teams.length>1?html`<p class="lx-sub">You’re on both teams. Open:</p>${pending.teams.map(t=>html`<button class="lx-btn" onClick=${()=>{if(code!==sent){setErr('That code isn’t right.');return;}finish(pending,t);}}>${t==='clinic'?'Clinic onboarding':'Billing onboarding'}</button>`)}`
+            :html`<button id="si-verify" class="lx-btn" onClick=${()=>{if(code!==sent){setErr('That code isn’t right.');return;}finish(pending);}}>Verify and continue <span aria-hidden="true">→</span></button>`}</div>
+        <button class="lx-link" onClick=${()=>{setMode('signin');setPw('');}}>Back</button>`
+      :html`<h1 class="lx-h">Sign in</h1><p class="lx-sub">Continue to your workspace</p>
+        <button class="lx-google" onClick=${()=>{setGpick(true);setErr('');}}>${G} Continue with Google</button>
+        ${gpick&&html`<div class="lx-gpick"><span class="lx-hint">Choose a Google account (preview)</span>${users.filter(u=>!u.disabled).map(u=>html`<button class="lx-chip" onClick=${()=>google(u.email)}><b>${u.name}</b> ${u.email}</button>`)}
+          <div class="row" style="gap:6px"><input class="lx-inp" style="height:38px" placeholder="another Google account" value=${gmail} onInput=${e=>setGmail(e.target.value)} onKeyDown=${e=>{if(e.key==='Enter')google(gmail);}}/><button class="lx-chip" onClick=${()=>google(gmail)}>Use</button></div></div>`}
+        <div class="lx-or"><span>or with email</span></div>
+        <div class="lx-form"><div><label class="lx-lbl" for="si-email">Email</label><input id="si-email" class="lx-inp" type="email" autocomplete="username" value=${email} onInput=${e=>{setEmail(e.target.value);setErr('');}}/></div>
+          <div><label class="lx-lbl" for="si-pw">Password</label><div class="lx-field"><input id="si-pw" class="lx-inp has-btn" type=${show?'text':'password'} autocomplete="current-password" value=${pw} onInput=${e=>{setPw(e.target.value);setErr('');}} onKeyDown=${e=>{if(e.key==='Enter')signIn();}}/><button type="button" class="lx-eye" onClick=${()=>setShow(!show)} aria-label=${show?'Hide password':'Show password'}>${show?'Hide':'Show'}</button></div></div>
+          ${err&&html`<div class="lx-err" role="alert">${err}</div>`}
+          <button class="lx-btn" onClick=${signIn}>Sign in <span aria-hidden="true">→</span></button></div>
+        <button class="lx-alt" onClick=${()=>onIn({email:'onboarding'+PLEXUS_DOMAIN,name:'Plexus Onboarding',role:'plexus',prole:'Admin',via:'preview'})}>Explore Plexus workspace (preview)</button>
+        ${demo.length>0&&html`<div class="lx-demo"><span>Preview: open an invitation</span>${demo.map(([l,x,site])=>html`<button class="lx-chip" onClick=${()=>{if(jget(ACC_KEY,{})[x.email]&&jget(ACC_KEY,{})[x.email].hash){setEmail(x.email);setErr('Account already created — enter the password.');}else{location.hash='';onIn({inviteToken:x.token});}}}><b>${l}</b> ${x.name||x.email} · ${site}</button>`)}</div>`}`}
     </div></main>`;
 }
 function App(){
-  const [auth,setAuth]=useState(loadAuth);
+  const [auth,setAuth]=useState(loadAuth),[invTok,setInvTok]=useState(()=>{try{return new URLSearchParams(location.search).get('invite');}catch(e){return null;}});
+  const [resumeAt,setResumeAt]=useState(null);
   const [facs,setFacs]=useState(loadFacs),[fid,setFid]=useState(()=>{const a=loadAuth();const f=loadFacs();return (a&&a.fid&&f.some(x=>x.id===a.fid))?a.fid:f[0].id;});
   const [s,setS]=useState(()=>loadFac(fid)),[view,setView]=useState(()=>{try{const v=new URLSearchParams(location.search).get('view');return ['clinic','billing'].includes(v)?v:'clinic';}catch(e){return 'clinic';}}),[saved,setSaved]=useState(null),[saving,setSaving]=useState(false);
   const [open,setOpen]=useState({}),[active,setActive]=useState(location.hash.slice(1)||'facility');
@@ -1123,17 +1231,19 @@ function App(){
   const plexus=view==='review'||view==='console';
   const [ek,setEk]=useState(null),[flags,setFlags]=useState({}),[tried,setTried]=useState(false);
   const P={edit:true,plexus,settlement:true,ek,setEk};
-  const who=plexus?'Morgan Lee (Plexus coordinator)':'Jamie Chen (Clinic admin)';
+  const actor=auth?{name:auth.name,tk:auth.role==='plexus'?'plexus':auth.team,team:auth.role==='plexus'?'Plexus team':auth.team==='billing'?'Billing team':'Clinic team'}:{name:'Plexus',tk:'plexus',team:'Plexus team'};
+  const who=byText(actor);
   useEffect(()=>{if(s.fid!==fid)setS(loadFac(fid));},[fid]);
+  useEffect(()=>{if(auth&&auth.role==='member'&&s.lastEdit)setResumeAt(s.lastEdit.at);},[auth&&auth.email,s.fid]);
   useEffect(()=>{setSaving(true);const t=setTimeout(()=>{try{localStorage.setItem(KEY+':'+s.fid,JSON.stringify(s));const g=loadGlobal();g.reqDefaults=s.reqDefaults||{};lsSet(GKEY,JSON.stringify(g));
       setFacs(fs=>{const n=fs.map(f=>f.id===s.fid&&(f.site!==s.site||f.clinic!==s.clinic)?{...f,site:s.site,clinic:s.clinic}:f);if(n.some((f,i)=>f!==fs[i]))lsSet(FKEY,JSON.stringify(n));return n;});
       setSaved(new Date());}catch(e){setSaved('mem');}setSaving(false);},600);return()=>clearTimeout(t);},[s]);
   const addFacility=f=>{const st0=fresh();const id='f'+uid();st0.fid=id;st0.site=f.site;st0.clinic=f.clinic||f.site;const g=loadGlobal();if(g.reqDefaults)st0.reqDefaults=g.reqDefaults;
     st0.audit.unshift({t:new Date().toLocaleString(),who:auth?auth.name:'Plexus',ev:'Clinic added',d:f.site});lsSet(KEY+':'+id,JSON.stringify(st0));
     const n=[...facs,{id,site:f.site,clinic:f.clinic||f.site,coordinator:f.coordinator||'',target:f.target||''}];setFacs(n);lsSet(FKEY,JSON.stringify(n));return id;};
-  const up=useCallback((fn,section,msg)=>setS(prev=>{const n=structuredClone(prev);fn(n);
+  const up=useCallback((fn,section,msg)=>setS(prev=>{const n=structuredClone(prev);fn(n);stampChanges(prev,n,{...actor,at:new Date().toISOString()});n.lastEdit={at:new Date().toISOString(),...actor};
     if(section){const t=n.tasks[section];if(['verified','waived','submitted','na'].includes(t.state)){n.audit.unshift({t:new Date().toLocaleString(),who,ev:`${LABEL[section]} reopened`,d:`${STATE_LABEL[t.state]} → In Progress (information changed)`});t.reason=['verified','waived'].includes(t.state)?'Information changed after verification. Resubmit for Plexus review.':'Edited after submission. Resubmit when ready.';t.state='saved';}else if(t.state==='not_started')t.state='saved';}
-    if(msg)n.audit.unshift({t:new Date().toLocaleString(),who,ev:msg,d:section?LABEL[section]:''});return n;}),[who]);
+    if(msg)n.audit.unshift({t:new Date().toLocaleString(),who,ev:msg,d:section?LABEL[section]:''});return n;}),[who,actor.tk]);
   const act=(k,state,reason)=>setS(prev=>{const n=structuredClone(prev);const t=n.tasks[k];
     if(state){n.audit.unshift({t:new Date().toLocaleString(),who,ev:`${LABEL[k]}: ${STATE_LABEL[t.state]} → ${STATE_LABEL[state]}`,d:reason});t.state=state;t.reason=['changes','na'].includes(state)?reason:'';}
     else n.audit.unshift({t:new Date().toLocaleString(),who,ev:`${LABEL[k]}: reminder`,d:reason});return n;});
@@ -1146,7 +1256,19 @@ function App(){
   const vis=st.secs.filter(x=>VIS.some(([k])=>k===x.k)),vdone=vis.filter(x=>x.complete).length,vpct=Math.round(vdone/VIS.length*100);
   const vsub=vis.every(x=>['submitted','na','verified','waived'].includes(x.state)),vstage=vis.every(x=>['verified','waived'].includes(x.state))?2:vsub?1:0;
   const gi=k=>SECTIONS.findIndex(x=>x[0]===k);
-  const submitAll=()=>{const inc=vis.filter(x=>!x.complete);
+  const [peer,setPeer]=useState(null);
+  const peerItems=()=>{const T=view==='billing'?'billing':'clinic',O=T==='clinic'?'billing':'clinic';const ack=((s.ack||{})[T])||{};const out=[];
+    const colls=T==='clinic'?SHARED:SHARED.filter(([c])=>c!=='logins');
+    for(const [coll,label] of colls)for(const x of s[coll]||[])if(x._by&&x._by.tk===O&&!(ack[coll+':'+x.id]>=x._by.at))out.push({key:coll+':'+x.id,coll,id:x.id,label,by:x._by,now:itemSummary(coll,x),prev:x._prev&&x._prev.by.tk===T?x._prev:null});
+    if(s.org._by&&s.org._by.tk===O&&!(ack['org']>=s.org._by.at))out.push({key:'org',coll:'org',label:'Practice details',by:s.org._by,now:itemSummary('org',s.org),prev:s.org._prev&&s.org._prev.by.tk===T?s.org._prev:null});
+    return out;};
+  const decidePeer=(it,agree)=>{const T=view==='billing'?'billing':'clinic';setS(prev=>{const n=structuredClone(prev);n.ack=n.ack||{};n.ack[T]=n.ack[T]||{};n.ack[T][it.key]=new Date().toISOString();
+      const x=it.coll==='org'?n.org:(n[it.coll]||[]).find(y=>y.id===it.id);if(x){if(agree)delete x._dispute;else x._dispute={by:{...actor,at:new Date().toISOString()},theirs:it.now,ours:it.prev?it.prev.sum:''};}
+      n.audit.unshift({t:new Date().toLocaleString(),who,ev:`${agree?'Agreed with':'Disputed'} ${it.by.team} change`,d:it.now});return n;});
+    setPeer(p=>{const r=(p||[]).filter(y=>y.key!==it.key);return r;});};
+  useEffect(()=>{if(peer&&peer.length===0){setPeer(null);doSubmit();}},[peer]);
+  const submitAll=()=>{const inc=vis.filter(x=>!x.complete);if(!inc.length){const pi=peerItems();if(pi.length){setPeer(pi);return;}}doSubmit();};
+  const doSubmit=()=>{const inc=vis.filter(x=>!x.complete);
     if(inc.length){setTried(true);setFlags(Object.fromEntries(inc.map(x=>[x.k,true])));setOpen(o=>({...o,...Object.fromEntries(inc.map(x=>[x.k,true]))}));return;}
     setTried(false);setFlags({});setS(prev=>{const n=structuredClone(prev);for(const [k] of VIS){const t=n.tasks[k];if(!['na','verified','waived'].includes(t.state)){t.state='submitted';t.reason='';}}n.audit.unshift({t:new Date().toLocaleString(),who,ev:(view==='billing'?'Billing':'Clinic')+' onboarding submitted for review',d:VIS.map(x=>x[1]).join(', ')});return n;});};
   const goTo=k=>{setOpen(o=>({...o,[k]:true}));setActive(k);prog.current=Date.now()+1200;try{history.replaceState(null,'','#'+k);}catch(e){}
@@ -1167,9 +1289,9 @@ function App(){
     <div class="who">${auth&&html`<span class="who-n">${auth.name}<small>${auth.role==='plexus'?'Plexus':auth.team==='billing'?'Billing team':'Clinic team'}</small></span><button class="link signout" onClick=${()=>{saveAuth(null);setAuth(null);setView('clinic');}}>Sign out</button>`}</div>
     ${auth&&auth.role==='plexus'&&html`<button class="reset" onClick=${reset} onBlur=${()=>setConfirmReset(false)}>${confirmReset?'Click again to erase':'Reset demo'}</button>`}</header>`;
 
-  if(!auth)return html`<${SignIn} s=${s} facs=${facs} onIn=${u=>{saveAuth(u);setAuth(u);if(u.fid)setFid(u.fid);setView(u.role==='plexus'?'console':u.team);scrollTo(0,0);}}/>`;
+  if(!auth||invTok)return html`<${SignIn} facs=${facs} inviteToken=${invTok} clearInvite=${()=>{setInvTok(null);try{history.replaceState(null,'',location.pathname);}catch(e){}}} onIn=${u=>{if(u.inviteToken){saveAuth(null);setAuth(null);setInvTok(u.inviteToken);return;}if(u.role==='plexus'&&!u.prole){const x=loadUsers().find(y=>y.email===u.email);u.prole=x?x.role:'Admin';}saveAuth(u);setAuth(u);setInvTok(null);if(u.fid)setFid(u.fid);setView(u.role==='plexus'?'console':u.team);scrollTo(0,0);}}/>`;
   if(auth.role!=='plexus'&&(view==='console'||view==='review'))return null;
-  if(view==='console')return html`${bar}<main><${Console} s=${s} st=${st} setS=${setS} facs=${facs} fid=${fid} setFid=${setFid} addFacility=${addFacility} openReview=${id=>{setFid(id);setView('review');scrollTo(0,0);}}/></main>`;
+  if(view==='console')return html`${bar}<main><${Console} s=${s} st=${st} setS=${setS} facs=${facs} fid=${fid} setFid=${setFid} addFacility=${addFacility} openReview=${id=>{setFid(id);setView('review');scrollTo(0,0);}} auth=${auth} who=${who} openInvite=${tok=>{saveAuth(null);setAuth(null);setInvTok(tok);}}/></main>`;
   return html`${bar}<main>
     ${view==='review'?html`<section class="hero rdash">
       <div class="hero-top"><div><button type="button" class="link back" onClick=${()=>{setView('console');scrollTo(0,0);}}>← Back to console</button><p class="eyebrow">${s.clinic} · Plexus review</p><h1>${s.site}</h1><button class=${'btn sm'+(reqFac?' pri':'')} style="margin-top:8px" onClick=${()=>setReqFac(!reqFac)}>${Icon('check',14)} Requirements for this facility${Object.values(s.reqOverride||{}).reduce((a,o)=>a+Object.keys(o).length,0)?' · customized':''}</button></div>
@@ -1194,6 +1316,7 @@ function App(){
         <ol class="stages" aria-label="Onboarding stage">${[view==='billing'?'Billing Completing':view==='review'?'Teams Completing':'Clinic Completing','Plexus Reviewing','Ready to Launch'].map((x,i)=>html`<li class=${i<vstage?'done':i===vstage?'cur':''} aria-current=${i===vstage?'step':undefined}><i>${i<vstage?'✓':i+1}</i>${x}</li>`)}</ol>
         <div class=${'save'+(!saving&&saved?' ok':'')} aria-live="polite">${saving?'Saving…':saved==='mem'?'Saved for this session (browser storage unavailable)':saved?`✓ All changes saved · ${saved.toLocaleTimeString([],{hour:'numeric',minute:'2-digit'})} · this browser only`:'Changes save automatically'}</div>
       </div>
+      ${resumeAt&&!plexus&&html`<div class="note resume" style="margin-top:10px">${Icon('check',14)} Welcome back — your progress was saved ${fmtDT(resumeAt)}. Pick up where you left off.<button class="link" onClick=${()=>setResumeAt(null)}>Dismiss</button></div>`}
       ${vstage===2&&html`<div class="note ok" style="margin-top:10px">Every section is verified. Launch approval still requires startup, training and the Plexus launch dry run.</div>`}
     </section>`}
     <nav class="tabs" ref=${tabsRef} aria-label="My Progress sections"><div>${VIS.map(([k,l],i)=>{const x=st.secs[gi(k)];return html`${k===BILLING_KEYS[0]&&i>0&&html`<span class="tab-sep" aria-hidden="true"/>`}<button data-k=${k} class=${(active===k?'on':'')+(BILLING_KEYS.includes(k)?' bill':'')} aria-current=${active===k?'true':undefined} onKeyDown=${e=>tk(e,i)} onClick=${()=>goTo(k)}><i class=${'dot '+(x.complete?'verified':x.state==='not_started'?'not_started':'saved')}/>${l}<span class="sr">, ${secLabel(x)}</span></button>`;})}</div></nav>
@@ -1210,6 +1333,17 @@ function App(){
           <${B} s=${s} up=${up} P=${{...P,pre:k+':',setEk:v=>setEk(v==null?null:(String(v).includes(':')?v:k+':'+v))}}/>
           <${Footer} k=${k} sec=${x} P=${P} act=${act} flag=${!!flags[k]}/>
         </div></section>`;})}</div>
+    ${peer&&peer.length>0&&html`<div class="modal-bg" role="dialog" aria-modal="true" aria-labelledby="peer-h"><div class="modal">
+      <h3 id="peer-h">Before you submit: changes from the ${view==='billing'?'clinic':'billing'} team</h3>
+      <p class="small muted">These shared items were updated by the other team. Do you agree with what they entered?</p>
+      <div class="peer-list">${peer.map(it=>html`<div class="peer" key=${it.key}><div class="peer-h"><b>${it.label}</b><${ByTag} by=${it.by}/></div>
+        <div class="peer-v"><span class="lbl">Their entry</span><span>${it.now}</span></div>
+        ${it.prev&&it.prev.sum!==it.now&&html`<div class="peer-v ours"><span class="lbl">Your team’s earlier entry</span><span>${it.prev.sum}</span></div>`}
+        <div class="row" style="gap:8px;justify-content:flex-end"><button class="btn ghost sm" onClick=${()=>decidePeer(it,false)}>Disagree</button><button class="btn pri sm" onClick=${()=>decidePeer(it,true)}>Agree</button></div></div>`)}</div>
+      <div class="row" style="justify-content:space-between"><span class="small muted">Disagreements go to Plexus to resolve. Your submission still goes through.</span><button class="link" onClick=${()=>setPeer(null)}>Back</button></div>
+    </div></div>`}
+    ${plexus&&view==='review'&&html`<${Disputes} s=${s} setS=${setS} who=${who}/>`}
+    ${plexus&&view==='review'&&(s.reminders||[]).length>0&&html`<details class="panel remlog"><summary>Reminder history (${s.reminders.length})</summary><ul>${s.reminders.map((r,i)=>html`<li key=${i}><span class=${'rt '+r.team}>${r.team==='clinic'?'C':'B'}</span>${fmtDT(r.at)} · ${r.team==='clinic'?'Clinic':'Billing'} team · ${r.to.length} recipient${r.to.length===1?'':'s'} · ${r.auto?'Automatic':'Sent by '+r.by}</li>`)}</ul></details>`}
     ${!plexus&&html`<section class=${'final'+(view==='billing'?' bill':'')}>
       ${vsub?html`<div class="final-done">${Icon('check',20)}<div><b>Submitted for review</b><span>Plexus will reach out if anything needs changes.</span></div></div>`:html`
       <div class="final-h"><div><b>Submit for Review</b><span>${vdone===VIS.length?'Everything is complete.':`${VIS.length-vdone} section${VIS.length-vdone>1?'s':''} left`}</span></div>
@@ -1223,7 +1357,7 @@ function App(){
 }
 
 const emailOk=e=>/^[^\s@,;]+@[^\s@,;]+\.[^\s@,;]+$/.test(e);
-function InviteBox({fac,team,list,setS}){
+function InviteBox({fac,team,list,setS,openInvite,who='Plexus'}){
   const blankRow=()=>({id:uid(),name:'',email:''});
   const [rows,setRows]=useState(()=>[blankRow()]),[err,setErr]=useState(''),[copied,setCopied]=useState(false);
   const label=team==='clinic'?'Clinic onboarding':'Billing onboarding';
@@ -1233,20 +1367,23 @@ function InviteBox({fac,team,list,setS}){
   const send=()=>{const filled=rows.filter(r=>r.email.trim()||r.name.trim());
     if(!filled.length){setErr('Add at least one person.');return;}
     const bad=filled.filter(r=>!emailOk(r.email.trim()));if(bad.length){setErr('Check the email for: '+bad.map(r=>r.name||r.email||'a blank row').join(', '));return;}
-    mut((l,n)=>{for(const r of filled){const e=r.email.trim().toLowerCase(),ex=l.find(x=>x.email===e);if(ex){ex.sent=now();if(r.name.trim())ex.name=r.name.trim();}else l.push({id:uid(),name:r.name.trim(),email:e,sent:now()});}
-      n.audit.unshift({t:new Date().toLocaleString(),who:'Morgan Lee (Plexus coordinator)',ev:`${label} invitation sent — ${fac}`,d:filled.map(r=>r.email.trim()).join(', ')});});
+    mut((l,n)=>{for(const r of filled){const e=r.email.trim().toLowerCase(),ex=l.find(x=>x.email===e);if(ex){ex.sent=now();ex.sentAt=new Date().toISOString();ex.token=ex.token||uid()+uid();if(r.name.trim())ex.name=r.name.trim();}else l.push({id:uid(),name:r.name.trim(),email:e,sent:now(),sentAt:new Date().toISOString(),token:uid()+uid()});}
+      n.audit.unshift({t:new Date().toLocaleString(),who,ev:`${label} invitation sent — ${fac}`,d:filled.map(r=>r.email.trim()).join(', ')});});
     setRows([blankRow()]);setErr('');};
   const link=(()=>{try{return location.origin+location.pathname+'?view='+team;}catch(e){return '?view='+team;}})();
   return html`<div class=${'invbox '+team}><div class="invbox-h"><b>${label}</b><span>${list.length} invited</span></div>
     ${list.length?html`<ul class="invlist">${list.map(x=>html`<li key=${x.id}><span class="inv-e">${x.name?html`<b>${x.name}</b><br/>`:''}<span>${x.email}</span></span><span class="small muted">Sent ${x.sent}</span>
-      <button class="link" onClick=${()=>mut(l=>{const y=l.find(z=>z.id===x.id);if(y)y.sent=now();})}>Resend</button><button class="link danger-link" onClick=${()=>mut(l=>{l.splice(l.findIndex(z=>z.id===x.id),1);})}>Remove</button></li>`)}</ul>`:html`<span class="small muted">No one invited yet.</span>`}
+      ${(()=>{const a=jget(ACC_KEY,{})[x.email];return a?html`<span class="acct ok">${a.method==='google'?'Google account':'Account created'}${a.lastSignIn?' · signed in '+fmtD(a.lastSignIn):''}</span>`:html`<span class="acct">Invited · no account yet</span>`;})()}
+      <button class="link" onClick=${()=>{mut(l=>{const y=l.find(z=>z.id===x.id);if(y){y.sent=now();y.sentAt=new Date().toISOString();y.token=y.token||uid()+uid();}});}}>Resend</button>
+      <button class="link" onClick=${()=>{try{navigator.clipboard.writeText(location.origin+location.pathname+'?invite='+x.token);}catch(e){}}}>Copy link</button>
+      ${openInvite&&!jget(ACC_KEY,{})[x.email]&&html`<button class="link" onClick=${()=>openInvite(x.token)}>Open invite (preview)</button>`}<button class="link danger-link" onClick=${()=>mut(l=>{l.splice(l.findIndex(z=>z.id===x.id),1);})}>Remove</button></li>`)}</ul>`:html`<span class="small muted">No one invited yet.</span>`}
     <div class="inv-rows">${rows.map((r,i)=>html`<div class="inv-row" key=${r.id}>
       <input aria-label=${'Name '+(i+1)} placeholder="Full name" value=${r.name} onInput=${e=>setRow(r.id,'name',e.target.value)}/>
       <input aria-label=${'Email '+(i+1)} type="email" placeholder="email@clinic.com" value=${r.email} onInput=${e=>setRow(r.id,'email',e.target.value)} onKeyDown=${e=>{if(e.key==='Enter'){e.preventDefault();send();}}}/>
       ${rows.length>1?html`<button type="button" class="link" aria-label="Remove row" onClick=${()=>setRows(rs=>rs.filter(x=>x.id!==r.id))}>✕</button>`:html`<span/>`}</div>`)}</div>
     <div class="row between"><button type="button" class="btn ghost sm" onClick=${()=>setRows(r=>[...r,blankRow()])}>${Icon('plus',14)} Add another person</button><button class="btn pri sm" onClick=${send}>Send ${rows.filter(r=>r.email.trim()).length>1?rows.filter(r=>r.email.trim()).length+' invitations':'invitation'}</button></div>
     ${err&&html`<span class="small" style="color:var(--red)">${err}</span>`}
-    <div class="row small"><span class="muted">Invite link opens ${team==='clinic'?'Clinic':'Billing'} view</span><button class="link" onClick=${()=>{try{navigator.clipboard.writeText(link);setCopied(true);setTimeout(()=>setCopied(false),1500);}catch(e){}}}>${copied?'Copied':'Copy link'}</button></div>
+    <div class="row small"><span class="muted">Each person gets a personal link to create their account (single use, expires in 7 days).</span></div>
   </div>`;
 }
 function ReqEditor({s,setS,mode,onClose}){
@@ -1272,20 +1409,65 @@ function ReqEditor({s,setS,mode,onClose}){
         <span class="req-l">${l}${custom(key)&&html`<i class="req-c">custom</i>`}</span><span class="req-v">${on?'Required':'Optional'}</span><span class=${'sw '+team+(on?' on':'')}><i/></span></button>`;})}</div>`)}</div>
   </div>`;
 }
-function Console({s,st,setS,facs,fid,setFid,addFacility,openReview}){
+function ReminderSettings({rem,setRem,onClose}){
+  const set=(k,v)=>setRem({...rem,[k]:v});
+  return html`<div class="panel setpanel"><div class="row between"><div><h3>Reminder settings</h3><span class="small muted">Automatic email reminders to teams that haven’t finished. Sent from ${rem.from}.</span></div><button class="link" onClick=${onClose}>Close</button></div>
+    <div class="set-grid">
+      <label class="set-row"><span>Send automatic reminders</span><button type="button" role="switch" aria-checked=${rem.enabled} class=${'sw clinic'+(rem.enabled?' on':'')} onClick=${()=>set('enabled',!rem.enabled)}><i/></button></label>
+      <label class="set-row"><span>How often</span><span class="row" style="gap:6px">Every <select value=${rem.every} onChange=${e=>set('every',+e.target.value)}>${[1,2,3,5,7,10,14].map(n=>html`<option value=${n}>${n}</option>`)}</select> <select value=${rem.business?'b':'c'} onChange=${e=>set('business',e.target.value==='b')}><option value="b">business days</option><option value="c">calendar days</option></select></span></label>
+      <label class="set-row"><span>Who gets them</span><select value=${rem.teams} onChange=${e=>set('teams',e.target.value)}><option value="both">Clinic and billing teams</option><option value="clinic">Clinic team only</option><option value="billing">Billing team only</option></select></label>
+      <label class="set-row"><span>Stop once the team submits</span><button type="button" role="switch" aria-checked=${rem.stopOnSubmit} class=${'sw clinic'+(rem.stopOnSubmit?' on':'')} onClick=${()=>set('stopOnSubmit',!rem.stopOnSubmit)}><i/></button></label>
+      <label class="set-row"><span>Maximum reminders per team</span><select value=${rem.max} onChange=${e=>set('max',+e.target.value)}>${[1,2,3,4,6,8,10,12].map(n=>html`<option value=${n}>${n}</option>`)}</select></label>
+      <label class="set-row"><span>Don’t send on weekends</span><button type="button" role="switch" aria-checked=${rem.noWeekends} class=${'sw clinic'+(rem.noWeekends?' on':'')} onClick=${()=>set('noWeekends',!rem.noWeekends)}><i/></button></label>
+      <label class="set-row"><span>Send from</span><input value=${rem.from} onInput=${e=>set('from',e.target.value)}/></label>
+    </div>
+    <span class="small muted">Each clinic row shows the next reminder for its clinic (C) and billing (B) teams. “Send now” sends one immediately. In this preview reminders are logged, not emailed.</span></div>`;
+}
+function UsersRoles({auth,who,onClose}){
+  const [users,setU]=useState(loadUsers),[nu,setNu]=useState({email:'',name:'',role:'Coordinator'}),[err,setErr]=useState('');
+  const save=u=>{setU(u);jset(USERS_KEY,u);};
+  const add=()=>{const em=nu.email.trim().toLowerCase();if(!emailOk(em)){setErr('Enter a valid Google account email.');return;}if(users.some(x=>x.email===em)){setErr('That account is already added.');return;}
+    save([...users,{email:em,name:nu.name.trim()||em.split('@')[0],role:nu.role,added:new Date().toISOString(),addedBy:who}]);setNu({email:'',name:'',role:'Coordinator'});setErr('');};
+  const accts=jget(ACC_KEY,{});
+  return html`<div class="panel setpanel"><div class="row between"><div><h3>Users & roles</h3><span class="small muted">Google accounts that can sign in to the Plexus workspace. ${'onboarding'+PLEXUS_DOMAIN} is the owner.</span></div><button class="link" onClick=${onClose}>Close</button></div>
+    <div class="tw"><table><thead><tr><th>Google account</th><th>Role</th><th>Status</th><th></th></tr></thead><tbody>
+      ${users.map(u=>html`<tr key=${u.email}><td><b style="font-weight:500">${u.name}</b><div class="small muted">${u.email}${u.owner?' · owner':''}</div></td>
+        <td><select value=${u.role} disabled=${u.owner} onChange=${e=>save(users.map(x=>x.email===u.email?{...x,role:e.target.value}:x))}>${Object.keys(PROLES).map(r=>html`<option value=${r}>${r}</option>`)}</select></td>
+        <td>${u.disabled?html`<${Pill} tone="gray">Disabled</${Pill}>`:html`<${Pill} tone="green">Active</${Pill}>`}</td>
+        <td>${!u.owner&&html`<button class="link" onClick=${()=>save(users.map(x=>x.email===u.email?{...x,disabled:!x.disabled}:x))}>${u.disabled?'Enable':'Disable'}</button> <button class="link danger-link" onClick=${()=>save(users.filter(x=>x.email!==u.email))}>Remove</button>`}</td></tr>`)}
+    </tbody></table></div>
+    <div class="nu-row"><input placeholder="name@plexusclinical.com or any Google account" value=${nu.email} onInput=${e=>{setNu({...nu,email:e.target.value});setErr('');}}/><input placeholder="Full name" value=${nu.name} onInput=${e=>setNu({...nu,name:e.target.value})}/>
+      <select value=${nu.role} onChange=${e=>setNu({...nu,role:e.target.value})}>${Object.keys(PROLES).map(r=>html`<option value=${r}>${r}</option>`)}</select><button class="btn pri sm" onClick=${add}>${Icon('plus',14)} Add account</button></div>
+    ${err&&html`<span class="small" style="color:var(--red)">${err}</span>`}
+    <h4 style="margin:6px 0 0">What each role can do</h4>
+    <div class="tw"><table class="perm"><thead><tr><th>Permission</th>${Object.keys(PROLES).map(r=>html`<th>${r}</th>`)}</tr></thead><tbody>
+      ${PERMS.map(([k,l,rs])=>html`<tr key=${k}><td>${l}</td>${Object.keys(PROLES).map(r=>html`<td>${rs.includes(r)?'✓':''}</td>`)}</tr>`)}</tbody></table></div>
+    <span class="small muted">Clinic and billing team members are invited per clinic and create their own accounts (email + password with two-step verification, or Google). ${Object.keys(accts).length} team account${Object.keys(accts).length===1?'':'s'} created so far.</span></div>`;
+}
+function Console({s,st,setS,facs,fid,setFid,addFacility,openReview,auth,openInvite,who}){
   const access=[...s.payers,...s.logins,...s.flows.labs,...s.clinicians.flatMap(c=>c.portals)].filter(a=>a.status!=='verified'&&(a.invite==='sent'||a.invite==='pending'||a.website||a.username||a.login)).length;
   const rows=facs.map(f=>{const fs=f.id===fid?s:loadFac(f.id);const fst=f.id===fid?st:status(fs);return {f,fs,fst};});
   const [adding,setAdding]=useState(false),[nf,setNf]=useState({site:'',clinic:'',coordinator:'',target:''}),[nfErr,setNfErr]=useState('');
   const saveNew=()=>{if(!nf.site.trim()){setNfErr('Enter the clinic name.');return;}if(facs.some(f=>f.site.toLowerCase()===nf.site.trim().toLowerCase())){setNfErr('A clinic with that name already exists.');return;}
     const id=addFacility({site:nf.site.trim(),clinic:nf.clinic.trim(),coordinator:nf.coordinator.trim(),target:nf.target});setAdding(false);setNf({site:'',clinic:'',coordinator:'',target:''});setNfErr('');setFid(id);setOpen(id);};
   const set=k=>e=>setS(p=>{const n=structuredClone(p);n.settings[k]=e.target.value.trim();return n;});
-  const [open,setOpen]=useState(null),[reqOpen,setReqOpen]=useState(false);
+  const [open,setOpen]=useState(null),[reqOpen,setReqOpen]=useState(false),[panel,setPanel]=useState(null),[rem,setRemS]=useState(loadRem),[,force]=useState(0);
+  const setRem=v=>{setRemS(v);jset(REM_KEY,v);};
+  const sendReminder=(f,team,auto)=>{const plan=reminderPlan(f.id===fid?s:loadFac(f.id),team,rem);const entry={at:new Date().toISOString(),team,to:plan.to||[],auto:!!auto,by:auto?'Automatic':who};
+    if(f.id===fid)setS(p=>{const n=structuredClone(p);n.reminders=[entry,...(n.reminders||[])];n.audit.unshift({t:new Date().toLocaleString(),who:entry.by,ev:`${team==='billing'?'Billing':'Clinic'} team reminder sent`,d:entry.to.join(', ')});return n;});
+    else{const fs=loadFac(f.id);fs.reminders=[entry,...(fs.reminders||[])];fs.audit.unshift({t:new Date().toLocaleString(),who:entry.by,ev:`${team==='billing'?'Billing':'Clinic'} team reminder sent`,d:entry.to.join(', ')});lsSet(KEY+':'+f.id,JSON.stringify(fs));force(x=>x+1);}};
+  useEffect(()=>{if(!rem.enabled)return;for(const f of facs){const fs=f.id===fid?s:loadFac(f.id);for(const t of ['clinic','billing']){const pl=reminderPlan(fs,t,rem);if(pl.state==='due'&&pl.overdue)sendReminder(f,t,true);}}},[]);
   const invs=id=>{const r=rows.find(x=>x.f.id===id);return r?((r.fs.invites||{})[r.fs.site]||{clinic:[],billing:[]}):{clinic:[],billing:[]};};
   const invBtn=f=>{const v=invs(f);return html`<button class=${'btn sm'+(open===f?' pri':'')} aria-expanded=${open===f} onClick=${()=>{if(open===f)setOpen(null);else{setFid(f);setOpen(f);}}}>${Icon('user',14)} Invite${v.clinic.length+v.billing.length?` · ${v.clinic.length} / ${v.billing.length}`:''}</button>`;};
-  const invPanel=f=>f!==fid?null:html`<div class="panel invpanel" id="invpanel"><div class="row between"><h3>Invitations · ${s.site}</h3><button class="link" onClick=${()=>setOpen(null)}>Close</button></div><div class="invgrid">${['clinic','billing'].map(t=>html`<${InviteBox} key=${f+t} fac=${s.site} team=${t} list=${invs(f)[t]} setS=${setS}/>`)}</div></div>`;
+  const invPanel=f=>f!==fid?null:html`<div class="panel invpanel" id="invpanel"><div class="row between"><h3>Invitations · ${s.site}</h3><button class="link" onClick=${()=>setOpen(null)}>Close</button></div><div class="invgrid">${['clinic','billing'].map(t=>html`<${InviteBox} key=${f+t} fac=${s.site} team=${t} list=${invs(f)[t]} setS=${setS} openInvite=${openInvite} who=${who}/>`)}</div></div>`;
   useEffect(()=>{if(open)document.getElementById('invpanel')?.scrollIntoView({block:'nearest',behavior:'smooth'});},[open]);
   return html`
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><h1>Clinic onboarding</h1><div class="row" style="gap:8px"><button class=${'btn'+(reqOpen?' pri':'')} onClick=${()=>setReqOpen(!reqOpen)}>${Icon('check',15)} Requirement defaults</button><button class="btn pri" onClick=${()=>{setAdding(true);setTimeout(()=>document.getElementById('nf-site')?.focus(),50);}}>${Icon('plus',15)} Add clinic</button></div></div>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><h1>Clinic onboarding</h1><div class="row" style="gap:8px">${can(auth,'requirements')&&html`<button class=${'btn'+(reqOpen?' pri':'')} onClick=${()=>setReqOpen(!reqOpen)}>${Icon('check',15)} Requirement defaults</button>`}
+    ${can(auth,'reminders')&&html`<button class=${'btn'+(panel==='rem'?' pri':'')} onClick=${()=>setPanel(panel==='rem'?null:'rem')}>${Icon('bell',15)} Reminders</button>`}
+    ${can(auth,'users')&&html`<button class=${'btn'+(panel==='users'?' pri':'')} onClick=${()=>setPanel(panel==='users'?null:'users')}>${Icon('users',15)} Users & roles</button>`}
+    ${can(auth,'clinics')&&html`<button class="btn pri" onClick=${()=>{setAdding(true);setTimeout(()=>document.getElementById('nf-site')?.focus(),50);}}>${Icon('plus',15)} Add clinic</button>`}</div></div>
+  ${panel==='rem'&&html`<${ReminderSettings} rem=${rem} setRem=${setRem} onClose=${()=>setPanel(null)}/>`}
+  ${panel==='users'&&html`<${UsersRoles} auth=${auth} who=${who} onClose=${()=>setPanel(null)}/>`}
   ${adding&&html`<div class="panel addfac"><h3>Add a clinic</h3><div class="grid">
     <label class="field"><span class="lbl">Clinic name *</span><input id="nf-site" value=${nf.site} placeholder="e.g. Taylor Family Practice" onInput=${e=>{setNf({...nf,site:e.target.value});setNfErr('');}} onKeyDown=${e=>{if(e.key==='Enter')saveNew();}}/></label>
     <label class="field"><span class="lbl">Organization</span><input value=${nf.clinic} placeholder="Parent organization (optional)" onInput=${e=>setNf({...nf,clinic:e.target.value})}/></label>
@@ -1295,12 +1477,12 @@ function Console({s,st,setS,facs,fid,setFid,addFacility,openReview}){
     <div class="row" style="justify-content:flex-end;gap:8px"><button class="btn ghost" onClick=${()=>{setAdding(false);setNfErr('');}}>Cancel</button><button class="btn pri" onClick=${saveNew}>Add clinic and invite teams</button></div></div>`}
   ${reqOpen&&html`<${ReqEditor} s=${s} setS=${setS} mode="defaults" onClose=${()=>setReqOpen(false)}/>`}
   <div class="kpis"><div class="kpi"><b>${rows.length}</b><span>Clinics</span></div><div class="kpi"><b>${rows.reduce((a,r)=>a+r.fst.secs.filter(x=>['submitted','na'].includes(x.state)).length,0)}</b><span>Sections awaiting review</span></div><div class="kpi"><b>${rows.filter(r=>r.fst.secs.every(x=>x.complete)).length}</b><span>Fully complete</span></div><div class="kpi"><b>${rows.filter(r=>r.fst.stage===2).length}</b><span>Ready to launch</span></div></div>
-  <div class="panel"><div class="tw"><table><thead><tr><th>Facility / organization</th><th>Stage</th><th>Clinic team</th><th>Billing team</th><th>Outstanding</th><th>Access to verify</th><th>Coordinator</th><th>Target date</th><th></th></tr></thead><tbody>
+  <div class="panel"><div class="tw"><table><thead><tr><th>Facility / organization</th><th>Stage</th><th>Clinic team</th><th>Billing team</th><th>Outstanding</th><th>Access to verify</th><th>Reminders</th><th>Coordinator</th><th>Target date</th><th></th></tr></thead><tbody>
     ${rows.map(({f,fs,fst})=>{const acc=[...fs.payers,...fs.logins].filter(a=>a.status!=='verified'&&(a.website||a.username||a.invited)).length;
       return html`<tr key=${f.id} class=${f.id===fid?'cur':''}><td><b style="font-weight:500">${fs.site}</b><div class="small muted">${fs.clinic} · ${fs.locations.length} location${fs.locations.length===1?'':'s'}</div></td><td><${Pill}>${['Clinic Completing','Plexus Reviewing','Ready to Launch'][fst.stage]}</${Pill}></td>
       ${[fst.secs.filter(x=>!BILLING_KEYS.includes(x.k)),fst.secs.filter(x=>BILLING_KEYS.includes(x.k))].map(g=>{const d=g.filter(x=>x.complete).length,sub=g.every(x=>['submitted','na','verified','waived'].includes(x.state));return html`<td><span class="mini"><span style=${`width:${Math.round(d/g.length*100)}%`}/></span>${d}/${g.length}${sub?html`<div class="small muted">Submitted</div>`:''}</td>`;})}
-      <td>${fst.secs.filter(x=>!x.complete).length} sections</td><td>${acc}</td><td>${f.coordinator||'—'}</td><td>${f.target?new Date(f.target+'T12:00').toLocaleDateString([], {month:'short',day:'numeric',year:'numeric'}):'—'}</td>
-      <td><div class="acts"><button class="btn sm pri" onClick=${()=>openReview(f.id)}>Open review</button>${invBtn(f.id)}</div></td></tr>`;})}
+      <td>${fst.secs.filter(x=>!x.complete).length} sections</td><td>${acc}</td><td class="remcell">${['clinic','billing'].map(t=>{const pl=reminderPlan(fs,t,rem);return html`<div key=${t}><span class=${'rt '+t}>${t==='clinic'?'C':'B'}</span>${pl.state==='due'?html`${fmtD(pl.next)}${pl.count?html` <span class="muted">· ${pl.count} sent</span>`:''}${can(auth,'reminders')&&html` <button class="link" onClick=${()=>sendReminder(f,t,false)}>Send now</button>`}`:html`<span class="muted">${pl.label||'Off'}</span>`}</div>`;})}</td><td>${f.coordinator||'—'}</td><td>${f.target?new Date(f.target+'T12:00').toLocaleDateString([], {month:'short',day:'numeric',year:'numeric'}):'—'}</td>
+      <td><div class="acts">${can(auth,'review')&&html`<button class="btn sm pri" onClick=${()=>openReview(f.id)}>Open review</button>`}${can(auth,'invite')&&invBtn(f.id)}</div></td></tr>`;})}
   </tbody></table></div></div>
   ${open&&invPanel(open)}`;
 }
