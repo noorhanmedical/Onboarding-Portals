@@ -64,3 +64,13 @@ max per team, no weekends, send-from address (default `onboarding@plexusclinical
 
 Portal/EMR/phone passwords are never stored in the database, JSON or logs: write-only to AWS Secrets Manager;
 only Admins may reveal, and every reveal is audited.
+
+
+## Reminder templates and RingCentral texts
+
+- Reminder settings (`plexus-onboarding-reminders`) now hold `tpl.clinic|billing.{subject,body}`, `sms`, `senderName`, `email` (bool), `text` (bool) and `rc.{connected,from,at}`. Persist them in the DB; they are the only source of truth for message wording.
+- Merge fields: `{first_name} {clinic} {team} {remaining} {link} {sender}`. Render server-side; unknown fields are left as typed.
+- Invitations carry an optional `phone` (mobile). Texts go only to invitees with a valid US mobile number.
+- Email: send from the Gmail account in `from` (onboarding@plexusclinical.com) using the rendered subject/body.
+- Text: RingCentral OAuth (authorization-code flow) started by an Admin from Settings → Reminders → Connect RingCentral. Store the refresh token in Secrets Manager — never in the browser or the DB row. Send with `POST /restapi/v1.0/account/~/extension/~/sms` from the connected number (`rc.from`). Always append " Reply STOP to opt out."; honor STOP/opt-out webhooks by flagging the invitee `smsOptOut` and skipping them.
+- Each send writes a reminder log entry `{at, team, channels, to, texts, msgs[{subject,body,sms}], auto, by}` plus an audit event. Do not log message bodies containing credentials (templates never include them).
