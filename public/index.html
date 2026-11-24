@@ -86,6 +86,11 @@ main{position:relative;z-index:1}
 @media(prefers-reduced-motion:reduce){.tile,.addtile,.chev-r{transition:none}.tile:hover,.addtile:hover{transform:none}}
 
 /* ---- typography & density refinement ---- */
+.set-btn{display:inline-flex;align-items:center;gap:6px;height:36px!important;padding:0 12px!important;border-radius:999px!important}.set-btn.on{border-color:#c4dbff!important;color:#c4dbff!important}
+.settings{scroll-margin-top:130px;margin:0 0 18px;display:flex;flex-direction:column;gap:12px}.set-head{display:flex;justify-content:space-between;align-items:center}.set-head h2{margin:0;font-size:22px;display:flex;align-items:center;gap:8px}
+.set-tabs{display:flex;gap:6px;flex-wrap:wrap}.set-tab{all:unset;cursor:pointer;padding:8px 16px;border-radius:999px;border:1.5px solid var(--line);background:#fff;font-size:15px;font-weight:500}.set-tab.on{background:var(--navy,hsl(222 60% 18%));border-color:transparent;color:#fff}.set-tab:focus-visible{outline:2px solid hsl(210 90% 60%)}
+.settings .setpanel,.settings .reqpanel,.settings .addfac{margin:0}.faclist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}.faclist li{display:flex;gap:10px;align-items:baseline;padding:8px 0;border-top:1px solid hsl(210 30% 94%);font-size:15px;flex-wrap:wrap}
+@media(max-width:640px){.set-btn span{display:none}.set-btn{padding:0 10px!important}.bar{height:auto!important;flex-wrap:wrap;padding:8px 10px!important;row-gap:8px}.bar .views{order:5;width:100%;margin:0!important;justify-content:space-between}.bar .views button{flex:1}.bar .who{margin-left:auto}main{padding-top:118px!important}}
 .by-tag{display:inline-flex;align-items:center;gap:4px;margin-top:6px;font-size:12px;font-weight:500;color:hsl(214 40% 40%);background:hsl(214 60% 96%);border:1px solid hsl(214 50% 88%);border-radius:999px;padding:2px 8px;align-self:flex-start;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .tile-top+.tile-lines+.by-tag,.tile-top+.by-tag{margin-left:42px}.ed-t .by-tag{margin-top:4px}
 @media(max-width:640px){.tile-top+.tile-lines+.by-tag{margin-left:0}}
@@ -589,7 +594,7 @@ function Verify({item,patch,P}){const [n,setN]=useState('');
   ${P.plexus&&item.status!=='verified'&&html`<div class="row"><input style="width:220px;min-height:32px" placeholder="Verification note" value=${n} onInput=${e=>setN(e.target.value)}/><button class="btn pri sm" disabled=${!n.trim()} onClick=${()=>{patch(i=>{i.status='verified';i.verifiedAt=new Date().toLocaleString();},'Access verified: '+n,true);setN('');}}>Record verified access</button></div>`}</div>`;}
 
 /* ---------------- iOS bento design system ---------------- */
-const ICONS={fax:['M6 9V3h12v6','M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2','M6 14h12v8H6z'],trash:['M3 6h18','M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6','M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2','M10 11v6','M14 11v6'],clipboard:['M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2','M9 2h6v4H9z','m9 14 2 2 4-4'],building:['M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z','M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2','M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2','M10 6h4','M10 10h4','M10 14h4','M10 18h4'],
+const ICONS={gear:['M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z','M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0z'],fax:['M6 9V3h12v6','M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2','M6 14h12v8H6z'],trash:['M3 6h18','M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6','M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2','M10 11v6','M14 11v6'],clipboard:['M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2','M9 2h6v4H9z','m9 14 2 2 4-4'],building:['M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z','M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2','M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2','M10 6h4','M10 10h4','M10 14h4','M10 18h4'],
 pin:['M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z','M12 13a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z'],
 users:['M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2','M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z','M22 21v-2a4 4 0 0 0-3-3.87','M16 3.13a4 4 0 0 1 0 7.75'],
 user:['M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2','M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z'],
@@ -1221,6 +1226,7 @@ function SignIn({facs,onIn,inviteToken,clearInvite}){
     </div></main>`;
 }
 function App(){
+  const [settings,setSettings]=useState(null);
   const [auth,setAuth]=useState(loadAuth),[invTok,setInvTok]=useState(()=>{try{return new URLSearchParams(location.search).get('invite');}catch(e){return null;}});
   const [resumeAt,setResumeAt]=useState(null);
   const [facs,setFacs]=useState(loadFacs),[fid,setFid]=useState(()=>{const a=loadAuth();const f=loadFacs();return (a&&a.fid&&f.some(x=>x.id===a.fid))?a.fid:f[0].id;});
@@ -1286,12 +1292,13 @@ function App(){
 
   const bar=html`<header class="bar"><${BannerStars}/><div class="brand"><img src=${PLEXUS_MARK} alt="" width="22" height="34"/><div class="ctx"><strong class="b1">Plexus Ancillary Services</strong><small class="b2">Onboarding${view==='console'?' · Console':view==='review'?' · Plexus review':view==='billing'?' · Billing team':auth&&auth.role==='plexus'?' · Clinic team':''}</small></div></div>
     ${auth&&auth.role==='plexus'&&html`<div class="views" role="tablist" aria-label="View as">${[['clinic','Clinic view'],['billing','Billing view'],['console','Plexus console']].map(([v,l])=>{const on=view===v||(v==='console'&&view==='review');return html`<button role="tab" aria-selected=${on} class=${on?'on':''} onClick=${()=>{setView(v);setOpen({});scrollTo(0,0);}}>${l}</button>`;})}</div>`}
-    <div class="who">${auth&&html`<span class="who-n">${auth.name}<small>${auth.role==='plexus'?'Plexus':auth.team==='billing'?'Billing team':'Clinic team'}</small></span><button class="link signout" onClick=${()=>{saveAuth(null);setAuth(null);setView('clinic');}}>Sign out</button>`}</div>
+    ${auth&&auth.role==='plexus'&&SET_TABS.some(([,,perm])=>can(auth,perm))&&html`<button class=${'set-btn'+(settings&&view==='console'?' on':'')} aria-label="Settings" aria-expanded=${!!settings} onClick=${()=>{if(settings&&view==='console'){setSettings(null);return;}setView('console');setSettings(SET_TABS.find(([,,perm])=>can(auth,perm))[0]);scrollTo(0,0);}}>${Icon('gear',16)}<span>Settings</span></button>`}
+    <div class="who">${auth&&html`<span class="who-n">${auth.name}<small>${auth.role==='plexus'?'Plexus':auth.team==='billing'?'Billing team':'Clinic team'}</small></span><button class="link signout" onClick=${()=>{saveAuth(null);setAuth(null);setSettings(null);setView('clinic');}}>Sign out</button>`}</div>
     ${auth&&auth.role==='plexus'&&html`<button class="reset" onClick=${reset} onBlur=${()=>setConfirmReset(false)}>${confirmReset?'Click again to erase':'Reset demo'}</button>`}</header>`;
 
   if(!auth||invTok)return html`<${SignIn} facs=${facs} inviteToken=${invTok} clearInvite=${()=>{setInvTok(null);try{history.replaceState(null,'',location.pathname);}catch(e){}}} onIn=${u=>{if(u.inviteToken){saveAuth(null);setAuth(null);setInvTok(u.inviteToken);return;}if(u.role==='plexus'&&!u.prole){const x=loadUsers().find(y=>y.email===u.email);u.prole=x?x.role:'Admin';}saveAuth(u);setAuth(u);setInvTok(null);if(u.fid)setFid(u.fid);setView(u.role==='plexus'?'console':u.team);scrollTo(0,0);}}/>`;
   if(auth.role!=='plexus'&&(view==='console'||view==='review'))return null;
-  if(view==='console')return html`${bar}<main><${Console} s=${s} st=${st} setS=${setS} facs=${facs} fid=${fid} setFid=${setFid} addFacility=${addFacility} openReview=${id=>{setFid(id);setView('review');scrollTo(0,0);}} auth=${auth} who=${who} openInvite=${tok=>{saveAuth(null);setAuth(null);setInvTok(tok);}}/></main>`;
+  if(view==='console')return html`${bar}<main><${Console} s=${s} st=${st} setS=${setS} facs=${facs} fid=${fid} setFid=${setFid} addFacility=${addFacility} openReview=${id=>{setFid(id);setView('review');scrollTo(0,0);}} auth=${auth} who=${who} settings=${settings} setSettings=${setSettings} openInvite=${tok=>{saveAuth(null);setAuth(null);setInvTok(tok);}}/></main>`;
   return html`${bar}<main>
     ${view==='review'?html`<section class="hero rdash">
       <div class="hero-top"><div><button type="button" class="link back" onClick=${()=>{setView('console');scrollTo(0,0);}}>← Back to console</button><p class="eyebrow">${s.clinic} · Plexus review</p><h1>${s.site}</h1><button class=${'btn sm'+(reqFac?' pri':'')} style="margin-top:8px" onClick=${()=>setReqFac(!reqFac)}>${Icon('check',14)} Requirements for this facility${Object.values(s.reqOverride||{}).reduce((a,o)=>a+Object.keys(o).length,0)?' · customized':''}</button></div>
@@ -1444,12 +1451,13 @@ function UsersRoles({auth,who,onClose}){
       ${PERMS.map(([k,l,rs])=>html`<tr key=${k}><td>${l}</td>${Object.keys(PROLES).map(r=>html`<td>${rs.includes(r)?'✓':''}</td>`)}</tr>`)}</tbody></table></div>
     <span class="small muted">Clinic and billing team members are invited per clinic and create their own accounts (email + password with two-step verification, or Google). ${Object.keys(accts).length} team account${Object.keys(accts).length===1?'':'s'} created so far.</span></div>`;
 }
-function Console({s,st,setS,facs,fid,setFid,addFacility,openReview,auth,openInvite,who}){
+const SET_TABS=[['clinics','Clinics','clinics'],['req','Requirements','requirements'],['rem','Reminders','reminders'],['users','Users & roles','users']];
+function Console({s,st,setS,facs,fid,setFid,addFacility,openReview,auth,openInvite,who,settings,setSettings}){
   const access=[...s.payers,...s.logins,...s.flows.labs,...s.clinicians.flatMap(c=>c.portals)].filter(a=>a.status!=='verified'&&(a.invite==='sent'||a.invite==='pending'||a.website||a.username||a.login)).length;
   const rows=facs.map(f=>{const fs=f.id===fid?s:loadFac(f.id);const fst=f.id===fid?st:status(fs);return {f,fs,fst};});
   const [adding,setAdding]=useState(false),[nf,setNf]=useState({site:'',clinic:'',coordinator:'',target:''}),[nfErr,setNfErr]=useState('');
   const saveNew=()=>{if(!nf.site.trim()){setNfErr('Enter the clinic name.');return;}if(facs.some(f=>f.site.toLowerCase()===nf.site.trim().toLowerCase())){setNfErr('A clinic with that name already exists.');return;}
-    const id=addFacility({site:nf.site.trim(),clinic:nf.clinic.trim(),coordinator:nf.coordinator.trim(),target:nf.target});setAdding(false);setNf({site:'',clinic:'',coordinator:'',target:''});setNfErr('');setFid(id);setOpen(id);};
+    const id=addFacility({site:nf.site.trim(),clinic:nf.clinic.trim(),coordinator:nf.coordinator.trim(),target:nf.target});setSettings(null);setNf({site:'',clinic:'',coordinator:'',target:''});setNfErr('');setFid(id);setOpen(id);};
   const set=k=>e=>setS(p=>{const n=structuredClone(p);n.settings[k]=e.target.value.trim();return n;});
   const [open,setOpen]=useState(null),[reqOpen,setReqOpen]=useState(false),[panel,setPanel]=useState(null),[rem,setRemS]=useState(loadRem),[,force]=useState(0);
   const setRem=v=>{setRemS(v);jset(REM_KEY,v);};
@@ -1460,28 +1468,30 @@ function Console({s,st,setS,facs,fid,setFid,addFacility,openReview,auth,openInvi
   const invs=id=>{const r=rows.find(x=>x.f.id===id);return r?((r.fs.invites||{})[r.fs.site]||{clinic:[],billing:[]}):{clinic:[],billing:[]};};
   const invBtn=f=>{const v=invs(f);return html`<button class=${'btn sm'+(open===f?' pri':'')} aria-expanded=${open===f} onClick=${()=>{if(open===f)setOpen(null);else{setFid(f);setOpen(f);}}}>${Icon('user',14)} Invite${v.clinic.length+v.billing.length?` · ${v.clinic.length} / ${v.billing.length}`:''}</button>`;};
   const invPanel=f=>f!==fid?null:html`<div class="panel invpanel" id="invpanel"><div class="row between"><h3>Invitations · ${s.site}</h3><button class="link" onClick=${()=>setOpen(null)}>Close</button></div><div class="invgrid">${['clinic','billing'].map(t=>html`<${InviteBox} key=${f+t} fac=${s.site} team=${t} list=${invs(f)[t]} setS=${setS} openInvite=${openInvite} who=${who}/>`)}</div></div>`;
+  useEffect(()=>{if(settings){document.getElementById('settings')?.scrollIntoView({block:'start',behavior:'smooth'});if(settings==='clinics')setTimeout(()=>document.getElementById('nf-site')?.focus(),80);}},[settings]);
   useEffect(()=>{if(open)document.getElementById('invpanel')?.scrollIntoView({block:'nearest',behavior:'smooth'});},[open]);
   return html`
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><h1>Clinic onboarding</h1><div class="row" style="gap:8px">${can(auth,'requirements')&&html`<button class=${'btn'+(reqOpen?' pri':'')} onClick=${()=>setReqOpen(!reqOpen)}>${Icon('check',15)} Requirement defaults</button>`}
-    ${can(auth,'reminders')&&html`<button class=${'btn'+(panel==='rem'?' pri':'')} onClick=${()=>setPanel(panel==='rem'?null:'rem')}>${Icon('bell',15)} Reminders</button>`}
-    ${can(auth,'users')&&html`<button class=${'btn'+(panel==='users'?' pri':'')} onClick=${()=>setPanel(panel==='users'?null:'users')}>${Icon('users',15)} Users & roles</button>`}
-    ${can(auth,'clinics')&&html`<button class="btn pri" onClick=${()=>{setAdding(true);setTimeout(()=>document.getElementById('nf-site')?.focus(),50);}}>${Icon('plus',15)} Add clinic</button>`}</div></div>
-  ${panel==='rem'&&html`<${ReminderSettings} rem=${rem} setRem=${setRem} onClose=${()=>setPanel(null)}/>`}
-  ${panel==='users'&&html`<${UsersRoles} auth=${auth} who=${who} onClose=${()=>setPanel(null)}/>`}
-  ${adding&&html`<div class="panel addfac"><h3>Add a clinic</h3><div class="grid">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><h1>Clinic onboarding</h1></div>
+  ${settings&&html`<div class="settings" id="settings"><div class="set-head"><h2>${Icon('gear',18)} Settings</h2><button class="link" onClick=${()=>setSettings(null)}>Close</button></div>
+    <div class="set-tabs" role="tablist">${SET_TABS.filter(([k,,perm])=>can(auth,perm)).map(([k,l])=>html`<button role="tab" aria-selected=${settings===k} class=${'set-tab'+(settings===k?' on':'')} onClick=${()=>setSettings(k)}>${l}</button>`)}</div>
+    ${settings==='rem'&&html`<${ReminderSettings} rem=${rem} setRem=${setRem} onClose=${()=>setSettings(null)}/>`}
+    ${settings==='users'&&html`<${UsersRoles} auth=${auth} who=${who} onClose=${()=>setSettings(null)}/>`}
+    ${settings==='req'&&html`<${ReqEditor} s=${s} setS=${setS} mode="defaults" onClose=${()=>setSettings(null)}/>`}
+    ${settings==='clinics'&&html`<div class="panel addfac"><h3>Add a clinic</h3><div class="grid">
     <label class="field"><span class="lbl">Clinic name *</span><input id="nf-site" value=${nf.site} placeholder="e.g. Taylor Family Practice" onInput=${e=>{setNf({...nf,site:e.target.value});setNfErr('');}} onKeyDown=${e=>{if(e.key==='Enter')saveNew();}}/></label>
     <label class="field"><span class="lbl">Organization</span><input value=${nf.clinic} placeholder="Parent organization (optional)" onInput=${e=>setNf({...nf,clinic:e.target.value})}/></label>
     <label class="field"><span class="lbl">Plexus coordinator</span><input value=${nf.coordinator} onInput=${e=>setNf({...nf,coordinator:e.target.value})}/></label>
     <label class="field"><span class="lbl">Target launch date</span><input type="date" value=${nf.target} onInput=${e=>setNf({...nf,target:e.target.value})}/></label></div>
     ${nfErr&&html`<span class="small" style="color:var(--red)">${nfErr}</span>`}
-    <div class="row" style="justify-content:flex-end;gap:8px"><button class="btn ghost" onClick=${()=>{setAdding(false);setNfErr('');}}>Cancel</button><button class="btn pri" onClick=${saveNew}>Add clinic and invite teams</button></div></div>`}
-  ${reqOpen&&html`<${ReqEditor} s=${s} setS=${setS} mode="defaults" onClose=${()=>setReqOpen(false)}/>`}
+    <div class="row" style="justify-content:flex-end;gap:8px"><button class="btn pri" onClick=${saveNew}>Add clinic and invite teams</button></div>
+      <h4 style="margin:6px 0 0">Clinics (${facs.length})</h4><ul class="faclist">${facs.map(f=>html`<li key=${f.id}><b>${f.site}</b><span class="muted">${f.clinic}${f.coordinator?' · '+f.coordinator:''}${f.target?' · launch '+fmtD(f.target+'T12:00'):''}</span></li>`)}</ul></div>`}
+  </div>`}
   <div class="kpis"><div class="kpi"><b>${rows.length}</b><span>Clinics</span></div><div class="kpi"><b>${rows.reduce((a,r)=>a+r.fst.secs.filter(x=>['submitted','na'].includes(x.state)).length,0)}</b><span>Sections awaiting review</span></div><div class="kpi"><b>${rows.filter(r=>r.fst.secs.every(x=>x.complete)).length}</b><span>Fully complete</span></div><div class="kpi"><b>${rows.filter(r=>r.fst.stage===2).length}</b><span>Ready to launch</span></div></div>
-  <div class="panel"><div class="tw"><table><thead><tr><th>Facility / organization</th><th>Stage</th><th>Clinic team</th><th>Billing team</th><th>Outstanding</th><th>Access to verify</th><th>Reminders</th><th>Coordinator</th><th>Target date</th><th></th></tr></thead><tbody>
+  <div class="panel"><div class="tw"><table><thead><tr><th>Facility / organization</th><th>Stage</th><th>Clinic team</th><th>Billing team</th><th>Outstanding</th><th>Access</th><th>Reminders</th><th>Coordinator</th><th></th></tr></thead><tbody>
     ${rows.map(({f,fs,fst})=>{const acc=[...fs.payers,...fs.logins].filter(a=>a.status!=='verified'&&(a.website||a.username||a.invited)).length;
       return html`<tr key=${f.id} class=${f.id===fid?'cur':''}><td><b style="font-weight:500">${fs.site}</b><div class="small muted">${fs.clinic} · ${fs.locations.length} location${fs.locations.length===1?'':'s'}</div></td><td><${Pill}>${['Clinic Completing','Plexus Reviewing','Ready to Launch'][fst.stage]}</${Pill}></td>
       ${[fst.secs.filter(x=>!BILLING_KEYS.includes(x.k)),fst.secs.filter(x=>BILLING_KEYS.includes(x.k))].map(g=>{const d=g.filter(x=>x.complete).length,sub=g.every(x=>['submitted','na','verified','waived'].includes(x.state));return html`<td><span class="mini"><span style=${`width:${Math.round(d/g.length*100)}%`}/></span>${d}/${g.length}${sub?html`<div class="small muted">Submitted</div>`:''}</td>`;})}
-      <td>${fst.secs.filter(x=>!x.complete).length} sections</td><td>${acc}</td><td class="remcell">${['clinic','billing'].map(t=>{const pl=reminderPlan(fs,t,rem);return html`<div key=${t}><span class=${'rt '+t}>${t==='clinic'?'C':'B'}</span>${pl.state==='due'?html`${fmtD(pl.next)}${pl.count?html` <span class="muted">· ${pl.count} sent</span>`:''}${can(auth,'reminders')&&html` <button class="link" onClick=${()=>sendReminder(f,t,false)}>Send now</button>`}`:html`<span class="muted">${pl.label||'Off'}</span>`}</div>`;})}</td><td>${f.coordinator||'—'}</td><td>${f.target?new Date(f.target+'T12:00').toLocaleDateString([], {month:'short',day:'numeric',year:'numeric'}):'—'}</td>
+      <td>${fst.secs.filter(x=>!x.complete).length} sections</td><td>${acc}</td><td class="remcell">${['clinic','billing'].map(t=>{const pl=reminderPlan(fs,t,rem);return html`<div key=${t}><span class=${'rt '+t}>${t==='clinic'?'C':'B'}</span>${pl.state==='due'?html`${fmtD(pl.next)}${pl.count?html` <span class="muted">· ${pl.count} sent</span>`:''}${can(auth,'reminders')&&html` <button class="link" onClick=${()=>sendReminder(f,t,false)}>Send now</button>`}`:html`<span class="muted">${pl.label||'Off'}</span>`}</div>`;})}</td><td>${f.coordinator||'—'}${f.target?html`<div class="small muted">Launch ${new Date(f.target+'T12:00').toLocaleDateString([], {month:'short',day:'numeric',year:'numeric'})}</div>`:''}</td>
       <td><div class="acts">${can(auth,'review')&&html`<button class="btn sm pri" onClick=${()=>openReview(f.id)}>Open review</button>`}${can(auth,'invite')&&invBtn(f.id)}</div></td></tr>`;})}
   </tbody></table></div></div>
   ${open&&invPanel(open)}`;
