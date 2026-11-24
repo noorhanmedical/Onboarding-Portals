@@ -904,7 +904,7 @@ function PortalReview({s,P}){
 }
 function Payers({s,up,P}){
   return html`<div class="instr pl-instr"><span>Select every insurance and portal you use, then add <b>${PLEXUS_BILLING}</b> as a user on each portal.</span><${Copy} text=${PLEXUS_BILLING} label="Copy email"/></div>
-  <${Group} icon="key" title="Logins"><${PortalCards} s=${s} up=${up} P=${P} sec="payers" required/></${Group}>
+  <${Group} icon="key" title="Logins"><${PortalCards} s=${s} up=${up} P=${P} sec="payers" required/><${LoginCards} s=${s} up=${up} P=${P} sec="payers" types=${['eFax']}/></${Group}>
   <${PortalReview} s=${s} P=${P}/>`;
 }
 
@@ -998,10 +998,11 @@ function LoginTile({e,L,P,s,up,icon,open,setOpen,onRemove,nameLabel,custom}){
     <span class="tile-lines">${m.length&&!adminOk&&!regs?html`<span class="ph">Add administrator or regular access</span>`:html`<span>${[adminOk?'Admin '+accState(ad):'',regs?`${regs} regular`:''].filter(Boolean).join(' · ')}</span>`}</span>${e._by&&html`<${ByTag} by=${e._by}/>`}</button>
     ${onRemove&&P.edit&&html`<${Trash} label=${title} confirm=${hasData} onClick=${onRemove}/>`}</div>`;
 }
-function LoginCards({s,up,P}){
+function LoginCards({s,up:up0,P,sec='emr',types}){
   const [q,setQ]=useState(''),[ask,setAsk]=useState(null),[openId,setOpenId]=useState(null);
+  const up=(f,_k,m)=>up0(f,sec,m);
   const L=id=>f=>up(d=>f(d.logins.find(x=>x.id===id)),'emr');
-  return LOGIN_GROUPS.map(([type,title,icon,names,addLabel,nameLabel])=>{
+  return LOGIN_GROUPS.filter(g=>!types||types.includes(g[0])).map(([type,title,icon,names,addLabel,nameLabel])=>{
     const sel=s.logins.filter(l=>l.type===type),inc=sel.filter(l=>loginMissing(l).length);
     const has=n=>sel.filter(l=>l.name===n);
     const pick=n=>up(d=>{d.logins.push(newLogin(type,n));},'emr',`Added ${n}`);
