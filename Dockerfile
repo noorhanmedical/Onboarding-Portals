@@ -6,7 +6,7 @@ ENV NODE_ENV=production PORT=3000
 ADD https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem /app/rds-ca.pem
 COPY package.json package-lock.json ./
 RUN npm ci --omit=dev && npm cache clean --force && chmod 644 /app/rds-ca.pem
-COPY server.js ./
+COPY server.js mailcfg.js ./
 COPY public ./public
 USER node
 EXPOSE 3000

@@ -22,10 +22,11 @@ Clinic and billing onboarding for Plexus partner clinics. One Node server (`serv
    | Secret | Required | Value |
    |---|---|---|
    | `APP_URL` | yes | The public address, e.g. `https://onboarding.plexusclinical.com` (used in invitation and reminder links) |
-   | `SMTP_HOST` | yes | `smtp.gmail.com` |
-   | `SMTP_PORT` | yes | `465` |
-   | `SMTP_USER` | yes | `onboarding@plexusclinical.com` |
-   | `SMTP_PASS` | yes | A Google **app password** for that account (Google Account → Security → 2-Step Verification on → App passwords) |
+   | `MAIL_KEY` | yes | A long random string. Encrypts the email-account passwords admins save in **Settings → Email** (the normal way to set up email). Never change it once accounts are saved |
+   | `SMTP_HOST` | no | Optional server-level fallback sender, e.g. `smtp.gmail.com` |
+   | `SMTP_PORT` | no | `465` (only with `SMTP_HOST`) |
+   | `SMTP_USER` | no | `onboarding@plexusclinical.com` |
+   | `SMTP_PASS` | no | A Google **app password** for that account (Google Account → Security → 2-Step Verification on → App passwords) |
    | `MAIL_FROM` | no | `Plexus Ancillary Services <onboarding@plexusclinical.com>` |
    | `SECURE_SHARE_URL` | yes | Your 1Password or Bitwarden "request a secret" link that clinics use to send passwords |
    | `GOOGLE_CLIENT_ID` | no | Turns on "Continue with Google". Google Cloud Console → APIs & Services → Credentials → OAuth client ID (Web), with `APP_URL` as an authorized JavaScript origin |
