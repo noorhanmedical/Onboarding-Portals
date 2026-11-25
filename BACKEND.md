@@ -74,3 +74,7 @@ only Admins may reveal, and every reveal is audited.
 - Email: send from the Gmail account in `from` (onboarding@plexusclinical.com) using the rendered subject/body.
 - Text: RingCentral OAuth (authorization-code flow) started by an Admin from Settings → Reminders → Connect RingCentral. Store the refresh token in Secrets Manager — never in the browser or the DB row. Send with `POST /restapi/v1.0/account/~/extension/~/sms` from the connected number (`rc.from`). Always append " Reply STOP to opt out."; honor STOP/opt-out webhooks by flagging the invitee `smsOptOut` and skipping them.
 - Each send writes a reminder log entry `{at, team, channels, to, texts, msgs[{subject,body,sms}], auto, by}` plus an audit event. Do not log message bodies containing credentials (templates never include them).
+
+## Status (Nov 2026)
+
+The Replit build in this repo now implements the core of this spec on Postgres: server-side storage with merge-on-save, invite accounts with emailed 2-step codes, Google sign-in for staff, role checks, emailed invitations and reminders, RingCentral texts, and the server-side reminder scheduler. Still pending for the AWS move: encrypted credential storage (Secrets Manager/KMS) to replace the secure-share link, file uploads to S3, and an audit table separate from the per-clinic log.

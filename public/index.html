@@ -145,6 +145,7 @@ table.perm td{text-align:center}table.perm td:first-child{text-align:left}
 .acct{font-size:12px;color:hsl(32 70% 35%);background:hsl(40 100% 94%);border-radius:999px;padding:2px 8px}.acct.ok{color:hsl(155 55% 28%);background:hsl(150 50% 93%)}
 .lx-google{all:unset;box-sizing:border-box;cursor:pointer;margin-top:22px;width:100%;height:46px;display:inline-flex;align-items:center;justify-content:center;gap:10px;border-radius:10px;background:#fff;color:#1f1f1f;font-size:15px;font-weight:600}.lx-google:hover{background:#f1f3f4}
 .lx-or{display:flex;align-items:center;gap:10px;margin-top:18px;color:#8592a8;font-size:12.5px}.lx-or::before,.lx-or::after{content:"";flex:1;height:1px;background:rgba(160,180,215,.2)}.lx-or+.lx-form{margin-top:14px}
+.lx-gbtn{margin-top:22px;display:flex;justify-content:center;min-height:44px;color-scheme:light}.lx-gbtn+.lx-or{margin-top:18px}
 .lx-gpick{margin-top:10px;display:flex;flex-direction:column;gap:6px}.lx-field{position:relative}.lx-inp.has-btn{padding-right:58px}.lx-eye{all:unset;cursor:pointer;position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:12.5px;color:#a8b4c8}.lx-hint{margin:6px 0 0;font-size:12px;color:#8592a8}.lx-hint b{color:#e6ecf5;letter-spacing:.1em}
 .lx-inp.code{letter-spacing:.4em;font-size:20px;text-align:center}.lx-link{all:unset;cursor:pointer;margin-top:14px;font-size:13.5px;color:#9cc4f2;display:block;text-align:center}
 .lx-inp:disabled{opacity:.7}
@@ -330,7 +331,7 @@ h1{font-size:30px;font-weight:400;letter-spacing:-.025em;margin:0}
 .stages li i{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:var(--soft);font-style:normal;font-size:11px}
 .stages li.cur{border-color:var(--accent-line);background:var(--accent-soft);color:var(--accent);font-weight:500}.stages li.cur i{background:var(--accent);color:#fff}
 .stages li.done{color:var(--green)}.stages li.done i{background:var(--green-soft)}
-.save{grid-column:1/-1;display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--muted);margin-top:2px}.save.ok{color:var(--green)}
+.save{grid-column:1/-1;display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--muted);margin-top:2px}.save.bad{color:var(--red)}.save.ok{color:var(--green)}
 .dot{width:7px;height:7px;border-radius:50%;background:var(--field);display:inline-block;flex-shrink:0}
 .dot.saved{background:var(--amber)}.dot.submitted,.dot.na{background:hsl(214 60% 55%)}.dot.verified,.dot.waived{background:var(--green)}.dot.changes{background:var(--red)}
 /* tabs */
@@ -420,11 +421,13 @@ td{padding:13px 14px;border-bottom:1px solid var(--line);vertical-align:top}tr:l
  .tabs{margin:0 -14px 12px;padding:6px 14px}.sec>h2 button{padding:13px 12px}.body{padding:2px 12px 14px}.todo{display:none}.card>header{flex-direction:column}.meta{justify-content:flex-start}
  .bar{padding:0 10px;gap:8px}.bar .ctx small{display:none}.bar .reset{display:none}.svc{grid-template-columns:1fr auto}}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}.snow{display:none}html{scroll-behavior:auto}}
+.sshare{display:flex;align-items:center;gap:12px;flex-wrap:wrap;min-height:40px}.ss-ok{display:inline-flex;align-items:center;gap:6px;color:hsl(150 55% 30%);font-weight:600;font-size:14px}.ss-mark{display:inline-flex;align-items:center;gap:6px;font-size:13.5px;color:var(--bluegray);margin-left:auto}
 </style>
 </head>
 <body>
 <div id="app"></div>
 <script src="/htm.js"></script>
+<script src="/merge.js"></script>
 <script>
 const {html,render,useState,useEffect,useRef,useMemo,useCallback}=htmPreact;
 
@@ -494,7 +497,7 @@ const blank=v=>v===undefined||v===null||String(v).trim()==='';
 
 function fresh(){
   const loc={id:uid(),name:'Main Clinic',street:'',suite:'',city:'',state:'AZ',zip:'',tz:'America/Phoenix',phone:'',fax:'',days:[],open:'',close:'',primary:true};
-    return {v:4,clinic:'Sonoran Family Health',site:'Scottsdale Clinic',
+    return {v:4,clinic:'',site:'',
     org:{legalName:'',dba:'',npi:'',type:'',phone:'',fax:'',email:'',website:'',status:''},
     locations:[loc],contacts:{primaryId:'',omId:''},clinicians:[],payers:[],logins:[],hours:{},visits:{ways:[],text:''},phone:{adminOn:true,regOn:false},room:{name:'',loc:''},
     flows:{lab:{},imaging:{},example:'',labs:[],delivery:{}},emrs:[],team:[],vendors:[],
@@ -510,11 +513,72 @@ function fresh(){
 }
 const KEY='plexus-my-progress-v4';
 const FKEY='plexus-onboarding-facilities',GKEY='plexus-onboarding-global';
-const lsGet=k=>{try{return localStorage.getItem(k);}catch(e){return null;}};const lsSet=(k,v)=>{try{localStorage.setItem(k,v);}catch(e){}};
+/* ---------- server sync: everything is saved to the Plexus server; MEM is this page's working copy ---------- */
+const MEM={},BASE={},VER={},SVER={};let ME=null,CONFIG={},SYNC={state:'idle',err:''};const SYNC_L=new Set();
+const {merge3,same:sameJ}=window.PxMerge;
+const setSync=(state,err='')=>{SYNC={state,err};SYNC_L.forEach(f=>f(SYNC));};
+async function api(method,url,body){const r=await fetch(url,{method,credentials:'same-origin',headers:body?{'Content-Type':'application/json'}:{},body:body?JSON.stringify(body):undefined});
+  let j={};try{j=await r.json();}catch(e){}if(r.status===401&&ME&&!url.startsWith('/api/auth')){ME=null;location.reload();}if(!r.ok){const e=new Error(j.error||'Something went wrong.');e.status=r.status;throw e;}return j;}
+const lsGet=k=>MEM[k]===undefined?null:MEM[k];
+const lsSet=(k,v)=>{MEM[k]=v;onWrite(k,v);};
+const facIds=()=>{try{return JSON.parse(MEM['plexus-onboarding-facilities']||'[]').map(f=>f.id);}catch(e){return [];}};
+let FACS_SRV=[];const pend={},busy={};
+function onWrite(k,v){
+  if(k.startsWith('plexus-my-progress-v4:')){const id=k.slice(22);if(!facIds().includes(id)||!(id in VER))return;try{if(BASE[id]&&sameJ(JSON.parse(v),BASE[id]))return;}catch(e){}
+    clearTimeout(pend[id]);setSync('pending');pend[id]=setTimeout(()=>flush(id),700);return;}
+  if(k==='plexus-onboarding-facilities'){let l=[];try{l=JSON.parse(v);}catch(e){}
+    for(const f of l){const was=FACS_SRV.find(x=>x.id===f.id);
+      if(!was){FACS_SRV.push({...f});let st={};try{st=JSON.parse(MEM['plexus-my-progress-v4:'+f.id]||'{}');}catch(e){}
+        setSync('saving');api('POST','/api/facilities',{id:f.id,state:st,coordinator:f.coordinator||'',target:f.target||''}).then(r=>{BASE[f.id]=r.state;VER[f.id]=r.version;setSync('saved');flush(f.id);}).catch(e=>setSync('error',e.message));}
+      else if((was.coordinator||'')!==(f.coordinator||'')||(was.target||'')!==(f.target||'')){Object.assign(was,f);api('POST','/api/facilities/'+f.id+'/meta',{coordinator:f.coordinator||'',target:f.target||''}).catch(e=>setSync('error',e.message));}}
+    return;}
+  const sk={'plexus-onboarding-global':'reqDefaults','plexus-onboarding-reminders':'reminders','plexus-onboarding-users':'users'}[k];
+  if(sk&&ME&&ME.role==='plexus'){let val;try{val=JSON.parse(v);}catch(e){return;}if(sk==='reqDefaults')val=val.reqDefaults||{};
+    clearTimeout(pend['s:'+sk]);pend['s:'+sk]=setTimeout(()=>api('PUT','/api/settings/'+sk,{value:val}).then(r=>{SVER[sk]=r.version;}).catch(e=>{if(e.status!==403)setSync('error',e.message);}),500);}
+}
+async function flush(id){
+  if(busy[id]){clearTimeout(pend[id]);pend[id]=setTimeout(()=>flush(id),400);return;}
+  const sentStr=MEM['plexus-my-progress-v4:'+id];if(!sentStr)return;const sent=JSON.parse(sentStr);
+  if(BASE[id]&&sameJ(sent,BASE[id])){if(!Object.values(busy).some(Boolean))setSync('saved');return;}
+  busy[id]=true;setSync('saving');
+  try{const r=await api('POST','/api/facilities/'+id+'/save',{base:BASE[id]||null,next:sent});applyServer(id,r.state,r.version,sent);setSync('saved');}
+  catch(e){setSync('error',e.status===403?'You don’t have access to save this clinic.':'Not saved yet — retrying…');if(e.status!==403){clearTimeout(pend[id]);pend[id]=setTimeout(()=>flush(id),4000);}}
+  finally{busy[id]=false;}
+}
+/* Fold a newer server copy into this page, keeping anything typed here that the server hasn't seen yet. */
+function applyServer(id,srv,version,sent){
+  const k='plexus-my-progress-v4:'+id,nowStr=MEM[k],now=nowStr?JSON.parse(nowStr):null;
+  const local=!now?srv:sent?(sameJ(now,sent)?srv:merge3(sent,now,srv)):(BASE[id]?merge3(BASE[id],now,srv):srv);
+  BASE[id]=srv;VER[id]=version;MEM[k]=JSON.stringify(local);
+  if(!now||!sameJ(local,now))dispatchEvent(new CustomEvent('px-remote',{detail:{id,before:now,after:local}}));
+  if(!sameJ(local,srv)){clearTimeout(pend[id]);pend[id]=setTimeout(()=>flush(id),700);}
+}
+function loadBoot(b){ME=b.me;CONFIG=b.config||{};if(!ME)return;
+  FACS_SRV=b.facs.map(f=>({...f}));MEM['plexus-onboarding-facilities']=JSON.stringify(b.facs.map(({version,...f})=>f));
+  for(const [id,x] of Object.entries(b.states||{})){BASE[id]=x.state;VER[id]=x.version;MEM['plexus-my-progress-v4:'+id]=JSON.stringify(x.state);}
+  applySettings(b.settings||{});MEM['plexus-onboarding-accounts']=JSON.stringify(b.accounts||{});}
+function applySettings(st){let ch=false;for(const [k,x] of Object.entries(st)){if(SVER[k]===x.version)continue;SVER[k]=x.version;ch=true;
+  if(k==='reqDefaults')MEM['plexus-onboarding-global']=JSON.stringify({reqDefaults:x.value||{}});
+  if(k==='reminders')MEM['plexus-onboarding-reminders']=JSON.stringify(x.value||{});
+  if(k==='users')MEM['plexus-onboarding-users']=JSON.stringify(x.value||[]);}return ch;}
+let syncing=false;
+async function pull(){if(!ME||syncing||document.hidden)return;syncing=true;
+  try{const r=await api('POST','/api/sync',{versions:VER,settings:SVER});
+    let facsCh=false;for(const f of r.facs){if(!FACS_SRV.some(x=>x.id===f.id)){FACS_SRV.push({...f});facsCh=true;}}
+    const ids=r.facs.map(f=>f.id);if(FACS_SRV.some(x=>!ids.includes(x.id))){FACS_SRV=FACS_SRV.filter(x=>ids.includes(x.id));facsCh=true;}
+    if(facsCh||r.facs.some(f=>{const m=FACS_SRV.find(x=>x.id===f.id);return m.coordinator!==f.coordinator||m.target!==f.target;})){
+      for(const f of r.facs){const m=FACS_SRV.find(x=>x.id===f.id);Object.assign(m,f);}
+      MEM['plexus-onboarding-facilities']=JSON.stringify(r.facs.map(({version,...f})=>f));facsCh=true;}
+    for(const [id,x] of Object.entries(r.changed||{})){if(busy[id])continue;
+      if(!(id in VER)){BASE[id]=x.state;VER[id]=x.version;MEM['plexus-my-progress-v4:'+id]=JSON.stringify(x.state);facsCh=true;}else applyServer(id,x.state,x.version,null);}
+    if(r.accounts)MEM['plexus-onboarding-accounts']=JSON.stringify(r.accounts);
+    if(applySettings(r.settings||{})||facsCh)dispatchEvent(new Event('px-refresh'));
+    if(SYNC.state==='error'&&!Object.values(busy).some(Boolean))setSync('saved');
+  }catch(e){}finally{syncing=false;}}
+setInterval(pull,4000);addEventListener('visibilitychange',()=>{if(!document.hidden)pull();});
+addEventListener('beforeunload',e=>{if(Object.keys(VER).some(id=>{const m=MEM['plexus-my-progress-v4:'+id];return m&&BASE[id]&&!sameJ(JSON.parse(m),BASE[id]);})){e.preventDefault();e.returnValue='';}});
 const loadGlobal=()=>{try{return JSON.parse(lsGet(GKEY))||{};}catch(e){return {};}};
-function loadFacs(){try{const f=JSON.parse(lsGet(FKEY));if(Array.isArray(f)&&f.length)return f;}catch(e){}
-  const legacy=lsGet(KEY);const s=legacy?loadRaw(legacy):fresh();const id='f'+uid();s.fid=id;lsSet(KEY+':'+id,JSON.stringify(s));
-  const facs=[{id,site:s.site,clinic:s.clinic,coordinator:'Morgan Lee',target:''}];lsSet(FKEY,JSON.stringify(facs));return facs;}
+function loadFacs(){try{const f=JSON.parse(lsGet(FKEY));if(Array.isArray(f))return f;}catch(e){}return [];}
 function loadFac(id){const raw=lsGet(KEY+':'+id);const s=raw?loadRaw(raw):fresh();s.fid=id;const g=loadGlobal();if(g.reqDefaults)s.reqDefaults=g.reqDefaults;return s;}
 function loadRaw(raw){try{const s=JSON.parse(raw);if(s&&s.v===4){s.logins=s.logins.filter(l=>l.name||l.website||[l.access.admin,l.access.regular,...(l.extra||[])].some(a=>a.username||a.pathway));s.logins.forEach(l=>{if(!['EMR','Lab portal','Clearinghouse','eFax'].includes(l.type))l.type='Other';l.extra=l.extra||[];for(const a of [l.access.admin,l.access.regular,...l.extra])if(a.url===undefined)a.url=(a.username||a.pathway)?(l.website||''):'';
     {const has=a=>!!(a.username||a.pathway||a.url);for(const a of [l.access.admin,l.access.regular,...l.extra]){if(a.pathway===''&&(a.username||a.url))a.pathway='fill';}
@@ -943,11 +1007,15 @@ const LAB_NAMES=['Quest Diagnostics','Labcorp','Sonora Quest','BioReference','Ot
 const CLEARINGHOUSES=['Availity Essentials','Change Healthcare','Office Ally','Waystar','Trizetto','Other'];
 const LOGIN_NAMES={EMR:EMRS,'Lab portal':LAB_NAMES,Clearinghouse:CLEARINGHOUSES,Availity:['Availity Essentials'],'Payer portal':[],'Practice management':[],Other:[]};
 const LOGIN_META={EMR:['EMR','Which EMR do you use?','Choose your EMR'],'Lab portal':['Lab Portal','Which lab?','Choose your lab'],Clearinghouse:['Clearinghouse','Which clearinghouse?','Choose your clearinghouse']};
-/* Passwords live only in page memory: never written to browser storage or the audit log. */
-const SECRETS={};
+/* Passwords are never typed into the portal. Clinics send them through Plexus's secure share link; Plexus marks each one received. */
+const CUR={s:null,up:null,auth:null,who:''};
 function Password({k,label='Password',dis}){
-  const [v,setV]=useState(SECRETS[k]||''),[show,setShow]=useState(false);const id=useMemo(()=>'f'+(++fid),[]);
-  return html`<div class="field"><label for=${id}>${label}</label><div class="pw"><input id=${id} type=${show?'text':'password'} autocomplete="new-password" value=${v} disabled=${dis} onInput=${e=>{SECRETS[k]=e.target.value;setV(e.target.value);}}/><button type="button" class="link" onClick=${()=>setShow(!show)}>${show?'Hide':'Show'}</button></div></div>`;
+  const s=CUR.s,rec=s&&(s.secureRecv||{})[k],plexus=CUR.auth&&CUR.auth.role==='plexus';
+  const mark=v=>CUR.up&&CUR.up(n=>{n.secureRecv=n.secureRecv||{};if(v)n.secureRecv[k]={at:new Date().toISOString(),by:CUR.who};else delete n.secureRecv[k];},null,v?`${label} received securely`:`${label} marked not received`);
+  return html`<div class="field full"><label>${label}</label><div class="sshare">
+    ${rec?html`<span class="ss-ok">${Icon('check',14)} Received ${fmtD(rec.at)}</span>`:CONFIG.secureShareUrl?html`<a class="btn sm" href=${CONFIG.secureShareUrl} target="_blank" rel="noopener noreferrer">${Icon('lock',14)} Send password securely</a>`:html`<span class="muted small">Plexus will collect this password with you securely.</span>`}
+    ${plexus&&!dis&&html`<label class="ss-mark"><input type="checkbox" checked=${!!rec} onChange=${e=>mark(e.target.checked)}/> Received</label>`}</div>
+    ${!rec&&html`<span class="hint">Never type a password into this form or email.</span>`}</div>`;
 }
 function AccessPanel({a,A,cls,label,req,sk,s,P,onRemove,toggle=true}){
   const on=a.on!==false;
@@ -988,7 +1056,7 @@ function LoginTile({e,L,P,s,up,icon,open,setOpen,onRemove,nameLabel,custom}){
         <${AccessPanel} a=${e.access.regular} A=${f=>L(x=>f(x.access.regular))} cls="regular" label="Regular access" sk=${e.id+':regular'} s=${s} P=${P}/>
         ${(e.extra||[]).map((a,i)=>html`<${AccessPanel} key=${i} a=${a} A=${f=>L(x=>f(x.extra[i]))} cls="regular" label=${'Regular access '+(i+2)} sk=${e.id+':reg'+i} s=${s} P=${P} toggle=${false} onRemove=${()=>L(x=>{x.extra.splice(i,1);})}/>`)}</div>
       ${P.edit&&html`<button type="button" class="btn ghost addacc" onClick=${()=>L(x=>{(x.extra=x.extra||[]).push(blankAccess(true));})}>${Icon('plus',16)} Add another regular access</button>`}
-      <span class="small muted">${Icon('lock',12)} Passwords clear on reload and never appear on cards.</span>
+      <span class="small muted">${Icon('lock',12)} Passwords are never typed here — send them with the secure link.</span>
       <${Verify} item=${e} P=${P} patch=${(f,msg)=>up(d=>f(d.logins.find(x=>x.id===e.id)),null,`${e.name||e.type} login: ${msg}`)}/>
       </div></div>`;
   const hasData=[ad,e.access.regular,...(e.extra||[])].some(a=>a.username||a.url||a.pathway);
@@ -1162,8 +1230,8 @@ function Footer({k,sec,P,act,flag}){
 const secLabel=x=>x.state==='submitted'?'Submitted':x.state==='na'?'Not applicable':['verified','waived'].includes(x.state)?'Verified':x.complete?'Complete':x.state==='not_started'?'Not started':'In progress';
 /* ---------------- app ---------------- */
 const AUTH_KEY='plexus-onboarding-session';
-const loadAuth=()=>{try{return JSON.parse(localStorage.getItem(AUTH_KEY))||null;}catch(e){return null;}};
-const saveAuth=a=>{try{a?localStorage.setItem(AUTH_KEY,JSON.stringify(a)):localStorage.removeItem(AUTH_KEY);}catch(e){}};
+const loadAuth=()=>ME;
+const signOut=async()=>{try{await api('POST','/api/auth/logout',{});}catch(e){}location.href=location.pathname;};
 const PLEXUS_DOMAIN='@plexusclinical.com';
 const ACC_KEY='plexus-onboarding-accounts',USERS_KEY='plexus-onboarding-users',REM_KEY='plexus-onboarding-reminders';
 const jget=(k,d)=>{try{const v=JSON.parse(lsGet(k));return v==null?d:v;}catch(e){return d;}};const jset=(k,v)=>lsSet(k,JSON.stringify(v));
@@ -1171,10 +1239,7 @@ const PROLES={Admin:'Full access, including users and roles',Coordinator:'Add cl
 const PERMS=[['users','Manage users and roles',['Admin']],['clinics','Add clinics',['Admin','Coordinator']],['invite','Invite clinic and billing teams',['Admin','Coordinator']],['review','Review and approve sections',['Admin','Coordinator','Reviewer','Billing']],['requirements','Edit requirement defaults',['Admin']],['reminders','Edit reminder settings',['Admin','Coordinator']],['credentials','Reveal stored credentials',['Admin']]];
 const can=(auth,perm)=>!!auth&&auth.role==='plexus'&&(PERMS.find(x=>x[0]===perm)||[,,[]])[2].includes(auth.prole||'Admin');
 const defaultUsers=()=>[{email:'onboarding'+PLEXUS_DOMAIN,name:'Plexus Onboarding',role:'Admin',owner:true,added:new Date().toISOString()},{email:'billing'+PLEXUS_DOMAIN,name:'Plexus Billing',role:'Billing',added:new Date().toISOString()},{email:'drimran'+PLEXUS_DOMAIN,name:'Dr. Imran',role:'Admin',added:new Date().toISOString()},{email:'dralhadheri'+PLEXUS_DOMAIN,name:'Dr. Alhadheri',role:'Admin',added:new Date().toISOString()}];
-/* Preview-only password sign-in for these Plexus admins (password: admin). Production uses Google sign-in only. */
-const PREVIEW_ADMIN_PW={['drimran'+PLEXUS_DOMAIN]:'29b6a9afe870f858480ba9f66586a746da727afa8ab4e181af2e46fcc6d314e6',['dralhadheri'+PLEXUS_DOMAIN]:'2553a71c40eb33c5d9e19e09656fbc8e15bdf46ee4c8d9c707c474afbdebee28'};
-const loadUsers=()=>{let u=jget(USERS_KEY,null);if(!Array.isArray(u)||!u.length)u=defaultUsers();
-  for(const d of defaultUsers().filter(x=>PREVIEW_ADMIN_PW[x.email])){const x=u.find(y=>y.email===d.email);if(!x)u.push(d);else{x.role='Admin';x.disabled=false;}}jset(USERS_KEY,u);return u;};
+const loadUsers=()=>{const u=jget(USERS_KEY,null);return Array.isArray(u)&&u.length?u:defaultUsers();};
 const TPL_DEFAULT={
   clinic:{subject:'Reminder: finish onboarding for {clinic}',body:'Hi {first_name},\n\nThis is a friendly reminder to finish the clinic onboarding for {clinic}. You have {remaining} left to complete.\n\nPick up where you left off: {link}\n\nThank you,\n{sender}'},
   billing:{subject:'Reminder: billing onboarding for {clinic}',body:'Hi {first_name},\n\nThis is a friendly reminder to finish the billing onboarding for {clinic}. You have {remaining} left to complete.\n\nPick up where you left off: {link}\n\nThank you,\n{sender}'}};
@@ -1189,7 +1254,6 @@ const phoneOk=p=>{const d=String(p||'').replace(/\D/g,'');return d.length===10||
 const fmtPhone=p=>{let d=String(p||'').replace(/\D/g,'');if(d.length===11&&d[0]==='1')d=d.slice(1);return d.length===10?`(${d.slice(0,3)}) ${d.slice(3,6)}-${d.slice(6)}`:p;};
 const portalLink=team=>{try{return location.origin+location.pathname+'?view='+team;}catch(e){return 'portal link';}};
 const remCtx=(rem,team,clinic,name,remaining)=>({first_name:(name||'').trim().split(/\s+/)[0]||'there',clinic:clinic||'your clinic',team:team==='billing'?'billing':'clinic',remaining:remaining===1?'1 section':`${remaining} sections`,link:portalLink(team),sender:rem.senderName||'Plexus Ancillary Services'});
-async function pwHash(email,pw){try{const d=await crypto.subtle.digest('SHA-256',new TextEncoder().encode('plexus-onboarding:'+email+':'+pw));return Array.from(new Uint8Array(d)).map(b=>b.toString(16).padStart(2,'0')).join('');}catch(e){let h=0;for(const ch of email+pw)h=(h*31+ch.charCodeAt(0))|0;return 'x'+h;}}
 const addBusinessDays=(d,n,biz)=>{const r=new Date(d);let k=0;while(k<n){r.setDate(r.getDate()+1);if(!biz||(r.getDay()!==0&&r.getDay()!==6))k++;}return r;};
 const fmtDT=iso=>{try{return new Date(iso).toLocaleString([], {month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});}catch(e){return '';}};
 const fmtD=iso=>{try{return new Date(iso).toLocaleDateString([], {month:'short',day:'numeric'});}catch(e){return '';}};
@@ -1231,71 +1295,62 @@ function BannerStars({intervalMs=30000,fixed}){
   return html`<div class=${'ws-stars'+(fixed?' fixed':'')} aria-hidden="true">${STARS.map((st,i)=>html`<span key=${i} class="ws-star" style=${{left:st.left,top:st.top,opacity:st.opacity,width:st.width+'px',height:st.height+'px'}}/>`)}
     ${m&&html`<span key=${'m'+m.id} class="ws-meteor" style=${{left:m.left,top:m.top}} onAnimationEnd=${()=>setM(null)}/>`}</div>`;
 }
-function SignIn({facs,onIn,inviteToken,clearInvite}){
+function SignIn({inviteToken,clearInvite}){
   const [mode,setMode]=useState(inviteToken?'invite':'signin'),[email,setEmail]=useState(''),[pw,setPw]=useState(''),[pw2,setPw2]=useState(''),[name,setName]=useState(''),[show,setShow]=useState(false);
-  const [err,setErr]=useState(''),[pending,setPending]=useState(null),[code,setCode]=useState(''),[sent,setSent]=useState(''),[gpick,setGpick]=useState(false),[gmail,setGmail]=useState('');
-  const all=facs.map(f=>{const st0=loadFac(f.id);return {f,inv:(st0.invites||{})[st0.site]||{clinic:[],billing:[]}};});
-  const users=loadUsers(),accts=jget(ACC_KEY,{});
-  const memberFor=em=>{const hit=all.find(a=>['clinic','billing'].some(t=>a.inv[t].some(x=>x.email===em)));if(!hit)return null;const teams=['clinic','billing'].filter(t=>hit.inv[t].some(x=>x.email===em));const rec=[...hit.inv.clinic,...hit.inv.billing].find(x=>x.email===em);return {email:em,name:(rec&&rec.name)||em,role:'member',teams,fid:hit.f.id,site:hit.f.site};};
-  const inviteRec=(()=>{if(!inviteToken)return null;for(const a of all)for(const t of ['clinic','billing']){const r=a.inv[t].find(x=>x.token===inviteToken);if(r)return {...r,team:t,f:a.f};}return null;})();
-  useEffect(()=>{if(inviteToken){setMode('invite');setErr('');setPw('');setPw2('');}if(inviteRec){setEmail(inviteRec.email);setName(inviteRec.name||'');}},[inviteToken]);
-  const startCode=u=>{const c=String(Math.floor(100000+Math.random()*900000));setSent(c);setCode('');setPending(u);setMode('code');};
-  const finish=(u,team)=>{const acc=jget(ACC_KEY,{});if(acc[u.email]){acc[u.email].lastSignIn=new Date().toISOString();jset(ACC_KEY,acc);}const v={...u};if(v.role==='member')v.team=team||v.teams[0];onIn(v);};
-  const signIn=async()=>{const em=email.trim().toLowerCase();if(!emailOk(em)){setErr('Enter a valid email address.');return;}
-    if(em.endsWith(PLEXUS_DOMAIN)){const u=users.find(x=>x.email===em&&!x.disabled);if(u&&PREVIEW_ADMIN_PW[em]){if(await pwHash(em,pw)===PREVIEW_ADMIN_PW[em]){onIn({email:em,name:u.name,role:'plexus',prole:u.role,via:'password'});return;}setErr('That email and password don’t match.');return;}setErr('Plexus staff sign in with Google.');return;}
-    const a=accts[em];const m=memberFor(em);if(!m){setErr('This email hasn’t been invited. Ask your Plexus coordinator for an invitation.');return;}
-    if(!a||!a.hash){setErr('You haven’t created your account yet. Open the invitation link in your email to create it.');return;}
-    if(await pwHash(em,pw)!==a.hash){setErr('That email and password don’t match.');return;}setErr('');startCode(m);};
-  const accept=async()=>{if(!inviteRec){setErr('This invitation link is invalid or was removed. Ask your Plexus coordinator to resend it.');return;}
-    if(!name.trim()){setErr('Enter your full name.');return;}if(pw.length<12){setErr('Use at least 12 characters for your password.');return;}if(pw!==pw2){setErr('The passwords don’t match.');return;}
-    const acc=jget(ACC_KEY,{});acc[inviteRec.email]={name:name.trim(),hash:await pwHash(inviteRec.email,pw),created:new Date().toISOString(),method:'password',mfa:true};jset(ACC_KEY,acc);
-    setErr('');startCode({...memberFor(inviteRec.email),name:name.trim()});};
-  const google=em=>{em=em.trim().toLowerCase();if(!emailOk(em)){setErr('Enter a valid Google account.');return;}
-    const u=users.find(x=>x.email===em&&!x.disabled);if(u){onIn({email:em,name:u.name,role:'plexus',prole:u.role,via:'google'});return;}
-    if(em.endsWith(PLEXUS_DOMAIN)){setErr('This Google account hasn’t been added in Users & roles. Ask onboarding@plexusclinical.com for access.');setGpick(false);return;}
-    const m=memberFor(em);if(!m){setErr('This Google account hasn’t been invited.');setGpick(false);return;}
-    const acc=jget(ACC_KEY,{});if(!acc[em])acc[em]={name:m.name,created:new Date().toISOString(),method:'google'};else acc[em].google=true;jset(ACC_KEY,acc);finish(m);};
-  const demo=[...all.flatMap(a=>a.inv.clinic.slice(0,2).map(x=>['Clinic team',x,a.f.site])),...all.flatMap(a=>a.inv.billing.slice(0,2).map(x=>['Billing team',x,a.f.site]))].slice(0,6);
+  const [err,setErr]=useState(''),[busy,setBusy]=useState(false),[pending,setPending]=useState(null),[code,setCode]=useState(''),[inv,setInv]=useState(null);
+  const staff=email.trim().toLowerCase().endsWith(PLEXUS_DOMAIN);const gRef=useRef(null);
+  const run=async f=>{if(busy)return;setBusy(true);setErr('');try{await f();}catch(e){setErr(e.message);}finally{setBusy(false);}};
+  const done=()=>{try{history.replaceState(null,'',location.pathname);}catch(e){}location.reload();};
+  useEffect(()=>{if(!inviteToken)return;setMode('invite');api('GET','/api/invite/'+encodeURIComponent(inviteToken)).then(r=>{setInv(r);setEmail(r.email);setName(r.name||'');}).catch(e=>setInv({error:e.message}));},[inviteToken]);
+  useEffect(()=>{if(!CONFIG.googleClientId||mode==='code'||!gRef.current)return;let dead=false;
+    const go=()=>{if(dead||!window.google||!gRef.current)return;google.accounts.id.initialize({client_id:CONFIG.googleClientId,callback:r=>run(async()=>{await api('POST','/api/auth/google',{credential:r.credential});done();})});
+      google.accounts.id.renderButton(gRef.current,{theme:'outline',size:'large',shape:'pill',width:Math.min(360,gRef.current.offsetWidth||360),text:'continue_with'});};
+    if(window.google)go();else{let sc=document.querySelector('script[data-gsi]');if(!sc){sc=document.createElement('script');sc.src='https://accounts.google.com/gsi/client';sc.async=true;sc.dataset.gsi='1';document.head.appendChild(sc);}sc.addEventListener('load',go);}
+    return()=>{dead=true;};},[mode]);
+  const signIn=()=>run(async()=>{const em=email.trim().toLowerCase();if(!emailOk(em))throw new Error('Enter a valid email address.');
+    const r=await api('POST','/api/auth/login',{email:em,password:pw});setPending(r);setCode('');setMode('code');});
+  const accept=()=>run(async()=>{if(!name.trim())throw new Error('Enter your full name.');if(pw.length<12)throw new Error('Use at least 12 characters for your password.');if(pw!==pw2)throw new Error('The passwords don’t match.');
+    const r=await api('POST','/api/invite/'+encodeURIComponent(inviteToken)+'/accept',{name:name.trim(),password:pw});setPending(r);setCode('');setMode('code');});
+  const verify=team=>run(async()=>{if(code.length!==6)throw new Error('Enter the 6-digit code.');await api('POST','/api/auth/verify',{email:pending.email,code,team});done();});
   const G=html`<svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>`;
+  const gBtn=CONFIG.googleClientId?html`<div class="lx-gbtn" ref=${gRef}></div>`:null;
   return html`<main class="lx"><${BannerStars} intervalMs=${10000} fixed/>
     <div class="lx-card">
       <img src=${PLEXUS_WHITE} alt="Plexus Ancillary Services" class="lx-logo"/>
       <div class="lx-app">Onboarding</div>
       ${mode==='invite'?html`<h1 class="lx-h">Accept your invitation</h1>
-        ${inviteRec?html`<p class="lx-sub">${inviteRec.f.site} · ${inviteRec.team==='billing'?'Billing team':'Clinic team'}. Create your account to start onboarding.</p>`:html`<p class="lx-sub">This invitation link is invalid or was removed.</p>`}
+        ${!inv?html`<p class="lx-sub">Checking your invitation…</p>`:inv.error||inv.expired?html`<p class="lx-sub">${inv.error||'This invitation expired. Ask your Plexus coordinator to resend it.'}</p><button class="lx-link" onClick=${()=>{clearInvite();setMode('signin');setErr('');}}>Go to sign in</button>`
+        :inv.hasAccount?html`<p class="lx-sub">You already have an account for ${inv.email}.</p><button class="lx-btn" onClick=${()=>{clearInvite();setMode('signin');}}>Sign in <span aria-hidden="true">→</span></button>`
+        :html`<p class="lx-sub">${inv.site} · ${inv.team==='billing'?'Billing team':'Clinic team'}. Create your account to start onboarding.</p>
         <div class="lx-form"><div><label class="lx-lbl" for="ia-name">Full name</label><input id="ia-name" class="lx-inp" autocomplete="name" value=${name} onInput=${e=>{setName(e.target.value);setErr('');}}/></div>
           <div><label class="lx-lbl" for="ia-email">Email</label><input id="ia-email" class="lx-inp" value=${email} disabled/></div>
           <div><label class="lx-lbl" for="ia-pw">Create password</label><div class="lx-field"><input id="ia-pw" class="lx-inp has-btn" type=${show?'text':'password'} autocomplete="new-password" value=${pw} onInput=${e=>{setPw(e.target.value);setErr('');}}/><button type="button" class="lx-eye" onClick=${()=>setShow(!show)} aria-label=${show?'Hide password':'Show password'}>${show?'Hide':'Show'}</button></div><p class="lx-hint">12 characters minimum</p></div>
           <div><label class="lx-lbl" for="ia-pw2">Confirm password</label><input id="ia-pw2" class="lx-inp" type=${show?'text':'password'} autocomplete="new-password" value=${pw2} onInput=${e=>{setPw2(e.target.value);setErr('');}} onKeyDown=${e=>{if(e.key==='Enter')accept();}}/></div>
           ${err&&html`<div class="lx-err" role="alert">${err}</div>`}
-          <button class="lx-btn" onClick=${accept}>Create account <span aria-hidden="true">→</span></button></div>
-        <button class="lx-alt" onClick=${()=>{setGmail(email);google(email);}}>${G} Use my Google account instead</button>
-        <button class="lx-link" onClick=${()=>{clearInvite&&clearInvite();setMode('signin');setErr('');}}>I already have an account</button>`
-      :mode==='code'?html`<h1 class="lx-h">Two-step verification</h1><p class="lx-sub">Enter the 6-digit code we sent to <b>${pending.email}</b>.</p>
-        <div class="lx-form"><div><label class="lx-lbl" for="si-code">Verification code</label><input id="si-code" class="lx-inp code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" value=${code} onInput=${e=>{setCode(e.target.value.replace(/\D/g,''));setErr('');}} onKeyDown=${e=>{if(e.key==='Enter')document.getElementById('si-verify')?.click();}}/></div>
-          <p class="lx-hint">Preview only: your code is <b>${sent}</b></p>
+          <button class="lx-btn" disabled=${busy} onClick=${accept}>${busy?'Creating…':html`Create account <span aria-hidden="true">→</span>`}</button></div>
+        ${gBtn&&html`<div class="lx-or"><span>or</span></div>${gBtn}`}`}`
+      :mode==='code'?html`<h1 class="lx-h">Check your email</h1><p class="lx-sub">${pending.staff?html`If <b>${pending.email}</b> has Plexus access, we sent it a 6-digit code.`:html`We sent a 6-digit code to <b>${pending.email}</b>.`}</p>
+        <div class="lx-form"><div><label class="lx-lbl" for="si-code">Verification code</label><input id="si-code" class="lx-inp code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" autofocus value=${code} onInput=${e=>{setCode(e.target.value.replace(/\D/g,''));setErr('');}} onKeyDown=${e=>{if(e.key==='Enter'&&(pending.teams||[]).length<2)verify();}}/></div>
           ${err&&html`<div class="lx-err" role="alert">${err}</div>`}
-          ${pending.role==='member'&&pending.teams.length>1?html`<p class="lx-sub">You’re on both teams. Open:</p>${pending.teams.map(t=>html`<button class="lx-btn" onClick=${()=>{if(code!==sent){setErr('That code isn’t right.');return;}finish(pending,t);}}>${t==='clinic'?'Clinic onboarding':'Billing onboarding'}</button>`)}`
-            :html`<button id="si-verify" class="lx-btn" onClick=${()=>{if(code!==sent){setErr('That code isn’t right.');return;}finish(pending);}}>Verify and continue <span aria-hidden="true">→</span></button>`}</div>
-        <button class="lx-link" onClick=${()=>{setMode('signin');setPw('');}}>Back</button>`
+          ${(pending.teams||[]).length>1?html`<p class="lx-sub">You’re on both teams. Open:</p>${pending.teams.map(t=>html`<button class="lx-btn" disabled=${busy} onClick=${()=>verify(t)}>${t==='clinic'?'Clinic onboarding':'Billing onboarding'}</button>`)}`
+            :html`<button id="si-verify" class="lx-btn" disabled=${busy} onClick=${()=>verify()}>${busy?'Checking…':html`Verify and continue <span aria-hidden="true">→</span>`}</button>`}</div>
+        <button class="lx-link" onClick=${()=>{setMode('signin');setPw('');setErr('');}}>Back</button>`
       :html`<h1 class="lx-h">Sign in</h1><p class="lx-sub">Continue to your workspace</p>
-        <button class="lx-google" onClick=${()=>{setGpick(true);setErr('');}}>${G} Continue with Google</button>
-        ${gpick&&html`<div class="lx-gpick"><span class="lx-hint">Choose a Google account (preview)</span>${users.filter(u=>!u.disabled).map(u=>html`<button class="lx-chip" onClick=${()=>google(u.email)}><b>${u.name}</b> ${u.email}</button>`)}
-          <div class="row" style="gap:6px"><input class="lx-inp" style="height:38px" placeholder="another Google account" value=${gmail} onInput=${e=>setGmail(e.target.value)} onKeyDown=${e=>{if(e.key==='Enter')google(gmail);}}/><button class="lx-chip" onClick=${()=>google(gmail)}>Use</button></div></div>`}
-        <div class="lx-or"><span>or with email</span></div>
-        <div class="lx-form"><div><label class="lx-lbl" for="si-email">Email</label><input id="si-email" class="lx-inp" type="email" autocomplete="username" value=${email} onInput=${e=>{setEmail(e.target.value);setErr('');}}/></div>
-          <div><label class="lx-lbl" for="si-pw">Password</label><div class="lx-field"><input id="si-pw" class="lx-inp has-btn" type=${show?'text':'password'} autocomplete="current-password" value=${pw} onInput=${e=>{setPw(e.target.value);setErr('');}} onKeyDown=${e=>{if(e.key==='Enter')signIn();}}/><button type="button" class="lx-eye" onClick=${()=>setShow(!show)} aria-label=${show?'Hide password':'Show password'}>${show?'Hide':'Show'}</button></div></div>
+        ${gBtn&&html`${gBtn}<div class="lx-or"><span>or with email</span></div>`}
+        <div class="lx-form"><div><label class="lx-lbl" for="si-email">Email</label><input id="si-email" class="lx-inp" type="email" autocomplete="username" value=${email} onInput=${e=>{setEmail(e.target.value);setErr('');}} onKeyDown=${e=>{if(e.key==='Enter'&&staff)signIn();}}/></div>
+          ${!staff&&html`<div><label class="lx-lbl" for="si-pw">Password</label><div class="lx-field"><input id="si-pw" class="lx-inp has-btn" type=${show?'text':'password'} autocomplete="current-password" value=${pw} onInput=${e=>{setPw(e.target.value);setErr('');}} onKeyDown=${e=>{if(e.key==='Enter')signIn();}}/><button type="button" class="lx-eye" onClick=${()=>setShow(!show)} aria-label=${show?'Hide password':'Show password'}>${show?'Hide':'Show'}</button></div></div>`}
           ${err&&html`<div class="lx-err" role="alert">${err}</div>`}
-          <button class="lx-btn" onClick=${signIn}>Sign in <span aria-hidden="true">→</span></button></div>
-        <button class="lx-alt" onClick=${()=>onIn({email:'onboarding'+PLEXUS_DOMAIN,name:'Plexus Onboarding',role:'plexus',prole:'Admin',via:'preview'})}>Explore Plexus workspace (preview)</button>
-        ${demo.length>0&&html`<div class="lx-demo"><span>Preview: open an invitation</span>${demo.map(([l,x,site])=>html`<button class="lx-chip" onClick=${()=>{if(jget(ACC_KEY,{})[x.email]&&jget(ACC_KEY,{})[x.email].hash){setEmail(x.email);setErr('Account already created — enter the password.');}else{location.hash='';onIn({inviteToken:x.token});}}}><b>${l}</b> ${x.name||x.email} · ${site}</button>`)}</div>`}`}
+          <button class="lx-btn" disabled=${busy} onClick=${signIn}>${busy?'Please wait…':staff?html`Email me a sign-in code <span aria-hidden="true">→</span>`:html`Sign in <span aria-hidden="true">→</span>`}</button></div>
+        <p class="lx-hint" style="text-align:center;margin-top:14px">New here? Use the invitation link in your email.</p>`}
     </div></main>`;
 }
+/* Per-team progress saved with each clinic so the server knows who still needs a reminder. */
+function st0Summary(s){try{const st=status(s);const g=t=>{const xs=st.secs.filter(x=>t==='billing'?BILLING_KEYS.includes(x.k):!BILLING_KEYS.includes(x.k));return {remaining:xs.filter(x=>!x.complete).length,submitted:xs.every(x=>['submitted','na','verified','waived'].includes(x.state))};};return {clinic:g('clinic'),billing:g('billing')};}catch(e){return null;}}
 function App(){
   const [settings,setSettings]=useState('clinics'),[invOpen,setInvOpen]=useState(null);
   const [auth,setAuth]=useState(loadAuth),[invTok,setInvTok]=useState(()=>{try{return new URLSearchParams(location.search).get('invite');}catch(e){return null;}});
   const [resumeAt,setResumeAt]=useState(null);
-  const [facs,setFacs]=useState(loadFacs),[fid,setFid]=useState(()=>{const a=loadAuth();const f=loadFacs();return (a&&a.fid&&f.some(x=>x.id===a.fid))?a.fid:f[0].id;});
+  const [facs,setFacs]=useState(loadFacs),[fid,setFid]=useState(()=>{const a=loadAuth();const f=loadFacs();return (a&&a.fid&&f.some(x=>x.id===a.fid))?a.fid:(f[0]||{}).id;});
   const [s,setS]=useState(()=>loadFac(fid)),[view,setView]=useState(()=>{try{const v=new URLSearchParams(location.search).get('view');return ['clinic','billing'].includes(v)?v:'clinic';}catch(e){return 'clinic';}}),[saved,setSaved]=useState(null),[saving,setSaving]=useState(false);
   const [open,setOpen]=useState({}),[active,setActive]=useState(location.hash.slice(1)||'facility');
   const prog=useRef(0),tabsRef=useRef(null),heads=useRef({});
@@ -1304,18 +1359,26 @@ function App(){
   const [ek,setEk]=useState(null),[flags,setFlags]=useState({}),[tried,setTried]=useState(false);
   const P={edit:true,plexus,settlement:true,ek,setEk};
   const actor=auth?{name:auth.name,tk:auth.role==='plexus'?'plexus':auth.team,team:auth.role==='plexus'?'Plexus team':auth.team==='billing'?'Billing team':'Clinic team'}:{name:'Plexus',tk:'plexus',team:'Plexus team'};
-  const who=byText(actor);
+  const who=byText(actor);CUR.s=s;CUR.auth=auth;CUR.who=who;
   useEffect(()=>{if(s.fid!==fid)setS(loadFac(fid));},[fid]);
   useEffect(()=>{if(auth&&auth.role==='member'&&s.lastEdit)setResumeAt(s.lastEdit.at);},[auth&&auth.email,s.fid]);
-  useEffect(()=>{setSaving(true);const t=setTimeout(()=>{try{localStorage.setItem(KEY+':'+s.fid,JSON.stringify(s));const g=loadGlobal();g.reqDefaults=s.reqDefaults||{};lsSet(GKEY,JSON.stringify(g));
-      setFacs(fs=>{const n=fs.map(f=>f.id===s.fid&&(f.site!==s.site||f.clinic!==s.clinic)?{...f,site:s.site,clinic:s.clinic}:f);if(n.some((f,i)=>f!==fs[i]))lsSet(FKEY,JSON.stringify(n));return n;});
-      setSaved(new Date());}catch(e){setSaved('mem');}setSaving(false);},600);return()=>clearTimeout(t);},[s]);
+  /* Every change goes to this page's working copy at once; the sync layer saves it to the server and merges in other people's edits. */
+  useEffect(()=>{if(!s.fid||!facs.some(f=>f.id===s.fid))return;const tm=st0Summary(s);const n=tm?{...s,_summary:tm}:s;
+    lsSet(KEY+':'+s.fid,JSON.stringify(n));
+    if(auth&&auth.role==='plexus'&&!sameJ(loadGlobal().reqDefaults||{},s.reqDefaults||{})){const g=loadGlobal();g.reqDefaults=s.reqDefaults||{};lsSet(GKEY,JSON.stringify(g));}
+    setFacs(fs=>{const n2=fs.map(f=>f.id===s.fid&&(f.site!==s.site||f.clinic!==s.clinic)?{...f,site:s.site,clinic:s.clinic}:f);if(n2.some((f,i)=>f!==fs[i]))MEM[FKEY]=JSON.stringify(n2);return n2.some((f,i)=>f!==fs[i])?n2:fs;});},[s]);
+  useEffect(()=>{const f=x=>{setSaving(x.state==='saving'||x.state==='pending');if(x.state==='saved')setSaved(new Date());if(x.state==='error')setSaved({err:x.err});};SYNC_L.add(f);return()=>SYNC_L.delete(f);},[]);
+  useEffect(()=>{const onRemote=e=>{const d=e.detail;if(d.id!==fid)return;setS(prev=>{const a=loadFac(fid);if(!d.before)return a;const m=merge3(d.before,prev,a);m.fid=fid;return sameJ(m,prev)?prev:m;});};
+    const onRefresh=()=>{const f=loadFacs();setFacs(f);if(f.length&&!f.some(x=>x.id===fid))setFid(f[0].id);force(x=>x+1);};
+    addEventListener('px-remote',onRemote);addEventListener('px-refresh',onRefresh);return()=>{removeEventListener('px-remote',onRemote);removeEventListener('px-refresh',onRefresh);};},[fid]);
+  const [,force]=useState(0);
   const addFacility=f=>{const st0=fresh();const id='f'+uid();st0.fid=id;st0.site=f.site;st0.clinic=f.clinic||f.site;const g=loadGlobal();if(g.reqDefaults)st0.reqDefaults=g.reqDefaults;
     st0.audit.unshift({t:new Date().toLocaleString(),who:auth?auth.name:'Plexus',ev:'Clinic added',d:f.site});lsSet(KEY+':'+id,JSON.stringify(st0));
     const n=[...facs,{id,site:f.site,clinic:f.clinic||f.site,coordinator:f.coordinator||'',target:f.target||''}];setFacs(n);lsSet(FKEY,JSON.stringify(n));return id;};
   const up=useCallback((fn,section,msg)=>setS(prev=>{const n=structuredClone(prev);fn(n);stampChanges(prev,n,{...actor,at:new Date().toISOString()});n.lastEdit={at:new Date().toISOString(),...actor};
     if(section){const t=n.tasks[section];if(['verified','waived','submitted','na'].includes(t.state)){n.audit.unshift({t:new Date().toLocaleString(),who,ev:`${LABEL[section]} reopened`,d:`${STATE_LABEL[t.state]} → In Progress (information changed)`});t.reason=['verified','waived'].includes(t.state)?'Information changed after verification. Resubmit for Plexus review.':'Edited after submission. Resubmit when ready.';t.state='saved';}else if(t.state==='not_started')t.state='saved';}
     if(msg)n.audit.unshift({t:new Date().toLocaleString(),who,ev:msg,d:section?LABEL[section]:''});return n;}),[who,actor.tk]);
+  CUR.up=up;
   const act=(k,state,reason)=>setS(prev=>{const n=structuredClone(prev);const t=n.tasks[k];
     if(state){n.audit.unshift({t:new Date().toLocaleString(),who,ev:`${LABEL[k]}: ${STATE_LABEL[t.state]} → ${STATE_LABEL[state]}`,d:reason});t.state=state;t.reason=['changes','na'].includes(state)?reason:'';}
     else n.audit.unshift({t:new Date().toLocaleString(),who,ev:`${LABEL[k]}: reminder`,d:reason});return n;});
@@ -1353,24 +1416,23 @@ function App(){
   const keys=VIS.map(x=>x[0]);
   const hk=(e,i)=>{let n=-1;const N=VIS.length;if(e.key==='ArrowDown')n=(i+1)%N;if(e.key==='ArrowUp')n=(i+N-1)%N;if(e.key==='Home')n=0;if(e.key==='End')n=N-1;if(n>=0){e.preventDefault();heads.current[keys[n]]?.focus();}};
   const tk=(e,i)=>{let n=-1;const N=VIS.length;if(e.key==='ArrowRight')n=(i+1)%N;if(e.key==='ArrowLeft')n=(i+N-1)%N;if(n>=0){e.preventDefault();tabsRef.current.querySelector(`[data-k="${keys[n]}"]`)?.focus();}};
-  const reset=()=>{if(confirmReset){for(const f of facs){try{localStorage.removeItem(KEY+':'+f.id);}catch(e){}}try{localStorage.removeItem(FKEY);localStorage.removeItem(GKEY);localStorage.removeItem(KEY);}catch(e){}const nf=loadFacs();setFacs(nf);setFid(nf[0].id);setS(loadFac(nf[0].id));setConfirmReset(false);}else setConfirmReset(true);};
-  const [confirmReset,setConfirmReset]=useState(false);
 
   const bar=html`<header class="bar"><${BannerStars}/><div class="brand"><img src=${PLEXUS_MARK} alt="" width="22" height="34"/><div class="ctx"><strong class="b1">Plexus Ancillary Services</strong><small class="b2">Onboarding${view==='settings'?' · Settings':view==='console'?' · Console':view==='review'?' · Plexus review':view==='billing'?' · Billing team':auth&&auth.role==='plexus'?' · Clinic team':''}</small></div></div>
     ${auth&&auth.role==='plexus'&&html`<div class="views" role="tablist" aria-label="View as">${[['clinic','Clinic view'],['billing','Billing view'],['console','Plexus console']].map(([v,l])=>{const on=view===v||(v==='console'&&view==='review');return html`<button role="tab" aria-selected=${on} class=${on?'on':''} onClick=${()=>{setView(v);setOpen({});scrollTo(0,0);}}>${l}</button>`;})}</div>`}
     ${auth&&auth.role==='plexus'&&SET_TABS.some(([,,perm])=>can(auth,perm))&&html`<button class=${'set-btn'+(view==='settings'?' on':'')} aria-label="Settings" aria-current=${view==='settings'?'page':undefined} onClick=${()=>{setInvOpen(null);setView(view==='settings'?'console':'settings');scrollTo(0,0);}}>${Icon('gear',16)}<span>Settings</span></button>`}
-    <div class="who">${auth&&html`<span class="who-n">${auth.name}<small>${auth.role==='plexus'?'Plexus':auth.team==='billing'?'Billing team':'Clinic team'}</small></span><button class="link signout" onClick=${()=>{saveAuth(null);setAuth(null);setSettings('clinics');setView('clinic');}}>Sign out</button>`}</div>
-    ${auth&&auth.role==='plexus'&&html`<button class="reset" onClick=${reset} onBlur=${()=>setConfirmReset(false)}>${confirmReset?'Click again to erase':'Reset demo'}</button>`}</header>`;
+    <div class="who">${auth&&html`<span class="who-n">${auth.name}<small>${auth.role==='plexus'?'Plexus':auth.team==='billing'?'Billing team':'Clinic team'}</small></span>${auth.role==='member'&&(auth.teams||[]).length>1&&html`<button class="link signout" onClick=${async()=>{const t2=auth.team==='clinic'?'billing':'clinic';try{await api('POST','/api/auth/team',{team:t2});}catch(e){}location.href=location.pathname+'?view='+t2;}}>Switch to ${auth.team==='clinic'?'billing':'clinic'}</button>`}<button class="link signout" onClick=${signOut}>Sign out</button>`}</div></header>`;
 
-  if(!auth||invTok)return html`<${SignIn} facs=${facs} inviteToken=${invTok} clearInvite=${()=>{setInvTok(null);try{history.replaceState(null,'',location.pathname);}catch(e){}}} onIn=${u=>{if(u.inviteToken){saveAuth(null);setAuth(null);setInvTok(u.inviteToken);return;}if(u.role==='plexus'&&!u.prole){const x=loadUsers().find(y=>y.email===u.email);u.prole=x?x.role:'Admin';}saveAuth(u);setAuth(u);setInvTok(null);if(u.fid)setFid(u.fid);setView(u.role==='plexus'?'console':u.team);scrollTo(0,0);}}/>`;
+  if(!auth||invTok)return html`<${SignIn} inviteToken=${invTok} clearInvite=${()=>{setInvTok(null);try{history.replaceState(null,'',location.pathname);}catch(e){}}}/>`;
+  if(!facs.length&&auth.role==='member')return html`${bar}<main><section class="panel"><h2>Your clinic isn’t available</h2><p class="muted">Your invitation may have been removed. Contact your Plexus coordinator.</p></section></main>`;
+  if(!facs.length&&view!=='settings')return html`${bar}<main><${Console} s=${s} st=${st} setS=${setS} facs=${facs} fid=${fid} setFid=${setFid} addFacility=${addFacility} openReview=${()=>{}} auth=${auth} who=${who} initOpen=${null}/></main>`;
   if(auth.role!=='plexus'&&(view==='console'||view==='review'))return null;
   if(view==='settings'&&auth&&auth.role==='plexus')return html`${bar}<main class="sp-wrap"><${SettingsPage} auth=${auth} who=${who} s=${s} setS=${setS} facs=${facs} addFacility=${addFacility} tab=${settings} setTab=${setSettings}
     openClinic=${id=>{setFid(id);setInvOpen(id);setView('console');scrollTo(0,0);}} onBack=${()=>{setView('console');scrollTo(0,0);}}/></main>`;
-  if(view==='console')return html`${bar}<main><${Console} key=${'c'+(invOpen||'')} initOpen=${invOpen} s=${s} st=${st} setS=${setS} facs=${facs} fid=${fid} setFid=${setFid} addFacility=${addFacility} openReview=${id=>{setFid(id);setView('review');scrollTo(0,0);}} auth=${auth} who=${who} openInvite=${tok=>{saveAuth(null);setAuth(null);setInvTok(tok);}}/></main>`;
+  if(view==='console')return html`${bar}<main><${Console} key=${'c'+(invOpen||'')} initOpen=${invOpen} s=${s} st=${st} setS=${setS} facs=${facs} fid=${fid} setFid=${setFid} addFacility=${addFacility} openReview=${id=>{setFid(id);setView('review');scrollTo(0,0);}} auth=${auth} who=${who}/></main>`;
   return html`${bar}<main>
     ${view==='review'?html`<section class="hero rdash">
       <div class="hero-top"><div><button type="button" class="link back" onClick=${()=>{setView('console');scrollTo(0,0);}}>← Back to console</button><p class="eyebrow">${s.clinic} · Plexus review</p><h1>${s.site}</h1><button class=${'btn sm'+(reqFac?' pri':'')} style="margin-top:8px" onClick=${()=>setReqFac(!reqFac)}>${Icon('check',14)} Requirements for this facility${Object.values(s.reqOverride||{}).reduce((a,o)=>a+Object.keys(o).length,0)?' · customized':''}</button></div>
-        <div class=${'save'+(!saving&&saved?' ok':'')} aria-live="polite">${saving?'Saving…':saved?'✓ Saved':''}</div></div>
+        <div class=${'save'+(!saving&&saved&&!saved.err?' ok':'')+(saved&&saved.err?' bad':'')} aria-live="polite">${saving?'Saving…':saved&&saved.err?saved.err:saved?'✓ Saved':''}</div></div>
       ${reqFac&&html`<${ReqEditor} s=${s} setS=${setS} mode="facility" onClose=${()=>setReqFac(false)}/>`}
       <div class="rcards" role="tablist" aria-label="Onboarding teams">${[['clinic','Clinic onboarding',CLIN,'clinic'],['billing','Billing onboarding',BILL,'billing']].map(([t,l,G,team])=>{const x=teamStat(G),inv=((s.invites||{})[s.site]||{})[team]||[];
         return html`<button type="button" role="tab" aria-selected=${rtab===t} class=${'rcard '+t+(rtab===t?' on':'')} onClick=${()=>{setRtab(t);setOpen({});}}>
@@ -1389,7 +1451,7 @@ function App(){
         <div><div class="track" role="progressbar" aria-label="Completed sections" aria-valuenow=${vpct} aria-valuemin="0" aria-valuemax="100"><span style=${`width:${vpct}%`}/></div>
           <p><b>${vdone}</b> of ${VIS.length} sections complete${vsub?' · submitted for review':''}</p></div>
         <ol class="stages" aria-label="Onboarding stage">${[view==='billing'?'Billing Completing':view==='review'?'Teams Completing':'Clinic Completing','Plexus Reviewing','Ready to Launch'].map((x,i)=>html`<li class=${i<vstage?'done':i===vstage?'cur':''} aria-current=${i===vstage?'step':undefined}><i>${i<vstage?'✓':i+1}</i>${x}</li>`)}</ol>
-        <div class=${'save'+(!saving&&saved?' ok':'')} aria-live="polite">${saving?'Saving…':saved==='mem'?'Saved for this session (browser storage unavailable)':saved?`✓ All changes saved · ${saved.toLocaleTimeString([],{hour:'numeric',minute:'2-digit'})} · this browser only`:'Changes save automatically'}</div>
+        <div class=${'save'+(!saving&&saved&&!saved.err?' ok':'')+(saved&&saved.err?' bad':'')} aria-live="polite">${saving?'Saving…':saved&&saved.err?saved.err:saved?`✓ All changes saved · ${saved.toLocaleTimeString([],{hour:'numeric',minute:'2-digit'})}`:''}</div>
       </div>
       ${resumeAt&&!plexus&&html`<div class="note resume" style="margin-top:10px">${Icon('check',14)} Welcome back — your progress was saved ${fmtDT(resumeAt)}. Pick up where you left off.<button class="link" onClick=${()=>setResumeAt(null)}>Dismiss</button></div>`}
       ${vstage===2&&html`<div class="note ok" style="margin-top:10px">Every section is verified. Launch approval still requires startup, training and the Plexus launch dry run.</div>`}
@@ -1427,14 +1489,13 @@ function App(){
         <div class="chips">${vis.filter(x=>!x.complete).map(x=>html`<button type="button" class="chip warn" onClick=${()=>goTo(x.k)}>${x.label}</button>`)}</div>`}`}
     </section>`}
     <details class="audit"><summary>🕘 Audit history (${s.audit.length})</summary>${s.audit.length?html`<ol>${s.audit.slice(0,200).map(a=>html`<li><b>${a.ev}</b>${a.d?` — ${a.d}`:''}<br/><span class="small muted">${a.who} · ${a.t}</span></li>`)}</ol>`:html`<p class="small muted">No events yet.</p>`}</details>
-    <p class="small muted" style="text-align:center;margin-top:18px">Interactive preview · data stays in this browser · no passwords are stored</p>
   </main>`;
 }
 
 const emailOk=e=>/^[^\s@,;]+@[^\s@,;]+\.[^\s@,;]+$/.test(e);
-function InviteBox({fac,team,list,setS,openInvite,who='Plexus'}){
+function InviteBox({fid,fac,team,list,setS,who='Plexus'}){
   const blankRow=()=>({id:uid(),name:'',email:'',phone:''});
-  const [rows,setRows]=useState(()=>[blankRow()]),[err,setErr]=useState(''),[copied,setCopied]=useState(false);
+  const [rows,setRows]=useState(()=>[blankRow()]),[err,setErr]=useState(''),[copied,setCopied]=useState(null),[busy,setBusy]=useState(false),[note,setNote]=useState('');
   const label=team==='clinic'?'Clinic onboarding':'Billing onboarding';
   const now=()=>new Date().toLocaleString([], {month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});
   const mut=f=>setS(p=>{const n=structuredClone(p);n.invites=n.invites||{};n.invites[fac]=n.invites[fac]||{clinic:[],billing:[]};f(n.invites[fac][team],n);return n;});
@@ -1443,23 +1504,24 @@ function InviteBox({fac,team,list,setS,openInvite,who='Plexus'}){
     if(!filled.length){setErr('Add at least one person.');return;}
     const bad=filled.filter(r=>!emailOk(r.email.trim()));if(bad.length){setErr('Check the email for: '+bad.map(r=>r.name||r.email||'a blank row').join(', '));return;}
     const badP=filled.filter(r=>r.phone.trim()&&!phoneOk(r.phone));if(badP.length){setErr('Check the mobile number for: '+badP.map(r=>r.name||r.email).join(', '));return;}
-    mut((l,n)=>{for(const r of filled){const e=r.email.trim().toLowerCase(),ex=l.find(x=>x.email===e);if(ex){ex.sent=now();ex.sentAt=new Date().toISOString();ex.token=ex.token||uid()+uid();if(r.name.trim())ex.name=r.name.trim();if(r.phone.trim())ex.phone=fmtPhone(r.phone);}else l.push({id:uid(),name:r.name.trim(),email:e,phone:r.phone.trim()?fmtPhone(r.phone):'',sent:now(),sentAt:new Date().toISOString(),token:uid()+uid()});}
-      n.audit.unshift({t:new Date().toLocaleString(),who,ev:`${label} invitation sent — ${fac}`,d:filled.map(r=>r.email.trim()).join(', ')});});
-    setRows([blankRow()]);setErr('');};
+    invite(filled.map(r=>({name:r.name.trim(),email:r.email.trim(),phone:r.phone.trim()?fmtPhone(r.phone):''})),()=>setRows([blankRow()]));};
+  const invite=async(people,after)=>{if(busy)return;setBusy(true);setErr('');setNote('');
+    try{const r=await api('POST','/api/facilities/'+fid+'/invites',{team,people});applyServer(fid,r.state,r.version,null);after&&after();setNote(r.emailed?`Sent to ${people.map(x=>x.email).join(', ')}`:'Saved. Email isn’t set up on the server yet — use Copy link to send it yourself.');}
+    catch(e){setErr(e.message);}finally{setBusy(false);}};
   const link=(()=>{try{return location.origin+location.pathname+'?view='+team;}catch(e){return '?view='+team;}})();
   return html`<div class=${'invbox '+team}><div class="invbox-h"><b>${label}</b><span>${list.length} invited</span></div>
-    ${list.length?html`<ul class="invlist">${list.map(x=>html`<li key=${x.id}><span class="inv-e">${x.name?html`<b>${x.name}</b><br/>`:''}<span>${x.email}</span>${x.phone?html`<br/><span class="small muted">${x.phone}</span>`:''}</span><span class="small muted">Sent ${x.sent}</span>
+    ${list.length?html`<ul class="invlist">${list.map(x=>html`<li key=${x.id}><span class="inv-e">${x.name?html`<b>${x.name}</b><br/>`:''}<span>${x.email}</span>${x.phone?html`<br/><span class="small muted">${x.phone}</span>`:''}</span><span class="small muted">Sent ${x.sentAt?fmtDT(x.sentAt):x.sent}</span>
       ${(()=>{const a=jget(ACC_KEY,{})[x.email];return a?html`<span class="acct ok">${a.method==='google'?'Google account':'Account created'}${a.lastSignIn?' · signed in '+fmtD(a.lastSignIn):''}</span>`:html`<span class="acct">Invited · no account yet</span>`;})()}
-      <button class="link" onClick=${()=>{mut(l=>{const y=l.find(z=>z.id===x.id);if(y){y.sent=now();y.sentAt=new Date().toISOString();y.token=y.token||uid()+uid();}});}}>Resend</button>
-      <button class="link" onClick=${()=>{try{navigator.clipboard.writeText(location.origin+location.pathname+'?invite='+x.token);}catch(e){}}}>Copy link</button>
-      ${openInvite&&!jget(ACC_KEY,{})[x.email]&&html`<button class="link" onClick=${()=>openInvite(x.token)}>Open invite (preview)</button>`}<button class="link danger-link" onClick=${()=>mut(l=>{l.splice(l.findIndex(z=>z.id===x.id),1);})}>Remove</button></li>`)}</ul>`:html`<span class="small muted">No one invited yet.</span>`}
+      <button class="link" disabled=${busy} onClick=${()=>invite([{name:x.name,email:x.email,phone:x.phone||''}])}>Resend</button>
+      ${x.token&&html`<button class="link" onClick=${()=>{try{navigator.clipboard.writeText(location.origin+'/?invite='+x.token);setCopied(x.id);setTimeout(()=>setCopied(null),1500);}catch(e){}}}>${copied===x.id?'Copied':'Copy link'}</button>`}
+      <button class="link danger-link" onClick=${()=>mut(l=>{l.splice(l.findIndex(z=>z.id===x.id),1);})}>Remove</button></li>`)}</ul>`:html`<span class="small muted">No one invited yet.</span>`}
     <div class="inv-rows">${rows.map((r,i)=>html`<div class="inv-row" key=${r.id}>
       <input aria-label=${'Name '+(i+1)} placeholder="Full name" value=${r.name} onInput=${e=>setRow(r.id,'name',e.target.value)}/>
       <input aria-label=${'Email '+(i+1)} type="email" placeholder="email@clinic.com" value=${r.email} onInput=${e=>setRow(r.id,'email',e.target.value)} onKeyDown=${e=>{if(e.key==='Enter'){e.preventDefault();send();}}}/>
       <input aria-label=${'Mobile '+(i+1)} type="tel" placeholder="Mobile (for texts)" value=${r.phone} onInput=${e=>setRow(r.id,'phone',e.target.value)}/>
       ${rows.length>1?html`<button type="button" class="link" aria-label="Remove row" onClick=${()=>setRows(rs=>rs.filter(x=>x.id!==r.id))}>✕</button>`:html`<span/>`}</div>`)}</div>
-    <div class="row between"><button type="button" class="btn ghost sm" onClick=${()=>setRows(r=>[...r,blankRow()])}>${Icon('plus',14)} Add another person</button><button class="btn pri sm" onClick=${send}>Send ${rows.filter(r=>r.email.trim()).length>1?rows.filter(r=>r.email.trim()).length+' invitations':'invitation'}</button></div>
-    ${err&&html`<span class="small" style="color:var(--red)">${err}</span>`}
+    <div class="row between"><button type="button" class="btn ghost sm" onClick=${()=>setRows(r=>[...r,blankRow()])}>${Icon('plus',14)} Add another person</button><button class="btn pri sm" disabled=${busy} onClick=${send}>${busy?'Sending…':''}Send ${rows.filter(r=>r.email.trim()).length>1?rows.filter(r=>r.email.trim()).length+' invitations':'invitation'}</button></div>
+    ${err&&html`<span class="small" style="color:var(--red)">${err}</span>`}${note&&!err&&html`<span class="small" style="color:var(--green,hsl(150 55% 32%))">${note}</span>`}
     <div class="row small"><span class="muted">Each person gets a personal link to create their account (single use, expires in 7 days).</span></div>
   </div>`;
 }
@@ -1471,7 +1533,7 @@ function ReqEditor({s,setS,mode,onClose,bare}){
   const custom=key=>mode==='facility'&&(((s.reqOverride||{})[team])||{})[key]!==undefined;
   const flip=key=>setS(p=>{const n=structuredClone(p);const tgt=mode==='defaults'?(n.reqDefaults=n.reqDefaults||{}):(n.reqOverride=n.reqOverride||{});tgt[team]=tgt[team]||{};
     const next=!val(key);if(mode==='facility'&&next===reqDefault(n,team,key))delete tgt[team][key];else tgt[team][key]=next;
-    n.audit.unshift({t:new Date().toLocaleString(),who:'Morgan Lee (Plexus coordinator)',ev:`${mode==='defaults'?'Default':n.site} requirement changed`,d:`${REQ_RULES.find(r=>r[0]===key)[1]} (${team}) → ${next?'Required':'Optional'}`});return n;});
+    n.audit.unshift({t:new Date().toLocaleString(),who:CUR.who||'Plexus',ev:`${mode==='defaults'?'Default':n.site} requirement changed`,d:`${REQ_RULES.find(r=>r[0]===key)[1]} (${team}) → ${next?'Required':'Optional'}`});return n;});
   const setAll=v=>setS(p=>{const n=structuredClone(p);const tgt=mode==='defaults'?(n.reqDefaults=n.reqDefaults||{}):(n.reqOverride=n.reqOverride||{});tgt[team]={};
     if(mode==='defaults'||v!==undefined)for(const r of REQ_RULES)if(r[2][team]){if(v===undefined)continue;if(mode==='defaults'?v!==true:v!==reqDefault(n,team,r[0]))tgt[team][r[0]]=v;}return n;});
   const nCustom=Object.keys(((s.reqOverride||{})[team])||{}).length;
@@ -1494,7 +1556,7 @@ function ReqEditor({s,setS,mode,onClose,bare}){
   </div>`;
 }
 function ReminderSettings({rem,setRem,facs=[]}){
-  const set=(k,v)=>setRem({...rem,[k]:v});
+  const set=(k,v)=>setRem({...rem,[k]:v});const rc=CONFIG.ringcentral||{connected:false,from:''};
   const [tt,setTt]=useState('clinic'),[rcOpen,setRcOpen]=useState(false),[rcNum,setRcNum]=useState(''),[rcErr,setRcErr]=useState(''),[prev,setPrev]=useState(false);
   const refs={subject:useRef(null),body:useRef(null),sms:useRef(null)},last=useRef('body');
   const Sw=({k,label,dis})=>html`<button type="button" role="switch" aria-checked=${!!rem[k]} aria-label=${label||k} disabled=${dis} class=${'sw clinic'+(rem[k]?' on':'')} onClick=${()=>set(k,!rem[k])}><i/></button>`;
@@ -1505,15 +1567,13 @@ function ReminderSettings({rem,setRem,facs=[]}){
   const ctx=remCtx(rem,tt,(facs[0]||{}).site||'Sample Clinic','Maria Lopez',3);
   const smsTxt=fillTpl(rem.sms,ctx)+SMS_STOP,segs=Math.ceil(smsTxt.length/160)||1;
   const Chips=({f})=>html`<div class="chips" aria-label="Insert field">${MERGE.map(([k,l])=>html`<button type="button" class="chip" onMouseDown=${e=>e.preventDefault()} onClick=${()=>{last.current=f==='sms'?'sms':(last.current==='sms'?'body':last.current);insert(k);}}>${l}</button>`)}</div>`;
-  const connect=()=>{if(!phoneOk(rcNum)){setRcErr('Enter the 10-digit RingCentral number texts will come from.');return;}
-    setRem({...rem,text:true,rc:{connected:true,from:fmtPhone(rcNum),at:new Date().toISOString()}});setRcOpen(false);setRcErr('');setRcNum('');};
   const dim=rem.enabled?'':' dim';
   return html`<div class="sp-stack">
     <section class="sp-card"><div class="sp-row"><span class="sp-l"><b>Automatic reminders</b><small>Nudge teams that haven’t finished onboarding</small></span><${Sw} k="enabled" label="Automatic reminders"/></div></section>
     <section class=${'sp-card'+dim}><h4>Channels</h4>
       <div class="sp-row"><span class="ch-ic mail">${Icon('mail',16)}</span><span class="sp-l"><b>Email</b><small>From ${rem.from}</small></span><${Sw} k="email" label="Email reminders"/></div>
-      <div class="sp-row"><span class="ch-ic sms">${Icon('msg',16)}</span><span class="sp-l"><b>Text message</b><small>${rem.rc.connected?`RingCentral · ${rem.rc.from}`:'Connect RingCentral to send texts'}</small></span>
-        ${rem.rc.connected?html`<${Sw} k="text" label="Text reminders"/>`:html`<button class="btn sm" onClick=${()=>setRcOpen(true)}>Connect</button>`}</div></section>
+      <div class="sp-row"><span class="ch-ic sms">${Icon('msg',16)}</span><span class="sp-l"><b>Text message</b><small>${rc.connected?`RingCentral · ${rc.from}`:'RingCentral not connected'}</small></span>
+        ${rc.connected?html`<${Sw} k="text" label="Text reminders"/>`:html`<span class="pill">Not connected</span>`}</div></section>
     <section class=${'sp-card'+dim}><h4>Schedule</h4>
       <div class="sp-row"><span class="sp-l">Send every</span><span class="sp-ctl"><select value=${rem.every} onChange=${e=>set('every',+e.target.value)}>${[1,2,3,5,7,10,14].map(n=>html`<option value=${n}>${n}</option>`)}</select><select value=${rem.business?'b':'c'} onChange=${e=>set('business',e.target.value==='b')}><option value="b">business days</option><option value="c">calendar days</option></select></span></div>
       <div class="sp-row"><span class="sp-l">Skip weekends</span><${Sw} k="noWeekends"/></div>
@@ -1529,27 +1589,24 @@ function ReminderSettings({rem,setRem,facs=[]}){
       <${Chips} f="email"/>
       <div class="tpl-f"><button class="link" onClick=${()=>setPrev(!prev)}>${prev?'Hide preview':'Preview'}</button><button class="link" onClick=${()=>setRem({...rem,tpl:{...rem.tpl,[tt]:{...TPL_DEFAULT[tt]}}})}>Reset to default</button></div>
       ${prev&&html`<div class="mailprev"><div class="mp-h"><span>From <b>${rem.senderName}</b> &lt;${rem.from}&gt;</span><span>To Maria Lopez</span><b class="mp-s">${fillTpl(rem.tpl[tt].subject,ctx)}</b></div><pre>${fillTpl(rem.tpl[tt].body,ctx)}</pre></div>`}</section>
-    <section class=${'sp-card tpl'+dim+(rem.text&&rem.rc.connected?'':' off')}><div class="sp-card-h"><h4>Text template</h4><span class="small muted">${smsTxt.length} chars · ${segs} text${segs>1?'s':''}</span></div>
+    <section class=${'sp-card tpl'+dim+(rem.text&&rc.connected?'':' off')}><div class="sp-card-h"><h4>Text template</h4><span class="small muted">${smsTxt.length} chars · ${segs} text${segs>1?'s':''}</span></div>
       <label class="tf"><span>Message</span><textarea ref=${refs.sms} aria-label="Text message" rows="3" value=${rem.sms} onFocus=${()=>last.current='sms'} onInput=${e=>set('sms',e.target.value)}></textarea></label>
       <${Chips} f="sms"/>
       <div class="smsprev"><div class="smsb">${smsTxt}</div></div>
       <div class="tpl-f"><span class="small muted">“Reply STOP to opt out” is added to every text.</span><button class="link" onClick=${()=>set('sms',SMS_DEFAULT)}>Reset to default</button></div></section>
-    <section class="sp-card"><div class="sp-card-h"><h4>RingCentral</h4>${rem.rc.connected?html`<span class="pill ok">Connected</span>`:html`<span class="pill">Not connected</span>`}</div>
-      ${rem.rc.connected?html`<div class="sp-row"><span class="sp-l"><b>${rem.rc.from}</b><small>Sending number · connected ${fmtD(rem.rc.at)}</small></span><button class="link danger-link" onClick=${()=>setRem({...rem,text:false,rc:{connected:false,from:'',at:''}})}>Disconnect</button></div>`
-       :rcOpen?html`<div class="sp-add rc"><input autofocus type="tel" aria-label="RingCentral sending number" placeholder="RingCentral number, e.g. (480) 555-0100" value=${rcNum} onInput=${e=>{setRcNum(e.target.value);setRcErr('');}} onKeyDown=${e=>{if(e.key==='Enter')connect();}}/><button class="btn pri sm" onClick=${connect}>Sign in with RingCentral</button><button class="link" onClick=${()=>{setRcOpen(false);setRcErr('');}}>Cancel</button></div>${rcErr&&html`<span class="sp-err">${rcErr}</span>`}`
-       :html`<div class="sp-row"><span class="sp-l"><small>Texts go to the mobile numbers added on each invitation.</small></span><button class="btn pri sm" onClick=${()=>setRcOpen(true)}>Connect RingCentral</button></div>`}</section>
-    <p class="sp-foot">Preview: reminders are logged with the exact message, not delivered.</p>
+    <section class="sp-card"><div class="sp-card-h"><h4>RingCentral</h4>${rc.connected?html`<span class="pill ok">Connected</span>`:html`<span class="pill">Not connected</span>`}</div>
+      <div class="sp-row"><span class="sp-l">${rc.connected?html`<b>${fmtPhone(rc.from)}</b><small>Texts are sent from this number</small>`:html`<small>Add the RingCentral keys to the server’s secrets to turn on texts.</small>`}</span></div></section>
   </div>`;
 }
 function UsersRoles({auth,who}){
   const [users,setU]=useState(loadUsers),[nu,setNu]=useState({email:'',name:'',role:'Coordinator'}),[err,setErr]=useState(''),[adding,setAdding]=useState(false),[menu,setMenu]=useState(null);
   const save=u=>{setU(u);jset(USERS_KEY,u);};
-  const add=()=>{const em=nu.email.trim().toLowerCase();if(!emailOk(em)){setErr('Enter a valid Google account email.');return;}if(users.some(x=>x.email===em)){setErr('That account is already added.');return;}
+  const add=()=>{const em=nu.email.trim().toLowerCase();if(!emailOk(em)){setErr('Enter a valid email.');return;}if(!em.endsWith(PLEXUS_DOMAIN)){setErr('Plexus accounts must be '+PLEXUS_DOMAIN+' addresses.');return;}if(users.some(x=>x.email===em)){setErr('That account is already added.');return;}
     save([...users,{email:em,name:nu.name.trim()||em.split('@')[0],role:nu.role,added:new Date().toISOString(),addedBy:who}]);setNu({email:'',name:'',role:'Coordinator'});setErr('');setAdding(false);};
   const ini=n=>n.split(/\s+/).filter(Boolean).map(x=>x[0]).slice(0,2).join('').toUpperCase();
   return html`<div class="sp-stack">
     <section class="sp-card"><div class="sp-card-h"><h4>Plexus accounts <span class="count">${users.length}</span></h4>${!adding&&html`<button class="btn pri sm" onClick=${()=>setAdding(true)}>${Icon('plus',14)} Add account</button>`}</div>
-      ${adding&&html`<div class="sp-add"><input autofocus placeholder="Google account email" value=${nu.email} onInput=${e=>{setNu({...nu,email:e.target.value});setErr('');}} onKeyDown=${e=>{if(e.key==='Enter')add();}}/><input placeholder="Full name" value=${nu.name} onInput=${e=>setNu({...nu,name:e.target.value})}/>
+      ${adding&&html`<div class="sp-add"><input autofocus placeholder=${'name'+PLEXUS_DOMAIN} value=${nu.email} onInput=${e=>{setNu({...nu,email:e.target.value});setErr('');}} onKeyDown=${e=>{if(e.key==='Enter')add();}}/><input placeholder="Full name" value=${nu.name} onInput=${e=>setNu({...nu,name:e.target.value})}/>
         <select value=${nu.role} onChange=${e=>setNu({...nu,role:e.target.value})}>${Object.keys(PROLES).map(r=>html`<option value=${r}>${r}</option>`)}</select><button class="btn pri sm" onClick=${add}>Add</button><button class="link" onClick=${()=>{setAdding(false);setErr('');}}>Cancel</button></div>
         ${err&&html`<span class="sp-err">${err}</span>`}`}
       ${users.map(u=>html`<div class=${'sp-row user'+(u.disabled?' off':'')} key=${u.email}>
@@ -1569,7 +1626,7 @@ function SettingsPage({auth,who,s,setS,facs,addFacility,openClinic,tab,setTab,on
   const [nf,setNf]=useState({site:'',clinic:'',coordinator:'',target:''}),[err,setErr]=useState(''),[adding,setAdding]=useState(false);
   const save=()=>{if(!nf.site.trim()){setErr('Enter the clinic name.');return;}if(facs.some(f=>f.site.toLowerCase()===nf.site.trim().toLowerCase())){setErr('A clinic with that name already exists.');return;}
     const id=addFacility({site:nf.site.trim(),clinic:nf.clinic.trim(),coordinator:nf.coordinator.trim(),target:nf.target});setNf({site:'',clinic:'',coordinator:'',target:''});setErr('');setAdding(false);openClinic(id);};
-  const DESC={clinics:'Add clinics and see everyone you’re onboarding.',req:'Choose what each team must complete. Clinics can be customized in review.',rem:'Email and text reminders for unfinished onboarding.',users:'Google accounts that can sign in to the Plexus workspace.'};
+  const DESC={clinics:'Add clinics and see everyone you’re onboarding.',req:'Choose what each team must complete. Clinics can be customized in review.',rem:'Email and text reminders for unfinished onboarding.',users:'Plexus staff who can sign in.'};
   return html`<div class="sp">
     <aside class="sp-nav"><button class="sp-back" onClick=${onBack}>← Console</button><h2>Settings</h2>
       <nav aria-label="Settings">${tabs.map(([k,l,,ic])=>html`<button aria-current=${cur[0]===k?'page':undefined} class=${'sp-nav-i'+(cur[0]===k?' on':'')} onClick=${()=>setTab(k)}>${Icon(ic,16)}<span>${l}</span></button>`)}</nav></aside>
@@ -1590,7 +1647,7 @@ function SettingsPage({auth,who,s,setS,facs,addFacility,openClinic,tab,setTab,on
     </section></div>`;
 }
 const SET_TABS=[['clinics','Clinics','clinics','building'],['req','Requirements','requirements','check'],['rem','Reminders','reminders','bell'],['users','Users & roles','users','users']];
-function Console({s,st,setS,facs,fid,setFid,addFacility,openReview,auth,openInvite,who,initOpen}){
+function Console({s,st,setS,facs,fid,setFid,addFacility,openReview,auth,who,initOpen}){
   const access=[...s.payers,...s.logins,...s.flows.labs,...s.clinicians.flatMap(c=>c.portals)].filter(a=>a.status!=='verified'&&(a.invite==='sent'||a.invite==='pending'||a.website||a.username||a.login)).length;
   const rows=facs.map(f=>{const fs=f.id===fid?s:loadFac(f.id);const fst=f.id===fid?st:status(fs);return {f,fs,fst};});
   const [adding,setAdding]=useState(false),[nf,setNf]=useState({site:'',clinic:'',coordinator:'',target:''}),[nfErr,setNfErr]=useState('');
@@ -1599,36 +1656,31 @@ function Console({s,st,setS,facs,fid,setFid,addFacility,openReview,auth,openInvi
   const set=k=>e=>setS(p=>{const n=structuredClone(p);n.settings[k]=e.target.value.trim();return n;});
   const [open,setOpen]=useState(null),[reqOpen,setReqOpen]=useState(false),[panel,setPanel]=useState(null),[rem,setRemS]=useState(loadRem),[,force]=useState(0);
   const setRem=v=>{setRemS(v);jset(REM_KEY,v);};
-  const sendReminder=(f,team,auto)=>{const fs0=f.id===fid?s:loadFac(f.id),plan=reminderPlan(fs0,team,rem),people=plan.people||[];
-    const useEmail=rem.email!==false,useText=!!rem.text&&rem.rc.connected,phones=useText?people.filter(x=>phoneOk(x.phone)):[];
-    const msgs=people.map(x=>{const ctx=remCtx(rem,team,fs0.site,x.name,plan.remaining||0);return {name:x.name,email:x.email,phone:x.phone||'',
-      subject:useEmail?fillTpl(rem.tpl[team].subject,ctx):'',body:useEmail?fillTpl(rem.tpl[team].body,ctx):'',sms:useText&&phoneOk(x.phone)?fillTpl(rem.sms,ctx)+SMS_STOP:''};});
-    const ch=[useEmail&&'Email',phones.length&&'Text'].filter(Boolean);
-    const entry={at:new Date().toISOString(),team,to:useEmail?(plan.to||[]):[],texts:phones.map(x=>fmtPhone(x.phone)),channels:ch,msgs,auto:!!auto,by:auto?'Automatic':who};
-    const d=[useEmail&&entry.to.length?'Email: '+entry.to.join(', '):'',entry.texts.length?'Text via RingCentral: '+entry.texts.join(', '):''].filter(Boolean).join(' · ')||'No reachable recipients';
-    const ev=`${team==='billing'?'Billing':'Clinic'} team reminder sent${ch.length?' ('+ch.join(' + ')+')':''}`;
-    if(f.id===fid)setS(p=>{const n=structuredClone(p);n.reminders=[entry,...(n.reminders||[])];n.audit.unshift({t:new Date().toLocaleString(),who:entry.by,ev,d});return n;});
-    else{const fs=loadFac(f.id);fs.reminders=[entry,...(fs.reminders||[])];fs.audit.unshift({t:new Date().toLocaleString(),who:entry.by,ev,d});lsSet(KEY+':'+f.id,JSON.stringify(fs));force(x=>x+1);}};
-  useEffect(()=>{if(!rem.enabled)return;for(const f of facs){const fs=f.id===fid?s:loadFac(f.id);for(const t of ['clinic','billing']){const pl=reminderPlan(fs,t,rem);if(pl.state==='due'&&pl.overdue)sendReminder(f,t,true);}}},[]);
+  const [remBusy,setRemBusy]=useState(null),[remErr,setRemErr]=useState('');
+  const sendReminder=async(f,team)=>{setRemBusy(f.id+team);setRemErr('');try{const r=await api('POST','/api/facilities/'+f.id+'/remind',{team});applyServer(f.id,r.state,r.version,null);force(x=>x+1);}catch(e){setRemErr(e.message);}finally{setRemBusy(null);}};
+  const showCo=facs.some(f=>f.coordinator||f.target);
   const invs=id=>{const r=rows.find(x=>x.f.id===id);return r?((r.fs.invites||{})[r.fs.site]||{clinic:[],billing:[]}):{clinic:[],billing:[]};};
   const invBtn=f=>{const v=invs(f);return html`<button class=${'btn sm'+(open===f?' pri':'')} aria-expanded=${open===f} onClick=${()=>{if(open===f)setOpen(null);else{setFid(f);setOpen(f);}}}>${Icon('user',14)} Invite${v.clinic.length+v.billing.length?` · ${v.clinic.length} / ${v.billing.length}`:''}</button>`;};
-  const invPanel=f=>f!==fid?null:html`<div class="panel invpanel" id="invpanel"><div class="row between"><h3>Invitations · ${s.site}</h3><button class="link" onClick=${()=>setOpen(null)}>Close</button></div><div class="invgrid">${['clinic','billing'].map(t=>html`<${InviteBox} key=${f+t} fac=${s.site} team=${t} list=${invs(f)[t]} setS=${setS} openInvite=${openInvite} who=${who}/>`)}</div></div>`;
+  const invPanel=f=>f!==fid?null:html`<div class="panel invpanel" id="invpanel"><div class="row between"><h3>Invitations · ${s.site}</h3><button class="link" onClick=${()=>setOpen(null)}>Close</button></div><div class="invgrid">${['clinic','billing'].map(t=>html`<${InviteBox} key=${f+t} fid=${f} fac=${s.site} team=${t} list=${invs(f)[t]} setS=${setS} who=${who}/>`)}</div></div>`;
   useEffect(()=>{if(initOpen){setFid(initOpen);setOpen(initOpen);}},[]);
   useEffect(()=>{if(open)document.getElementById('invpanel')?.scrollIntoView({block:'nearest',behavior:'smooth'});},[open]);
   return html`
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><h1>Clinic onboarding</h1></div>
 
   <div class="kpis"><div class="kpi"><b>${rows.length}</b><span>Clinics</span></div><div class="kpi"><b>${rows.reduce((a,r)=>a+r.fst.secs.filter(x=>['submitted','na'].includes(x.state)).length,0)}</b><span>Sections awaiting review</span></div><div class="kpi"><b>${rows.filter(r=>r.fst.secs.every(x=>x.complete)).length}</b><span>Fully complete</span></div><div class="kpi"><b>${rows.filter(r=>r.fst.stage===2).length}</b><span>Ready to launch</span></div></div>
-  <div class="panel"><div class="tw"><table><thead><tr><th>Facility / organization</th><th>Stage</th><th>Clinic team</th><th>Billing team</th><th>Outstanding</th><th>Access</th><th>Reminders</th><th>Coordinator</th><th></th></tr></thead><tbody>
+  <div class="panel"><div class="tw"><table><thead><tr><th>Facility / organization</th><th>Stage</th><th>Clinic team</th><th>Billing team</th><th>Outstanding</th><th>Access</th><th>Reminders</th>${showCo&&html`<th>Coordinator</th>`}<th></th></tr></thead><tbody>
     ${rows.map(({f,fs,fst})=>{const acc=[...fs.payers,...fs.logins].filter(a=>a.status!=='verified'&&(a.website||a.username||a.invited)).length;
       return html`<tr key=${f.id} class=${f.id===fid?'cur':''}><td><b style="font-weight:500">${fs.site}</b><div class="small muted">${fs.clinic} · ${fs.locations.length} location${fs.locations.length===1?'':'s'}</div></td><td><${Pill}>${['Clinic Completing','Plexus Reviewing','Ready to Launch'][fst.stage]}</${Pill}></td>
       ${[fst.secs.filter(x=>!BILLING_KEYS.includes(x.k)),fst.secs.filter(x=>BILLING_KEYS.includes(x.k))].map(g=>{const d=g.filter(x=>x.complete).length,sub=g.every(x=>['submitted','na','verified','waived'].includes(x.state));return html`<td><span class="mini"><span style=${`width:${Math.round(d/g.length*100)}%`}/></span>${d}/${g.length}${sub?html`<div class="small muted">Submitted</div>`:''}</td>`;})}
-      <td>${fst.secs.filter(x=>!x.complete).length} sections</td><td>${acc}</td><td class="remcell">${['clinic','billing'].map(t=>{const pl=reminderPlan(fs,t,rem);return html`<div key=${t}><span class=${'rt '+t}>${t==='clinic'?'C':'B'}</span>${pl.state==='due'?html`${fmtD(pl.next)}${pl.count?html` <span class="muted">· ${pl.count} sent</span>`:''}${can(auth,'reminders')&&html` <button class="link" onClick=${()=>sendReminder(f,t,false)}>Send now</button>`}`:html`<span class="muted">${pl.label||'Off'}</span>`}</div>`;})}</td><td>${f.coordinator||'—'}${f.target?html`<div class="small muted">Launch ${new Date(f.target+'T12:00').toLocaleDateString([], {month:'short',day:'numeric',year:'numeric'})}</div>`:''}</td>
+      <td>${fst.secs.filter(x=>!x.complete).length} sections</td><td>${acc}</td><td class="remcell">${['clinic','billing'].map(t=>{const pl=reminderPlan(fs,t,rem);return html`<div key=${t}><span class=${'rt '+t}>${t==='clinic'?'C':'B'}</span>${pl.state==='due'?html`<span title=${pl.count?pl.count+' sent so far':'None sent yet'}>${fmtD(pl.next)}</span>${can(auth,'reminders')&&html` <button class="link" disabled=${remBusy===f.id+t} onClick=${()=>sendReminder(f,t)}>${remBusy===f.id+t?'Sending…':'Send now'}</button>`}`:html`<span class="muted">${pl.label||'Off'}</span>`}</div>`;})}</td>${showCo&&html`<td>${f.coordinator||'—'}${f.target?html`<div class="small muted">Launch ${new Date(f.target+'T12:00').toLocaleDateString([], {month:'short',day:'numeric',year:'numeric'})}</div>`:''}</td>`}
       <td><div class="acts">${can(auth,'review')&&html`<button class="btn sm pri" onClick=${()=>openReview(f.id)}>Open review</button>`}${can(auth,'invite')&&invBtn(f.id)}</div></td></tr>`;})}
-  </tbody></table></div></div>
+  </tbody></table>${!rows.length&&html`<p class="muted" style="padding:18px 6px">No clinics yet. Add your first clinic in Settings → Clinics.</p>`}</div></div>
+  ${remErr&&html`<p class="small" style="color:var(--red)">${remErr}</p>`}
   ${open&&invPanel(open)}`;
 }
-render(html`<${App}/>`,document.getElementById('app'));
+(async function boot(){const el=document.getElementById('app');
+  try{loadBoot(await api('GET','/api/bootstrap'));render(html`<${App}/>`,el);}
+  catch(e){render(html`<main style="padding:80px 24px;text-align:center"><h2>Can’t reach the Plexus server</h2><p class="muted">Check your connection and reload the page.</p><button class="btn pri" onClick=${()=>location.reload()}>Reload</button></main>`,el);}})();
 </script>
 </body>
 </html>

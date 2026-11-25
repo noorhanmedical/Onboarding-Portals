@@ -1,41 +1,51 @@
-# Plexus Ancillary Services — Onboarding
+# Plexus Ancillary Services — Onboarding Portal
 
-Clinic onboarding and billing onboarding for Plexus partner clinics.
+Clinic and billing onboarding for Plexus partner clinics. One Node server (`server.js`) serves the app (`public/`) and a JSON API backed by Postgres.
 
-Three views:
-- **Clinic view** — the clinic team completes Clinic Onboarding.
-- **Billing view** — the billing team completes Billing Onboarding.
-- **Plexus console** — every facility with clinic and billing completion; **Open review** opens Plexus review for that facility.
+## What's real
 
-- **Clinic Onboarding:** Facility Details, Add Clinician, Clinic Flows, Logins, Telephone Systems, Team, Vendors, Scheduling, Testing Day
-- **Billing Onboarding:** Facility Details, Add Clinician, Billing, Logins (insurance, multi-payer and prior authorization portals)
-- Shared sections (facility, clinicians, portal logins) stay in sync between both teams.
-
-## Sign-in (preview)
-
-- Plexus staff sign in with an `@plexusclinical.com` email and land on the Plexus console.
-- Clinic and billing team members sign in with the email they were invited with and only see their team's onboarding.
-- In this preview no email is sent; the "Open sign-in link" button stands in for the emailed magic link.
-  Production sign-in (magic links via SES, server-enforced roles) is part of the AWS backend.
-
-## Run
-
-```bash
-npm start          # http://localhost:3000
-```
-
-No dependencies or build step. On Replit, press **Run**.
-
-## Files
-
-| Path | What it is |
+| | |
 |---|---|
-| `public/index.html` | The whole app (Preact + htm, inline CSS/JS) |
-| `public/htm.js` | Vendored Preact + htm runtime |
-| `server.js` | Zero-dependency static server with security headers and `/healthz` |
+| **Data** | Every clinic is stored on the server. Clinic team, billing team and Plexus all work on the same copy; edits made at the same time are merged (see `public/merge.js`) and show up for the others within a few seconds. |
+| **Access** | Clinic and billing users only see their own clinic and can't change invitations, reminders, requirements or verification. Plexus staff see every clinic; what they can change follows their role in Settings → Users & roles. |
+| **Sign-in** | Clinic users: invitation link → create account (12+ character password) → 6-digit code by email every sign-in. Plexus staff: Google, or a 6-digit code emailed to their @plexusclinical.com address. Sessions last 12 hours of inactivity. |
+| **Invitations** | Emailed from the server. Links are single-use and expire after 7 days. An email can belong to only one clinic. |
+| **Reminders** | Sent by the server 9am–5pm clinic time on the schedule in Settings → Reminders. Email always; texts when RingCentral is set up. |
+| **Passwords** | Never typed into the portal. Login cards collect URL, username and access level; the clinic sends each password through Plexus's secure share link, and Plexus ticks **Received**. The server also strips any `password` field it is sent. |
 
-## Data and security
+## Put it on Replit
 
-This version is a working prototype: progress is saved in the viewer's browser (localStorage).
-Passwords are held in page memory only — never written to storage, logs or exports.
-Do not enter real patient data. Shared multi-user data and invitations require a backend (next phase).
+1. **Import** this repo into Replit (Create → Import from GitHub → `noorhanmedical/Onboarding-Portals`).
+2. **Database:** open Tools → Database and create a PostgreSQL database. Replit adds `DATABASE_URL` for you. Tables are created on first start.
+3. **Secrets** (Tools → Secrets):
+
+   | Secret | Required | Value |
+   |---|---|---|
+   | `APP_URL` | yes | The public address, e.g. `https://onboarding.plexusclinical.com` (used in invitation and reminder links) |
+   | `SMTP_HOST` | yes | `smtp.gmail.com` |
+   | `SMTP_PORT` | yes | `465` |
+   | `SMTP_USER` | yes | `onboarding@plexusclinical.com` |
+   | `SMTP_PASS` | yes | A Google **app password** for that account (Google Account → Security → 2-Step Verification on → App passwords) |
+   | `MAIL_FROM` | no | `Plexus Ancillary Services <onboarding@plexusclinical.com>` |
+   | `SECURE_SHARE_URL` | yes | Your 1Password or Bitwarden "request a secret" link that clinics use to send passwords |
+   | `GOOGLE_CLIENT_ID` | no | Turns on "Continue with Google". Google Cloud Console → APIs & Services → Credentials → OAuth client ID (Web), with `APP_URL` as an authorized JavaScript origin |
+   | `ADMIN_EMAILS` | no | Always-admin accounts. Default: onboarding@, drimran@, dralhadheri@ (plexusclinical.com) |
+   | `RINGCENTRAL_CLIENT_ID`, `RINGCENTRAL_CLIENT_SECRET`, `RINGCENTRAL_JWT`, `RINGCENTRAL_FROM` | no | Turns on text reminders (RingCentral developer app with JWT auth and the SMS scope; `FROM` is the sending number) |
+   | `REMINDER_TZ` | no | Default `America/Phoenix` |
+
+4. **Run** to test, then **Deploy → Reserved VM** (already set in `.replit`) and connect your domain.
+5. **First sign-in:** go to the site, enter `drimran@plexusclinical.com`, click *Email me a sign-in code*. If email isn't set up yet, the code is printed in the Replit console.
+
+Without SMTP the server still runs: emails (codes, invitations, reminders) are printed to the console instead of sent, and the invitation panel tells you to use **Copy link**.
+
+## Compliance note
+
+Replit does not sign a HIPAA BAA. This portal holds no patient records, and it never stores system passwords, so keep it that way: don't add patient data or password fields here. To store credentials in the app later, move it to AWS under the BAA (see `BACKEND.md`).
+
+## Develop locally
+
+```
+npm install
+DATABASE_URL=postgres://user:pass@localhost:5432/onboarding npm start
+npm test
+```

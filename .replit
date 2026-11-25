@@ -1,6 +1,6 @@
 run = "npm start"
 entrypoint = "server.js"
-modules = ["nodejs-20"]
+modules = ["nodejs-20", "postgresql-16"]
 
 [[ports]]
 localPort = 3000
@@ -8,4 +8,6 @@ externalPort = 80
 
 [deployment]
 run = ["npm", "start"]
-deploymentTarget = "cloudrun"
+build = ["npm", "ci", "--omit=dev"]
+# Reserved VM: one always-on server, so automatic reminders run on schedule and never send twice.
+deploymentTarget = "vm"
