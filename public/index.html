@@ -206,6 +206,12 @@ table.perm td{text-align:center}table.perm td:first-child{text-align:left}
 .mailprev pre,.remmsg pre{white-space:pre-wrap;font:inherit;font-size:14.5px;margin:0;padding:14px;line-height:1.55}
 .smsprev{background:hsl(214 30% 97%);border-radius:12px;padding:14px;margin:4px 0 6px}.smsb{max-width:320px;background:hsl(142 55% 40%);color:#fff;border-radius:18px 18px 18px 4px;padding:9px 13px;font-size:14.5px;line-height:1.4;white-space:pre-wrap;word-break:break-word}
 .pill{font-size:12px;font-weight:600;border-radius:999px;padding:3px 10px;background:hsl(214 10% 92%);color:hsl(214 10% 40%)}.pill.ok{background:hsl(142 50% 92%);color:hsl(142 60% 28%)}
+.pill.bad{background:var(--red-soft);color:var(--red)}
+.sp-card.warn{background:var(--amber-soft);border-color:var(--amber)}
+.ok-t{color:var(--green);display:block}.bad-t{color:var(--red);display:block}
+.mailst{display:block;margin:4px 0}.mailacc .sp-l small{display:block}.mailact{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+.mailroutes .sp-ctl{min-width:0;max-width:100%}.mailroutes select{max-width:100%;min-width:0;text-overflow:ellipsis}
+@media (max-width:640px){.mailacc{flex-wrap:wrap}.mailact{width:100%;justify-content:flex-start}.mailroutes .sp-row{flex-wrap:wrap}.mailroutes .sp-ctl{width:100%}.mailroutes select{width:100%}}
 .sp-add.rc{grid-template-columns:1fr auto auto}
 .remmsg{display:inline;margin-left:4px}.remmsg summary{display:inline;cursor:pointer;color:hsl(214 70% 42%);font-weight:500}.remmsg>div{margin-top:8px;border:1px solid hsl(214 30% 90%);border-radius:10px;padding:8px;background:#fff}.remmsg .smsb{margin:8px}
 .remlog li{flex-wrap:wrap}
@@ -1236,7 +1242,7 @@ const PLEXUS_DOMAIN='@plexusclinical.com';
 const ACC_KEY='plexus-onboarding-accounts',USERS_KEY='plexus-onboarding-users',REM_KEY='plexus-onboarding-reminders';
 const jget=(k,d)=>{try{const v=JSON.parse(lsGet(k));return v==null?d:v;}catch(e){return d;}};const jset=(k,v)=>lsSet(k,JSON.stringify(v));
 const PROLES={Admin:'Full access, including users and roles',Coordinator:'Add clinics, invite teams, reminders',Reviewer:'Review and approve sections',Billing:'Billing onboarding review'};
-const PERMS=[['users','Manage users and roles',['Admin']],['clinics','Add clinics',['Admin','Coordinator']],['invite','Invite clinic and billing teams',['Admin','Coordinator']],['review','Review and approve sections',['Admin','Coordinator','Reviewer','Billing']],['requirements','Edit requirement defaults',['Admin']],['reminders','Edit reminder settings',['Admin','Coordinator']],['credentials','Reveal stored credentials',['Admin']]];
+const PERMS=[['users','Manage users and roles',['Admin']],['clinics','Add clinics',['Admin','Coordinator']],['invite','Invite clinic and billing teams',['Admin','Coordinator']],['review','Review and approve sections',['Admin','Coordinator','Reviewer','Billing']],['requirements','Edit requirement defaults',['Admin']],['reminders','Edit reminder settings',['Admin','Coordinator']],['email','Connect email accounts and choose senders',['Admin']],['credentials','Reveal stored credentials',['Admin']]];
 const can=(auth,perm)=>!!auth&&auth.role==='plexus'&&(PERMS.find(x=>x[0]===perm)||[,,[]])[2].includes(auth.prole||'Admin');
 const defaultUsers=()=>[{email:'onboarding'+PLEXUS_DOMAIN,name:'Plexus Onboarding',role:'Admin',owner:true,added:new Date().toISOString()},{email:'billing'+PLEXUS_DOMAIN,name:'Plexus Billing',role:'Billing',added:new Date().toISOString()},{email:'drimran'+PLEXUS_DOMAIN,name:'Dr. Imran',role:'Admin',added:new Date().toISOString()},{email:'dralhadheri'+PLEXUS_DOMAIN,name:'Dr. Alhadheri',role:'Admin',added:new Date().toISOString()}];
 const loadUsers=()=>{const u=jget(USERS_KEY,null);return Array.isArray(u)&&u.length?u:defaultUsers();};
@@ -1556,7 +1562,7 @@ function ReqEditor({s,setS,mode,onClose,bare}){
   </div>`;
 }
 function ReminderSettings({rem,setRem,facs=[]}){
-  const set=(k,v)=>setRem({...rem,[k]:v});const rc=CONFIG.ringcentral||{connected:false,from:''};
+  const set=(k,v)=>setRem({...rem,[k]:v});const rc=CONFIG.ringcentral||{connected:false,from:''};const remFrom=(CONFIG.senders||{}).reminder||'';
   const [tt,setTt]=useState('clinic'),[rcOpen,setRcOpen]=useState(false),[rcNum,setRcNum]=useState(''),[rcErr,setRcErr]=useState(''),[prev,setPrev]=useState(false);
   const refs={subject:useRef(null),body:useRef(null),sms:useRef(null)},last=useRef('body');
   const Sw=({k,label,dis})=>html`<button type="button" role="switch" aria-checked=${!!rem[k]} aria-label=${label||k} disabled=${dis} class=${'sw clinic'+(rem[k]?' on':'')} onClick=${()=>set(k,!rem[k])}><i/></button>`;
@@ -1571,7 +1577,7 @@ function ReminderSettings({rem,setRem,facs=[]}){
   return html`<div class="sp-stack">
     <section class="sp-card"><div class="sp-row"><span class="sp-l"><b>Automatic reminders</b><small>Nudge teams that haven’t finished onboarding</small></span><${Sw} k="enabled" label="Automatic reminders"/></div></section>
     <section class=${'sp-card'+dim}><h4>Channels</h4>
-      <div class="sp-row"><span class="ch-ic mail">${Icon('mail',16)}</span><span class="sp-l"><b>Email</b><small>From ${rem.from}</small></span><${Sw} k="email" label="Email reminders"/></div>
+      <div class="sp-row"><span class="ch-ic mail">${Icon('mail',16)}</span><span class="sp-l"><b>Email</b><small>${remFrom?'From '+remFrom:'No sending account chosen'} · change in Settings → Email</small></span><${Sw} k="email" label="Email reminders"/></div>
       <div class="sp-row"><span class="ch-ic sms">${Icon('msg',16)}</span><span class="sp-l"><b>Text message</b><small>${rc.connected?`RingCentral · ${rc.from}`:'RingCentral not connected'}</small></span>
         ${rc.connected?html`<${Sw} k="text" label="Text reminders"/>`:html`<span class="pill">Not connected</span>`}</div></section>
     <section class=${'sp-card'+dim}><h4>Schedule</h4>
@@ -1581,14 +1587,14 @@ function ReminderSettings({rem,setRem,facs=[]}){
     <section class=${'sp-card'+dim}><h4>Recipients</h4>
       <div class="sp-row"><span class="sp-l">Send to</span><span class="sp-ctl"><select value=${rem.teams} onChange=${e=>set('teams',e.target.value)}><option value="both">Clinic and billing teams</option><option value="clinic">Clinic team only</option><option value="billing">Billing team only</option></select></span></div>
       <div class="sp-row"><span class="sp-l">Stop once the team submits</span><${Sw} k="stopOnSubmit"/></div>
-      <div class="sp-row"><span class="sp-l">Send from</span><span class="sp-ctl"><input aria-label="Send from email" value=${rem.from} onInput=${e=>set('from',e.target.value)}/></span></div>
+      <div class="sp-row"><span class="sp-l">Send from</span><span class="sp-ctl"><span class="small">${remFrom||'Not set'} <span class="muted">(Settings → Email)</span></span></span></div>
       <div class="sp-row"><span class="sp-l">Sender name</span><span class="sp-ctl"><input aria-label="Sender name" value=${rem.senderName} onInput=${e=>set('senderName',e.target.value)}/></span></div></section>
     <section class=${'sp-card tpl'+dim+(rem.email===false?' off':'')}><div class="sp-card-h"><h4>Email template</h4><div class="seg sm" role="tablist">${[['clinic','Clinic'],['billing','Billing']].map(([k,l])=>html`<button role="tab" aria-selected=${tt===k} class=${'seg-b '+k+(tt===k?' on':'')} onClick=${()=>setTt(k)}>${l}</button>`)}</div></div>
       <label class="tf"><span>Subject</span><input ref=${refs.subject} aria-label="Email subject" value=${rem.tpl[tt].subject} onFocus=${()=>last.current='subject'} onInput=${e=>setTpl('subject',e.target.value)}/></label>
       <label class="tf"><span>Message</span><textarea ref=${refs.body} aria-label="Email message" rows="8" value=${rem.tpl[tt].body} onFocus=${()=>last.current='body'} onInput=${e=>setTpl('body',e.target.value)}></textarea></label>
       <${Chips} f="email"/>
       <div class="tpl-f"><button class="link" onClick=${()=>setPrev(!prev)}>${prev?'Hide preview':'Preview'}</button><button class="link" onClick=${()=>setRem({...rem,tpl:{...rem.tpl,[tt]:{...TPL_DEFAULT[tt]}}})}>Reset to default</button></div>
-      ${prev&&html`<div class="mailprev"><div class="mp-h"><span>From <b>${rem.senderName}</b> &lt;${rem.from}&gt;</span><span>To Maria Lopez</span><b class="mp-s">${fillTpl(rem.tpl[tt].subject,ctx)}</b></div><pre>${fillTpl(rem.tpl[tt].body,ctx)}</pre></div>`}</section>
+      ${prev&&html`<div class="mailprev"><div class="mp-h"><span>From <b>${rem.senderName}</b> &lt;${remFrom||'not set'}&gt;</span><span>To Maria Lopez</span><b class="mp-s">${fillTpl(rem.tpl[tt].subject,ctx)}</b></div><pre>${fillTpl(rem.tpl[tt].body,ctx)}</pre></div>`}</section>
     <section class=${'sp-card tpl'+dim+(rem.text&&rc.connected?'':' off')}><div class="sp-card-h"><h4>Text template</h4><span class="small muted">${smsTxt.length} chars · ${segs} text${segs>1?'s':''}</span></div>
       <label class="tf"><span>Message</span><textarea ref=${refs.sms} aria-label="Text message" rows="3" value=${rem.sms} onFocus=${()=>last.current='sms'} onInput=${e=>set('sms',e.target.value)}></textarea></label>
       <${Chips} f="sms"/>
@@ -1620,13 +1626,80 @@ function UsersRoles({auth,who}){
     <p class="sp-foot">Clinic and billing team members aren’t listed here — they’re invited per clinic from the console and create their own accounts.</p>
   </div>`;
 }
+const MAIL_KINDS=[['code','Sign-in codes','The 6-digit codes people type to sign in'],['invite','Invitations','Invites to clinic and billing teams'],['reminder','Reminders','Automatic and “Send now” reminders']];
+const MAIL_HELP={
+  google:{pw:'Google app password',steps:'In that Google account: Security → turn on 2-Step Verification → App passwords → create one (any name, e.g. “Plexus portal”) and paste the 16 characters here. If App passwords isn’t offered, your Google Workspace admin may need to allow it.',link:['Google: Sign in with app passwords','https://support.google.com/accounts/answer/185833']},
+  microsoft:{pw:'Password (or app password)',steps:'Use the mailbox’s password, or an app password if the account uses multi-factor sign-in. Your Microsoft 365 admin may need to turn on “Authenticated SMTP” for this mailbox.',link:['Microsoft: Authenticated SMTP submission','https://learn.microsoft.com/en-us/exchange/clients-and-mobile-in-exchange-online/authenticated-client-smtp-submission']},
+  ses:{pw:'SES SMTP password',steps:'Create SMTP credentials in the Amazon SES console, then enter the SMTP endpoint for your region, the SMTP username and the SMTP password. The From address must be verified in SES.',link:['AWS: Obtaining SES SMTP credentials','https://docs.aws.amazon.com/ses/latest/dg/smtp-credentials.html']},
+  other:{pw:'Password',steps:'Enter the outgoing (SMTP) server details from your email provider.',link:null}};
+const MAIL_BLANK={provider:'google',fromEmail:'',fromName:'Plexus Ancillary Services',username:'',host:'',port:587,password:''};
+function EmailSettings({auth}){
+  const [d,setD]=useState(null),[err,setErr]=useState(''),[form,setForm]=useState(null),[busy,setBusy]=useState(''),[msg,setMsg]=useState({}),[confirm,setConfirm]=useState(null),[testTo,setTestTo]=useState(auth.email||'');
+  const load=async()=>{try{setD(await api('GET','/api/mail'));setErr('');}catch(e){setErr(e.message);}};
+  useEffect(()=>{load();},[]);
+  const after=r=>{setD(r);CONFIG.email=r.accounts.length>0||!!r.serverSender;CONFIG.senders=Object.fromEntries(MAIL_KINDS.map(([k])=>{const a=r.accounts.find(x=>x.id===r.routes[k]);return [k,a?a.fromEmail:(r.serverSender||'')];}));};
+  const run=async(key,fn)=>{setBusy(key);setErr('');try{await fn();}catch(e){setErr(e.message);}finally{setBusy('');}};
+  if(!d)return html`<div class="sp-stack"><section class="sp-card"><p class="muted">${err||'Loading…'}</p></section></div>`;
+  const acc=id=>d.accounts.find(a=>a.id===id);
+  const setF=(k,v)=>setForm({...form,[k]:v});
+  const save=()=>run('save',async()=>{const body={...form};const r=form.id?await api('PUT','/api/mail/accounts/'+form.id,body):await api('POST','/api/mail/accounts',body);after(r);const id=form.id||r.id;setForm(null);setMsg({...msg,[id]:{ok:true,t:'Saved. Send a test to make sure it works.'}});});
+  const test=id=>run('test'+id,async()=>{const r=await api('POST','/api/mail/accounts/'+id+'/test',{to:testTo});after(r);setMsg({...msg,[id]:r.ok?{ok:true,t:'Test sent to '+r.to+'. Check that inbox.'}:{ok:false,t:'Test failed: '+r.error}});});
+  const remove=id=>run('rm'+id,async()=>{after(await api('DELETE','/api/mail/accounts/'+id,{}));setConfirm(null);});
+  const route=(k,v)=>run('route',async()=>{after(await api('PUT','/api/mail/routes',{routes:{...d.routes,[k]:v}}));});
+  const fallback=d.serverSender?`Server default (${d.serverSender})`:'Not sent — written to the server log';
+  const help=form&&MAIL_HELP[form.provider];
+  const status=a=>a.lastError&&(!a.lastOkAt||new Date(a.lastErrorAt)>new Date(a.lastOkAt))?html`<span class="pill bad">Failed ${fmtDT(a.lastErrorAt)}</span>`:a.lastOkAt?html`<span class="pill ok">Working · last sent ${fmtDT(a.lastOkAt)}</span>`:html`<span class="pill">Not tested yet</span>`;
+  const used=a=>MAIL_KINDS.filter(([k])=>d.routes[k]===a.id).map(([,l])=>l.toLowerCase());
+  return html`<div class="sp-stack">
+    ${!d.keyReady&&html`<section class="sp-card warn"><b>Email accounts are switched off on the server.</b><p class="small">The server needs its MAIL_KEY secret before it can store passwords safely. Ask whoever runs the server to add it.</p></section>`}
+    ${err&&html`<p class="sp-err" role="alert">${err}</p>`}
+    <section class="sp-card mailroutes"><h4>Which email sends what</h4>
+      ${MAIL_KINDS.map(([k,l,sub])=>html`<div class="sp-row" key=${k}><span class="sp-l"><b>${l}</b><small>${sub}</small></span><span class="sp-ctl">
+        <select aria-label=${'Sender for '+l} value=${d.routes[k]||''} disabled=${busy==='route'} onChange=${e=>route(k,e.target.value)}>
+          <option value="">${fallback}</option>${d.accounts.map(a=>html`<option value=${a.id}>${a.fromName?a.fromName+' — ':''}${a.fromEmail}</option>`)}</select></span></div>`)}
+      ${!d.accounts.length&&html`<p class="small muted">Connect an account below, then choose it here. The first account you connect is used for everything.</p>`}
+    </section>
+    <section class="sp-card"><div class="sp-card-h"><h4>Sending accounts <span class="count">${d.accounts.length}</span></h4>${!form&&d.keyReady&&html`<button class="btn pri sm" onClick=${()=>setForm({...MAIL_BLANK})}>${Icon('plus',14)} Connect account</button>`}</div>
+      ${form&&html`<div class="sp-form">
+        <div class="seg sm" role="tablist" aria-label="Email provider">${Object.entries(d.presets).map(([k,p])=>html`<button role="tab" aria-selected=${form.provider===k} class=${'seg-b'+(form.provider===k?' on':'')} onClick=${()=>setF('provider',k)}>${p.label}</button>`)}</div>
+        <div class="grid">
+          <label class="field"><span class="lbl">Send from (email address) *</span><input type="email" autocomplete="off" value=${form.fromEmail} placeholder="onboarding@plexusclinical.com" onInput=${e=>setF('fromEmail',e.target.value)}/></label>
+          <label class="field"><span class="lbl">Name people see</span><input value=${form.fromName} onInput=${e=>setF('fromName',e.target.value)}/></label>
+          ${(form.provider==='ses'||form.provider==='other')&&html`
+            <label class="field"><span class="lbl">Mail server (SMTP) *</span><input autocomplete="off" value=${form.host} placeholder=${form.provider==='ses'?'email-smtp.us-west-2.amazonaws.com':'smtp.example.com'} onInput=${e=>setF('host',e.target.value)}/></label>
+            <label class="field"><span class="lbl">Port</span><select value=${form.port} onChange=${e=>setF('port',+e.target.value)}>${[465,587,2465,2587,25,2525].map(n=>html`<option value=${n}>${n}</option>`)}</select></label>
+            <label class="field"><span class="lbl">Username</span><input autocomplete="off" value=${form.username} placeholder="Usually the email address" onInput=${e=>setF('username',e.target.value)}/></label>`}
+          <label class="field"><span class="lbl">${help.pw}${form.id?'':' *'}</span><input type="password" autocomplete="new-password" value=${form.password} placeholder=${form.id&&form.hasPassword?'Saved — leave blank to keep it':''} onInput=${e=>setF('password',e.target.value)}/></label>
+        </div>
+        <p class="small muted">${help.steps}${help.link&&html` <a href=${help.link[1]} target="_blank" rel="noopener">${help.link[0]}</a>`}</p>
+        <p class="small muted">The password is stored encrypted and is never shown again, to you or anyone else. You can replace it at any time.</p>
+        <div class="sp-form-a"><button class="link" onClick=${()=>{setForm(null);setErr('');}}>Cancel</button><button class="btn pri sm" disabled=${busy==='save'} onClick=${save}>${busy==='save'?'Saving…':form.id?'Save changes':'Connect account'}</button></div></div>`}
+      ${d.accounts.map(a=>html`<div class="sp-row mailacc" key=${a.id}>
+        <span class="av b">${Icon('mail',15)}</span>
+        <span class="sp-l"><b>${a.fromName||a.fromEmail}</b><small>${a.fromEmail} · ${(d.presets[a.provider]||{}).label||a.provider}${used(a).length?' · sends '+used(a).join(', '):' · not used yet'}</small>
+          <span class="mailst">${status(a)}</span>
+          ${a.lastError&&(!a.lastOkAt||new Date(a.lastErrorAt)>new Date(a.lastOkAt))&&html`<small class="bad-t">${a.lastError}</small>`}
+          ${msg[a.id]&&html`<small class=${msg[a.id].ok?'ok-t':'bad-t'}>${msg[a.id].t}</small>`}
+          <small class="muted">Updated ${fmtDT(a.updatedAt)}${a.updatedBy?' by '+a.updatedBy:''}</small></span>
+        <span class="sp-ctl mailact">
+          <button class="btn sm" disabled=${!!busy} onClick=${()=>test(a.id)}>${busy==='test'+a.id?'Sending…':'Send test'}</button>
+          <button class="link" onClick=${()=>setForm({provider:a.provider,fromEmail:a.fromEmail,fromName:a.fromName,username:a.username,host:a.host,port:a.port,password:'',id:a.id,hasPassword:a.hasPassword})}>Edit</button>
+          ${confirm===a.id?html`<span class="small">Remove? <button class="link danger" onClick=${()=>remove(a.id)}>Yes</button> <button class="link" onClick=${()=>setConfirm(null)}>No</button></span>`:html`<button class="link danger" onClick=${()=>setConfirm(a.id)}>Remove</button>`}</span></div>`)}
+      ${d.accounts.length>0&&html`<div class="sp-row"><span class="sp-l"><small>Test emails go to</small></span><span class="sp-ctl"><input type="email" aria-label="Send test emails to" value=${testTo} onInput=${e=>setTestTo(e.target.value)}/></span></div>`}
+    </section>
+    <section class="sp-card"><h4>Recent emails</h4>
+      ${d.recent.length?d.recent.slice(0,12).map((r,i)=>html`<div class="sp-row" key=${i}><span class="sp-l"><b>${({code:'Sign-in code',invite:'Invitation',reminder:'Reminder',test:'Test'})[r.kind]||r.kind} → ${r.recipient}</b><small>${fmtDT(r.at)}${r.sender?' · from '+r.sender:''}${r.ok?'':' · '+(r.error||'not sent')}</small></span><span class="sp-ctl">${r.ok?html`<span class="pill ok">Sent</span>`:html`<span class="pill bad">Not sent</span>`}</span></div>`):html`<p class="small muted">Nothing sent yet.</p>`}</section>
+    <details class="sp-card sp-perm"><summary><h4>Change history</h4></summary>
+      ${d.changes.length?d.changes.map((c,i)=>html`<div class="sp-row" key=${i}><span class="sp-l"><b>${c.ev}</b><small>${fmtDT(c.at)} · ${c.who}${c.detail?' · '+c.detail:''}</small></span></div>`):html`<p class="small muted">No changes yet.</p>`}</details>
+  </div>`;
+}
 function SettingsPage({auth,who,s,setS,facs,addFacility,openClinic,tab,setTab,onBack}){
   const tabs=SET_TABS.filter(([k,,perm])=>can(auth,perm));const cur=tabs.find(t=>t[0]===tab)||tabs[0];
   const [rem,setRemS]=useState(loadRem);const setRem=v=>{setRemS(v);jset(REM_KEY,v);};
   const [nf,setNf]=useState({site:'',clinic:'',coordinator:'',target:''}),[err,setErr]=useState(''),[adding,setAdding]=useState(false);
   const save=()=>{if(!nf.site.trim()){setErr('Enter the clinic name.');return;}if(facs.some(f=>f.site.toLowerCase()===nf.site.trim().toLowerCase())){setErr('A clinic with that name already exists.');return;}
     const id=addFacility({site:nf.site.trim(),clinic:nf.clinic.trim(),coordinator:nf.coordinator.trim(),target:nf.target});setNf({site:'',clinic:'',coordinator:'',target:''});setErr('');setAdding(false);openClinic(id);};
-  const DESC={clinics:'Add clinics and see everyone you’re onboarding.',req:'Choose what each team must complete. Clinics can be customized in review.',rem:'Email and text reminders for unfinished onboarding.',users:'Plexus staff who can sign in.'};
+  const DESC={clinics:'Add clinics and see everyone you’re onboarding.',req:'Choose what each team must complete. Clinics can be customized in review.',rem:'Email and text reminders for unfinished onboarding.',users:'Plexus staff who can sign in.',email:'Connect the email accounts the portal sends from, and choose which one sends what.'};
   return html`<div class="sp">
     <aside class="sp-nav"><button class="sp-back" onClick=${onBack}>← Console</button><h2>Settings</h2>
       <nav aria-label="Settings">${tabs.map(([k,l,,ic])=>html`<button aria-current=${cur[0]===k?'page':undefined} class=${'sp-nav-i'+(cur[0]===k?' on':'')} onClick=${()=>setTab(k)}>${Icon(ic,16)}<span>${l}</span></button>`)}</nav></aside>
@@ -1644,9 +1717,10 @@ function SettingsPage({auth,who,s,setS,facs,addFacility,openClinic,tab,setTab,on
       ${cur[0]==='req'&&html`<${ReqEditor} s=${s} setS=${setS} mode="defaults" bare/>`}
       ${cur[0]==='rem'&&html`<${ReminderSettings} rem=${rem} setRem=${setRem} facs=${facs}/>`}
       ${cur[0]==='users'&&html`<${UsersRoles} auth=${auth} who=${who}/>`}
+      ${cur[0]==='email'&&html`<${EmailSettings} auth=${auth}/>`}
     </section></div>`;
 }
-const SET_TABS=[['clinics','Clinics','clinics','building'],['req','Requirements','requirements','check'],['rem','Reminders','reminders','bell'],['users','Users & roles','users','users']];
+const SET_TABS=[['clinics','Clinics','clinics','building'],['req','Requirements','requirements','check'],['rem','Reminders','reminders','bell'],['email','Email','email','mail'],['users','Users & roles','users','users']];
 function Console({s,st,setS,facs,fid,setFid,addFacility,openReview,auth,who,initOpen}){
   const access=[...s.payers,...s.logins,...s.flows.labs,...s.clinicians.flatMap(c=>c.portals)].filter(a=>a.status!=='verified'&&(a.invite==='sent'||a.invite==='pending'||a.website||a.username||a.login)).length;
   const rows=facs.map(f=>{const fs=f.id===fid?s:loadFac(f.id);const fst=f.id===fid?st:status(fs);return {f,fs,fst};});

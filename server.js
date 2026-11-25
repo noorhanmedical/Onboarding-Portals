@@ -7,6 +7,8 @@ const path = require('path');
 const crypto = require('crypto');
 const { Pool } = require('pg');
 const nodemailer = require('nodemailer');
+const dns = require('dns');
+const mailcfg = require('./mailcfg.js');
 const { merge3, same } = require('./public/merge.js');
 
 /* ---------------- config ---------------- */
@@ -34,10 +36,12 @@ const dbSsl = /rds\.amazonaws\.com/.test(process.env.DATABASE_URL) || process.en
 const db = new Pool({ connectionString: process.env.DATABASE_URL.replace(/[?&]sslmode=[^&]*/, ''), ssl: dbSsl, max: Number(process.env.DB_POOL_MAX) || 8 });
 const CRON_SECRET = process.env.CRON_SECRET || '';
 
+// Optional server-level sender (SMTP_* settings). Settings → Email accounts take priority; this is the fallback.
 const mailer = process.env.SMTP_HOST ? nodemailer.createTransport({
   host: process.env.SMTP_HOST, port: Number(process.env.SMTP_PORT) || 465, secure: (Number(process.env.SMTP_PORT) || 465) === 465,
   auth: process.env.SMTP_USER ? { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS } : undefined,
 }) : null;
+const MAIL_KEY = mailcfg.mailKey();
 
 /* ---------------- schema ---------------- */
 async function migrate() {
@@ -50,6 +54,11 @@ async function migrate() {
     create table if not exists sessions (token_hash text primary key, email text not null, team text, expires_at timestamptz not null);
     create table if not exists auth_codes (email text primary key, code_hash text not null, attempts integer not null default 0, expires_at timestamptz not null, team text);
     create table if not exists email_log (id bigserial primary key, at timestamptz not null default now(), kind text, recipient text, subject text, ok boolean, error text);
+    alter table email_log add column if not exists sender text;
+    create table if not exists mail_accounts (id text primary key, provider text not null, from_email text not null, from_name text not null default '', username text not null,
+      host text not null, port integer not null, password_enc text, created_at timestamptz not null default now(), created_by text, updated_at timestamptz not null default now(), updated_by text,
+      last_ok_at timestamptz, last_error text, last_error_at timestamptz);
+    create table if not exists admin_log (id bigserial primary key, at timestamptz not null default now(), who text not null, ev text not null, detail text not null default '');
   `);
 }
 
@@ -93,7 +102,7 @@ async function staffFor(email) {
   if (u && !u.disabled && email.endsWith(PLEXUS_DOMAIN)) return { email, name: u.name || email, role: u.role || 'Reviewer' };
   return null;
 }
-const PERM = { users: ['Admin'], clinics: ['Admin', 'Coordinator'], invite: ['Admin', 'Coordinator'], review: ['Admin', 'Coordinator', 'Reviewer', 'Billing'], requirements: ['Admin'], reminders: ['Admin', 'Coordinator'] };
+const PERM = { users: ['Admin'], clinics: ['Admin', 'Coordinator'], invite: ['Admin', 'Coordinator'], review: ['Admin', 'Coordinator', 'Reviewer', 'Billing'], requirements: ['Admin'], reminders: ['Admin', 'Coordinator'], email: ['Admin'] };
 const can = (me, p) => !!me && me.role === 'plexus' && (PERM[p] || []).includes(me.prole);
 const SETTING_PERM = { users: 'users', reqDefaults: 'requirements', reminders: 'reminders' };
 
@@ -132,15 +141,60 @@ async function currentUser(req) {
 }
 
 /* ---------------- email + sms ---------------- */
+/* Sending accounts (Settings → Email). Each message kind (code, invite, reminder) is sent from the account chosen
+   for it; if that fails or none is chosen, the server-level SMTP_* sender is used. Sign-in codes are never lost:
+   if no sender works, the code is written to the server log so an admin can't be locked out. */
+const errText = (e) => String((e && e.message) || e || 'Unknown error').replace(/\s+/g, ' ').slice(0, 300);
+async function mailRoutes() { const r = (await getSetting('mailRoutes', {})).value || {}; const o = {}; for (const k of mailcfg.KINDS) o[k] = typeof r[k] === 'string' ? r[k] : ''; return o; }
+const transports = new Map(); // account id -> { stamp, t }
+async function assertPublicHost(host) {
+  if (!PROD) return;
+  const addrs = await dns.promises.lookup(host, { all: true });
+  if (!addrs.length || addrs.some((a) => mailcfg.privateHost(a.address))) throw new Error('That mail server address points to a private network.');
+}
+async function accountTransport(a) {
+  if (!MAIL_KEY) throw new Error('Email accounts can’t be used until the server has its MAIL_KEY secret.');
+  if (!a.password_enc) throw new Error('No password saved for this account.');
+  const stamp = new Date(a.updated_at).getTime(), hit = transports.get(a.id);
+  if (hit && hit.stamp === stamp) return hit.t;
+  await assertPublicHost(a.host);
+  const t = nodemailer.createTransport(mailcfg.transportOptions(a, mailcfg.decrypt(a.password_enc, MAIL_KEY, a.id), { prod: PROD }));
+  transports.set(a.id, { stamp, t });
+  return t;
+}
+async function noteAccount(id, ok, error) {
+  if (ok) await db.query('update mail_accounts set last_ok_at=now(), last_error=null, last_error_at=null where id=$1', [id]).catch(() => {});
+  else await db.query('update mail_accounts set last_error=$2, last_error_at=now() where id=$1', [id, error]).catch(() => {});
+}
+async function deliver(account, to, subject, text) {
+  const t = await accountTransport(account);
+  await t.sendMail({ from: mailcfg.fromHeader(account), to, subject, text });
+}
 async function sendEmail(kind, to, subject, text) {
-  let ok = true, error = null;
-  try {
-    if (mailer) await mailer.sendMail({ from: MAIL_FROM, to, subject, text });
-    else console.log(`[email not configured — would send] kind=${kind} to=${to} subject="${subject}"\n${text}\n`);
-  } catch (e) { ok = false; error = String(e.message || e).slice(0, 300); console.error('[email failed]', kind, to, error); }
-  await db.query('insert into email_log (kind, recipient, subject, ok, error) values ($1,$2,$3,$4,$5)', [kind, to, subject, ok, error]).catch(() => {});
+  let ok = false, error = null, sender = null;
+  const id = (await mailRoutes())[kind];
+  const acc = id ? (await db.query('select * from mail_accounts where id=$1', [id])).rows[0] : null;
+  if (acc) {
+    try { await deliver(acc, to, subject, text); ok = true; sender = acc.from_email; await noteAccount(acc.id, true); }
+    catch (e) { error = errText(e); await noteAccount(acc.id, false, error); console.error('[email failed]', kind, 'via', acc.from_email, error); }
+  }
+  if (!ok && mailer) {
+    try { await mailer.sendMail({ from: MAIL_FROM, to, subject, text }); ok = true; sender = 'server: ' + (process.env.SMTP_USER || MAIL_FROM); }
+    catch (e) { error = errText(e); console.error('[email failed]', kind, 'via server sender', error); }
+  }
+  if (!ok && (!acc && !mailer || kind === 'code')) console.log(`[email not sent — written here instead] kind=${kind} to=${to} subject="${subject}"\n${text}\n`);
+  // Never store a sign-in code in the log; the subject of a code email contains it.
+  await db.query('insert into email_log (kind, recipient, subject, ok, error, sender) values ($1,$2,$3,$4,$5,$6)', [kind, to, kind === 'code' ? 'Sign-in code' : subject, ok, ok ? null : error, sender]).catch(() => {});
   return ok;
 }
+async function emailOn() { return !!mailer || Object.values(await mailRoutes()).some(Boolean); }
+async function senderSummary() {
+  const routes = await mailRoutes(), out = {};
+  const rows = (await db.query('select id, from_email from mail_accounts')).rows;
+  for (const k of mailcfg.KINDS) { const a = rows.find((x) => x.id === routes[k]); out[k] = a ? a.from_email : mailer ? (process.env.SMTP_USER || MAIL_FROM) : ''; }
+  return out;
+}
+const adminLog = (who, ev, detail = '') => db.query('insert into admin_log (who, ev, detail) values ($1,$2,$3)', [who, ev, String(detail).slice(0, 500)]).catch(() => {});
 let rcToken = null;
 async function sendSms(to, text) {
   if (!RC_ON) return false;
@@ -285,11 +339,12 @@ async function accountSummary() {
 const routes = [];
 const route = (method, pattern, fn, opts = {}) => routes.push({ method, re: new RegExp('^' + pattern.replace(/:(\w+)/g, '(?<$1>[^/]+)') + '$'), fn, opts });
 
-route('GET', '/api/config', async () => ({ googleClientId: GOOGLE_CLIENT_ID, ringcentral: { connected: RC_ON, from: RC_ON ? RC.from : '' }, email: !!mailer, secureShareUrl: SECURE_SHARE_URL }), { open: true });
+route('GET', '/api/config', async () => ({ googleClientId: GOOGLE_CLIENT_ID, ringcentral: { connected: RC_ON, from: RC_ON ? RC.from : '' }, email: await emailOn(), secureShareUrl: SECURE_SHARE_URL }), { open: true });
 
 route('GET', '/api/bootstrap', async (req, me) => {
-  const config = { googleClientId: GOOGLE_CLIENT_ID, ringcentral: { connected: RC_ON, from: RC_ON ? RC.from : '' }, email: !!mailer, secureShareUrl: SECURE_SHARE_URL };
+  const config = { googleClientId: GOOGLE_CLIENT_ID, ringcentral: { connected: RC_ON, from: RC_ON ? RC.from : '' }, email: await emailOn(), secureShareUrl: SECURE_SHARE_URL };
   if (!me) return { me: null, config };
+  if (me.role === 'plexus') config.senders = await senderSummary();
   lastBaseUrl = baseUrl(req);
   const facs = await facilityList(me);
   const states = {};
@@ -367,7 +422,7 @@ route('POST', '/api/facilities/:id/invites', async (req, me, b, p) => {
     await sendEmail('invite', x.email, `You're invited: ${r.state.site} ${team} onboarding with Plexus`,
       `Hi ${(x.name || '').split(' ')[0] || 'there'},\n\nPlexus Ancillary Services invited you to complete the ${team} onboarding for ${r.state.site}.\n\nCreate your account here (the link works once and expires in ${INVITE_DAYS} days):\n${link}\n\nQuestions? Reply to this email.\n\nPlexus Ancillary Services`);
   }
-  return { state: r.state, version: r.version, emailed: !!mailer };
+  return { state: r.state, version: r.version, emailed: await emailOn() };
 });
 
 route('POST', '/api/facilities/:id/remind', async (req, me, b, p) => {
@@ -388,6 +443,89 @@ route('PUT', '/api/settings/:key', async (req, me, b, p) => {
   if (p.key === 'reminders' && value) delete value.rc;
   return { version: await putSetting(p.key, stripSecrets(value)) };
 });
+
+/* ---- Settings → Email (Admins only). Passwords are write-only: no response ever includes one. ---- */
+const notAllowed = () => Object.assign(new Error('Not allowed'), { status: 403 });
+const bad = (m) => Object.assign(new Error(m), { status: 400 });
+const ACCOUNT_COLS = 'id, provider, from_email, from_name, username, host, port, password_enc is not null as has_password, created_at, created_by, updated_at, updated_by, last_ok_at, last_error, last_error_at';
+const publicAccount = (a) => ({ id: a.id, provider: a.provider, fromEmail: a.from_email, fromName: a.from_name, username: a.username, host: a.host, port: a.port, hasPassword: a.has_password,
+  createdAt: a.created_at, createdBy: a.created_by, updatedAt: a.updated_at, updatedBy: a.updated_by, lastOkAt: a.last_ok_at, lastError: a.last_error, lastErrorAt: a.last_error_at });
+async function mailState() {
+  const accounts = (await db.query(`select ${ACCOUNT_COLS} from mail_accounts order by created_at`)).rows.map(publicAccount);
+  const recent = (await db.query('select at, kind, recipient, ok, error, sender from email_log order by id desc limit 25')).rows; // no subjects: older rows may hold codes
+  const changes = (await db.query('select at, who, ev, detail from admin_log order by id desc limit 25')).rows;
+  return { accounts, routes: await mailRoutes(), kinds: mailcfg.KINDS, presets: mailcfg.PRESETS, keyReady: !!MAIL_KEY,
+    serverSender: mailer ? (process.env.SMTP_USER || MAIL_FROM) : null, recent, changes };
+}
+async function accountRow(id) { return (await db.query(`select ${ACCOUNT_COLS} from mail_accounts where id=$1`, [String(id)])).rows[0] || null; }
+const KIND_LABEL = { code: 'Sign-in codes', invite: 'Invitations', reminder: 'Reminders' };
+
+route('GET', '/api/mail', async (req, me) => { if (!can(me, 'email')) throw notAllowed(); return mailState(); });
+
+route('POST', '/api/mail/accounts', async (req, me, b) => {
+  if (!can(me, 'email')) throw notAllowed();
+  if (!MAIL_KEY) throw bad('The server is missing its MAIL_KEY secret, so passwords can’t be stored safely yet.');
+  const { value: v, error } = mailcfg.validateAccount(b, { prod: PROD }); if (error) throw bad(error);
+  if ((await db.query('select 1 from mail_accounts where from_email=$1', [v.fromEmail])).rows[0]) throw bad('That address is already connected. Edit it instead.');
+  const id = 'm' + rand(9);
+  await db.query('insert into mail_accounts (id, provider, from_email, from_name, username, host, port, password_enc, created_by, updated_by) values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$9)',
+    [id, v.provider, v.fromEmail, v.fromName, v.username, v.host, v.port, mailcfg.encrypt(v.password, MAIL_KEY, id), me.email]);
+  await adminLog(me.email, 'Connected sending account', v.fromEmail);
+  // The first account connected sends everything until an admin chooses otherwise.
+  const routes = await mailRoutes();
+  if (!Object.values(routes).some(Boolean)) { await putSetting('mailRoutes', Object.fromEntries(mailcfg.KINDS.map((k) => [k, id]))); await adminLog(me.email, 'Chose sender for all messages', v.fromEmail); }
+  return { id, ...(await mailState()) };
+}, { limit: 'mail' });
+
+route('PUT', '/api/mail/accounts/:id', async (req, me, b, p) => {
+  if (!can(me, 'email')) throw notAllowed();
+  const prev = await accountRow(p.id); if (!prev) throw Object.assign(new Error('That account was removed.'), { status: 404 });
+  const { value: v, error } = mailcfg.validateAccount(b, { prod: PROD, prev }); if (error) throw bad(error);
+  if (v.password && !MAIL_KEY) throw bad('The server is missing its MAIL_KEY secret, so passwords can’t be stored safely yet.');
+  if ((await db.query('select 1 from mail_accounts where from_email=$1 and id<>$2', [v.fromEmail, p.id])).rows[0]) throw bad('Another account already uses that address.');
+  await db.query(`update mail_accounts set provider=$2, from_email=$3, from_name=$4, username=$5, host=$6, port=$7, password_enc=coalesce($8, password_enc), updated_at=now(), updated_by=$9, last_error=null, last_error_at=null where id=$1`,
+    [p.id, v.provider, v.fromEmail, v.fromName, v.username, v.host, v.port, v.password ? mailcfg.encrypt(v.password, MAIL_KEY, p.id) : null, me.email]);
+  transports.delete(p.id);
+  await adminLog(me.email, v.password ? 'Updated sending account and its password' : 'Updated sending account', v.fromEmail);
+  return mailState();
+}, { limit: 'mail' });
+
+route('DELETE', '/api/mail/accounts/:id', async (req, me, b, p) => {
+  if (!can(me, 'email')) throw notAllowed();
+  const prev = await accountRow(p.id); if (!prev) return mailState();
+  await db.query('delete from mail_accounts where id=$1', [p.id]); transports.delete(p.id);
+  const routes = await mailRoutes(), cleared = mailcfg.KINDS.filter((k) => routes[k] === p.id);
+  if (cleared.length) { for (const k of cleared) routes[k] = ''; await putSetting('mailRoutes', routes); }
+  await adminLog(me.email, 'Removed sending account', prev.from_email + (cleared.length ? ' (was sending ' + cleared.map((k) => KIND_LABEL[k].toLowerCase()).join(', ') + ')' : ''));
+  return mailState();
+});
+
+route('PUT', '/api/mail/routes', async (req, me, b) => {
+  if (!can(me, 'email')) throw notAllowed();
+  const ids = new Set((await db.query('select id from mail_accounts')).rows.map((r) => r.id)), prev = await mailRoutes(), next = {};
+  for (const k of mailcfg.KINDS) { const v = String((b.routes || {})[k] || ''); if (v && !ids.has(v)) throw bad('Choose a connected account.'); next[k] = v; }
+  await putSetting('mailRoutes', next);
+  const names = Object.fromEntries((await db.query('select id, from_email from mail_accounts')).rows.map((r) => [r.id, r.from_email]));
+  const diff = mailcfg.KINDS.filter((k) => prev[k] !== next[k]).map((k) => `${KIND_LABEL[k]}: ${names[next[k]] || (mailer ? 'server sender' : 'not sent')}`);
+  if (diff.length) await adminLog(me.email, 'Changed which account sends what', diff.join(' · '));
+  return mailState();
+});
+
+route('POST', '/api/mail/accounts/:id/test', async (req, me, b, p) => {
+  if (!can(me, 'email')) throw notAllowed();
+  const acc = (await db.query('select * from mail_accounts where id=$1', [p.id])).rows[0]; if (!acc) throw Object.assign(new Error('That account was removed.'), { status: 404 });
+  const to = lower(b.to || me.email); if (!emailOk(to)) throw bad('Enter a valid address for the test email.');
+  try {
+    await deliver(acc, to, 'Test email from Plexus Onboarding Portals', `This is a test from Settings → Email.\n\nIt was sent from ${acc.from_email}. If you got it, this account is ready to use.\n\nSent by ${me.name} (${me.email}).`);
+    await noteAccount(acc.id, true);
+    await db.query('insert into email_log (kind, recipient, subject, ok, sender) values ($1,$2,$3,true,$4)', ['test', to, 'Test email', acc.from_email]).catch(() => {});
+    return { ok: true, to, ...(await mailState()) };
+  } catch (e) {
+    const error = errText(e); await noteAccount(acc.id, false, error);
+    await db.query('insert into email_log (kind, recipient, subject, ok, error, sender) values ($1,$2,$3,false,$4,$5)', ['test', to, 'Test email', error, acc.from_email]).catch(() => {});
+    return { ok: false, error, ...(await mailState()) };
+  }
+}, { limit: 'mailtest' });
 
 /* ---- auth ---- */
 route('GET', '/api/invite/:token', async (req, me, b, p) => {
@@ -511,7 +649,7 @@ const server = http.createServer((req, res) => {
 });
 
 migrate().then(() => {
-  server.listen(PORT, '0.0.0.0', () => console.log(`Plexus Onboarding Portal on http://localhost:${PORT} — email ${mailer ? 'on' : 'OFF (logged to console)'}, Google sign-in ${GOOGLE_CLIENT_ID ? 'on' : 'off'}, RingCentral ${RC_ON ? 'on' : 'off'}`));
+  server.listen(PORT, '0.0.0.0', () => console.log(`Plexus Onboarding Portal on http://localhost:${PORT} — server email ${mailer ? 'on' : 'off'}, email accounts ${MAIL_KEY ? 'ready' : 'OFF (no MAIL_KEY)'}, Google sign-in ${GOOGLE_CLIENT_ID ? 'on' : 'off'}, RingCentral ${RC_ON ? 'on' : 'off'}`));
   if (process.env.DISABLE_INTERNAL_SCHEDULER !== 'true') setInterval(reminderTick, 10 * 60 * 1000).unref();
   setInterval(() => db.query('delete from sessions where expires_at < now(); delete from auth_codes where expires_at < now()').catch(() => {}), 3600 * 1000).unref();
 }).catch((e) => { console.error('Database setup failed:', e.message); process.exit(1); });
