@@ -38,6 +38,16 @@ Clinic and billing onboarding for Plexus partner clinics. One Node server (`serv
 
 Without SMTP the server still runs: emails (codes, invitations, reminders) are printed to the console instead of sent, and the invitation panel tells you to use **Copy link**.
 
+## Put it on AWS
+
+Everything for AWS is in [`deploy/aws/AWS.md`](deploy/aws/AWS.md): App Runner (container from ECR) + RDS PostgreSQL + Secrets Manager + an EventBridge rule for reminders. The `Dockerfile` builds the production image; `deploy/aws/push-image.sh` and `deploy/aws/reminder-schedule.sh` do the CLI steps. No code changes between Replit and AWS — only settings.
+
+| Extra setting | Where | Value |
+|---|---|---|
+| `CRON_SECRET` | AWS | Secret the reminder schedule sends to `/api/cron/reminders` |
+| `DISABLE_INTERNAL_SCHEDULER` | AWS | `true` — EventBridge triggers reminders instead of the built-in timer |
+| `DATABASE_SSL` | optional | `require` to force TLS on a non-RDS host (RDS gets verified TLS automatically) |
+
 ## Compliance note
 
 Replit does not sign a HIPAA BAA. This portal holds no patient records, and it never stores system passwords, so keep it that way: don't add patient data or password fields here. To store credentials in the app later, move it to AWS under the BAA (see `BACKEND.md`).

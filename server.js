@@ -26,7 +26,13 @@ const SESSION_HOURS = 12, CODE_MINUTES = 10, INVITE_DAYS = 7;
 const PROD = process.env.NODE_ENV === 'production' || !!process.env.REPLIT_DEPLOYMENT;
 
 if (!process.env.DATABASE_URL) { console.error('DATABASE_URL is not set. On Replit, add a PostgreSQL database (Tools → Database).'); process.exit(1); }
-const db = new Pool({ connectionString: process.env.DATABASE_URL, ssl: /sslmode=require|neon\.tech|amazonaws/.test(process.env.DATABASE_URL) ? { rejectUnauthorized: false } : undefined, max: 8 });
+// TLS: AWS RDS needs it; the RDS CA bundle is baked into the Docker image (verify-full). Other hosts: sslmode=require in the URL.
+const RDS_CA = ['/app/rds-ca.pem', path.join(__dirname, 'rds-ca.pem')].find((f) => { try { return fs.statSync(f).isFile(); } catch (e) { return false; } });
+const dbSsl = /rds\.amazonaws\.com/.test(process.env.DATABASE_URL) || process.env.DATABASE_SSL === 'require'
+  ? (RDS_CA ? { ca: fs.readFileSync(RDS_CA, 'utf8'), rejectUnauthorized: true } : { rejectUnauthorized: false })
+  : /sslmode=require|neon\.tech/.test(process.env.DATABASE_URL) ? { rejectUnauthorized: false } : undefined;
+const db = new Pool({ connectionString: process.env.DATABASE_URL.replace(/[?&]sslmode=[^&]*/, ''), ssl: dbSsl, max: Number(process.env.DB_POOL_MAX) || 8 });
+const CRON_SECRET = process.env.CRON_SECRET || '';
 
 const mailer = process.env.SMTP_HOST ? nodemailer.createTransport({
   host: process.env.SMTP_HOST, port: Number(process.env.SMTP_PORT) || 465, secure: (Number(process.env.SMTP_PORT) || 465) === 465,
@@ -233,7 +239,16 @@ async function sendReminder(fid, team, by) {
   return res;
 }
 function localParts(d) { const p = Object.fromEntries(new Intl.DateTimeFormat('en-US', { timeZone: TZ, weekday: 'short', hour: 'numeric', hour12: false }).formatToParts(d).map((x) => [x.type, x.value])); return { day: p.weekday, hour: Number(p.hour) % 24 }; }
+/* Only one server runs a reminder pass at a time (AWS may run several copies); a Postgres advisory lock guards it. */
 async function reminderTick() {
+  const c = await db.connect().catch(() => null); if (!c) return { ran: false };
+  try {
+    const got = (await c.query('select pg_try_advisory_lock(7310431) as ok')).rows[0].ok;
+    if (!got) return { ran: false, reason: 'another server is sending' };
+    try { await reminderPass(); return { ran: true }; } finally { await c.query('select pg_advisory_unlock(7310431)'); }
+  } finally { c.release(); }
+}
+async function reminderPass() {
   try {
     const rem = await reminderSettings();
     if (!rem.enabled) return;
@@ -444,6 +459,13 @@ route('POST', '/api/auth/google', async (req, me, b, p, res) => {
   return { me: who };
 }, { open: true, limit: 'auth' });
 
+/* For AWS EventBridge Scheduler (or any cron): POST /api/cron/reminders with header x-cron-secret. */
+route('POST', '/api/cron/reminders', async (req) => {
+  const got = String(req.headers['x-cron-secret'] || '');
+  if (!CRON_SECRET || got.length !== CRON_SECRET.length || !crypto.timingSafeEqual(Buffer.from(got), Buffer.from(CRON_SECRET))) throw Object.assign(new Error('Not allowed'), { status: 403 });
+  return reminderTick();
+}, { open: true, limit: 'cron' });
+
 route('POST', '/api/auth/team', async (req, me, b) => {
   if (me.role !== 'member' || !me.teams.includes(b.team)) throw Object.assign(new Error('Not allowed'), { status: 403 });
   await db.query('update sessions set team=$2 where token_hash=$1', [sha(cookies(req).pxo), b.team]);
@@ -474,7 +496,7 @@ async function handleApi(req, res, url) {
 
 const server = http.createServer((req, res) => {
   const url = decodeURIComponent((req.url || '/').split('?')[0]);
-  if (url === '/healthz') { res.writeHead(200, { 'Content-Type': 'text/plain' }); return res.end('ok'); }
+  if (url === '/healthz') { db.query('select 1').then(() => { res.writeHead(200, { 'Content-Type': 'text/plain' }); res.end('ok'); }, () => { res.writeHead(503, { 'Content-Type': 'text/plain' }); res.end('db unavailable'); }); return; }
   if (url.startsWith('/api/')) return handleApi(req, res, url);
   let file = path.normalize(path.join(ROOT, url === '/' ? 'index.html' : url));
   if (!file.startsWith(ROOT)) { res.writeHead(403); return res.end(); }
@@ -490,6 +512,7 @@ const server = http.createServer((req, res) => {
 
 migrate().then(() => {
   server.listen(PORT, '0.0.0.0', () => console.log(`Plexus Onboarding Portal on http://localhost:${PORT} — email ${mailer ? 'on' : 'OFF (logged to console)'}, Google sign-in ${GOOGLE_CLIENT_ID ? 'on' : 'off'}, RingCentral ${RC_ON ? 'on' : 'off'}`));
-  setInterval(reminderTick, 10 * 60 * 1000).unref();
+  if (process.env.DISABLE_INTERNAL_SCHEDULER !== 'true') setInterval(reminderTick, 10 * 60 * 1000).unref();
   setInterval(() => db.query('delete from sessions where expires_at < now(); delete from auth_codes where expires_at < now()').catch(() => {}), 3600 * 1000).unref();
 }).catch((e) => { console.error('Database setup failed:', e.message); process.exit(1); });
+for (const sig of ['SIGTERM', 'SIGINT']) process.on(sig, () => { server.close(() => db.end().finally(() => process.exit(0))); setTimeout(() => process.exit(0), 8000).unref(); });
